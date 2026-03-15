@@ -2661,7 +2661,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Sessão Ativa</div><div style="font-size:11px;color:var(--text-muted)">Chrome · São Paulo, SP</div></div><button class="btn btn-ghost" style="font-size:11px;color:var(--red)">Encerrar</button></div>
           </div>
         </div>
-        <div class="chart-card">
+        <div class="chart-card" id="perfil-plano-card">
           <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
           <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.18);border-radius:var(--radius-sm);padding:15px"><div style="font-size:17px;font-weight:800">Essencial</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação · Relatórios</div><div style="font-size:22px;font-weight:800;color:var(--green);margin-top:10px">R$ 49<span style="font-size:13px;color:var(--text-muted);font-weight:400">/mês</span></div></div>
           <button class="btn btn-primary" style="width:100%;margin-top:12px">🚀 Upgrade para Pro</button>
@@ -3529,7 +3529,82 @@ async function salvarPerfil() {
   } catch { err.style.display='block'; setTimeout(()=>err.style.display='none',4000) }
 }
 
-async function carregarPerfil() { aplicarUsuarioUI(App.usuario) }
+async function carregarPerfil() {
+  aplicarUsuarioUI(App.usuario)
+  const card = document.getElementById('perfil-plano-card')
+  if (!card) return
+  const isDemo = !App.token
+  if (isDemo) {
+    card.innerHTML = `
+      <div class="chart-title" style="margin-bottom:13px">🚀 Escolha seu Plano</div>
+      <div style="display:flex;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:14px">
+        <button id="plano-toggle-mensal" onclick="perfilTogglePlano('mensal')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:var(--green);color:#fff">Mensal</button>
+        <button id="plano-toggle-anual" onclick="perfilTogglePlano('anual')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-muted)">Anual <span style="font-size:10px;color:#fbbf24;font-weight:800">-17%</span></button>
+      </div>
+      <div id="plano-cards-demo" style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.22);border-radius:var(--radius-sm);padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="font-size:15px;font-weight:800">Essencial</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Dashboard · Registros · Precificação · Relatórios</div>
+            </div>
+            <div style="text-align:right">
+              <div id="demo-preco-essencial" style="font-size:20px;font-weight:800;color:var(--green)">R$ 49<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span></div>
+              <div id="demo-sub-essencial" style="font-size:10px;color:var(--text-muted);margin-top:2px"></div>
+            </div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.03));border:1px solid rgba(99,102,241,0.22);border-radius:var(--radius-sm);padding:14px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div>
+              <div style="display:flex;align-items:center;gap:6px"><span style="font-size:15px;font-weight:800">Pro</span><span style="font-size:9px;font-weight:800;padding:2px 7px;background:rgba(99,102,241,0.2);color:#a78bfa;border-radius:20px;border:1px solid rgba(99,102,241,0.3)">POPULAR</span></div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px">Tudo do Essencial + IA · Score · Metas · Cards</div>
+            </div>
+            <div style="text-align:right">
+              <div id="demo-preco-pro" style="font-size:20px;font-weight:800;color:#a78bfa">R$ 99<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span></div>
+              <div id="demo-sub-pro" style="font-size:10px;color:var(--text-muted);margin-top:2px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button onclick="authTab('cadastro');navigate('auth')" class="btn btn-primary" style="width:100%;margin-top:14px">✨ Criar conta grátis por 7 dias</button>
+      <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Sem cartão necessário · Cancele quando quiser</div>`
+  } else {
+    const u = App.usuario || {}
+    const planoNome = (u.plano_nome || u.plano || 'Essencial')
+    const planoPreco = u.plano_preco || 'R$ 49'
+    const planoDesc = u.plano_desc || 'Dashboard · Registros · Precificação · Relatórios'
+    card.innerHTML = `
+      <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
+      <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.18);border-radius:var(--radius-sm);padding:15px">
+        <div style="font-size:17px;font-weight:800">${planoNome}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px">${planoDesc}</div>
+        <div style="font-size:22px;font-weight:800;color:var(--green);margin-top:10px">${planoPreco}<span style="font-size:13px;color:var(--text-muted);font-weight:400">/mês</span></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px">🚀 Upgrade para Pro</button>`
+  }
+}
+
+function perfilTogglePlano(tipo) {
+  const btnM = document.getElementById('plano-toggle-mensal')
+  const btnA = document.getElementById('plano-toggle-anual')
+  if (!btnM || !btnA) return
+  if (tipo === 'mensal') {
+    btnM.style.background = 'var(--green)'; btnM.style.color = '#fff'
+    btnA.style.background = 'transparent'; btnA.style.color = 'var(--text-muted)'
+    document.getElementById('demo-preco-essencial').innerHTML = 'R$ 49<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span>'
+    document.getElementById('demo-sub-essencial').textContent = ''
+    document.getElementById('demo-preco-pro').innerHTML = 'R$ 99<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span>'
+    document.getElementById('demo-sub-pro').textContent = ''
+  } else {
+    btnA.style.background = 'var(--green)'; btnA.style.color = '#fff'
+    btnM.style.background = 'transparent'; btnM.style.color = 'var(--text-muted)'
+    document.getElementById('demo-preco-essencial').innerHTML = 'R$ 490<span style="font-size:11px;color:var(--text-muted);font-weight:400">/ano</span>'
+    document.getElementById('demo-sub-essencial').textContent = 'R$ 40,83/mês · economize R$ 98'
+    document.getElementById('demo-preco-pro').innerHTML = 'R$ 990<span style="font-size:11px;color:var(--text-muted);font-weight:400">/ano</span>'
+    document.getElementById('demo-sub-pro').textContent = 'R$ 82,50/mês · economize R$ 198'
+  }
+}
 
 // ======================================
 // NAVIGATION
