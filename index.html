@@ -2661,30 +2661,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Sessão Ativa</div><div style="font-size:11px;color:var(--text-muted)">Chrome · São Paulo, SP</div></div><button class="btn btn-ghost" style="font-size:11px;color:var(--red)">Encerrar</button></div>
           </div>
         </div>
-        <div class="chart-card" id="perfil-plano-card">
-          <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
-          <div style="display:flex;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:14px">
-            <button id="plano-toggle-mensal" onclick="perfilTogglePlano('mensal')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:var(--green);color:#fff">Mensal</button>
-            <button id="plano-toggle-anual" onclick="perfilTogglePlano('anual')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-muted)">Anual <span style="font-size:10px;color:#fbbf24;font-weight:800">-47%</span></button>
-          </div>
-          <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:16px">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-              <div>
-                <div style="display:flex;align-items:center;gap:7px">
-                  <span style="font-size:18px;font-weight:800;color:#fff">Pro</span>
-                  <span style="font-size:9px;font-weight:800;padding:2px 8px;background:rgba(99,102,241,0.25);color:#a78bfa;border-radius:20px;border:1px solid rgba(99,102,241,0.35)">COMPLETO</span>
-                </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação<br>Relatórios · IA · Score · Metas · Cards</div>
-              </div>
-              <div style="text-align:right">
-                <div id="demo-preco-de" style="font-size:11px;color:var(--text-muted);text-decoration:line-through">R$ 49,90</div>
-                <div id="demo-preco-pro" style="font-size:22px;font-weight:800;color:#a78bfa;line-height:1.1">R$ 37,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span></div>
-                <div id="demo-sub-pro" style="font-size:10px;color:var(--text-muted);margin-top:2px"></div>
-              </div>
-            </div>
-          </div>
-          <a id="demo-btn-assinar" href="https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;margin-top:12px;display:block;text-align:center;text-decoration:none">⚡ Assinar Mensal — R$ 37,90/mês</a>
-          <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Cancele quando quiser · Pagamento seguro via Stripe</div>
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
+          <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.18);border-radius:var(--radius-sm);padding:15px"><div style="font-size:17px;font-weight:800">Essencial</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação · Relatórios</div><div style="font-size:22px;font-weight:800;color:var(--green);margin-top:10px">R$ 49<span style="font-size:13px;color:var(--text-muted);font-weight:400">/mês</span></div></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:12px">🚀 Upgrade para Pro</button>
         </div>
       </div>
     </div>
@@ -3175,8 +3155,8 @@ async function api(path, opts = {}) {
 }
 
 // -- Formatadores ----------------------
-const fmtBRL = v => { const n = parseFloat(v); return 'R$ ' + (isNaN(n) ? '0,00' : n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})) }
-const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p.length >= 3 ? p[2]+'/'+p[1] : d }
+const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})
+const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
 
 // ======================================
 // AUTH
@@ -3398,8 +3378,8 @@ async function iniciarDashboard() {
       if(cards[3]){cards[3].dataset.target=Math.round(dados.margem);         countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.badge-up,.badge-down')
-      if(vars[0]&&dados.variacao?.faturamento!=null){vars[0].textContent=(dados.variacao.faturamento>=0?'↑':'↓')+Math.abs(dados.variacao.faturamento).toFixed(0)+'%'; vars[0].className=dados.variacao.faturamento>=0?'badge-up':'badge-down'}
-      if(vars[2]&&dados.variacao?.lucro!=null){vars[2].textContent=(dados.variacao.lucro>=0?'↑':'↓')+Math.abs(dados.variacao.lucro).toFixed(0)+'%'; vars[2].className=dados.variacao.lucro>=0?'badge-up':'badge-down'}
+      if(vars[0]){vars[0].textContent=(dados.variacao.faturamento>=0?'↑':'↓')+Math.abs(dados.variacao.faturamento).toFixed(0)+'%'; vars[0].className=dados.variacao.faturamento>=0?'badge-up':'badge-down'}
+      if(vars[2]){vars[2].textContent=(dados.variacao.lucro>=0?'↑':'↓')+Math.abs(dados.variacao.lucro).toFixed(0)+'%'; vars[2].className=dados.variacao.lucro>=0?'badge-up':'badge-down'}
       // Meta
       const pct=dados.progresso_meta||0
       const pf=document.querySelector('.progress-fill'); if(pf) pf.style.width=pct+'%'
@@ -3549,80 +3529,7 @@ async function salvarPerfil() {
   } catch { err.style.display='block'; setTimeout(()=>err.style.display='none',4000) }
 }
 
-async function carregarPerfil() {
-  aplicarUsuarioUI(App.usuario)
-  const card = document.getElementById('perfil-plano-card')
-  if (!card) return
-  const isDemo = !App.token
-  if (isDemo) {
-    card.innerHTML = `
-      <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
-      <div style="display:flex;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:14px">
-        <button id="plano-toggle-mensal" onclick="perfilTogglePlano('mensal')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:var(--green);color:#fff">Mensal</button>
-        <button id="plano-toggle-anual" onclick="perfilTogglePlano('anual')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-muted)">Anual <span style="font-size:10px;color:#fbbf24;font-weight:800">-47%</span></button>
-      </div>
-      <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:16px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-          <div>
-            <div style="display:flex;align-items:center;gap:7px">
-              <span style="font-size:18px;font-weight:800;color:#fff">Pro</span>
-              <span style="font-size:9px;font-weight:800;padding:2px 8px;background:rgba(99,102,241,0.25);color:#a78bfa;border-radius:20px;border:1px solid rgba(99,102,241,0.35)">COMPLETO</span>
-            </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação<br>Relatórios · IA · Score · Metas · Cards</div>
-          </div>
-          <div style="text-align:right">
-            <div id="demo-preco-de" style="font-size:11px;color:var(--text-muted);text-decoration:line-through">R$ 49,90</div>
-            <div id="demo-preco-pro" style="font-size:22px;font-weight:800;color:#a78bfa;line-height:1.1">R$ 37,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span></div>
-            <div id="demo-sub-pro" style="font-size:10px;color:var(--text-muted);margin-top:2px"></div>
-          </div>
-        </div>
-      </div>
-      <a id="demo-btn-assinar" href="https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;margin-top:12px;display:block;text-align:center;text-decoration:none">⚡ Assinar Mensal — R$ 37,90/mês</a>
-      <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Cancele quando quiser · Pagamento seguro via Stripe</div>`
-  } else {
-    const u = App.usuario || {}
-    const planoNome = u.plano_nome || 'Pro'
-    const planoDesc = u.plano_desc || 'Dashboard · Registros · Precificação · Relatórios · IA · Score · Metas · Cards'
-    const planoPeriodicidade = u.plano_periodo === 'anual' ? 'R$ 247,90/ano' : 'R$ 37,90/mês'
-    card.innerHTML = `
-      <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
-      <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:15px">
-        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
-          <span style="font-size:17px;font-weight:800">${planoNome}</span>
-          <span style="font-size:9px;font-weight:800;padding:2px 8px;background:rgba(99,102,241,0.25);color:#a78bfa;border-radius:20px;border:1px solid rgba(99,102,241,0.35)">ATIVO</span>
-        </div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${planoDesc}</div>
-        <div style="font-size:20px;font-weight:800;color:#a78bfa;margin-top:10px">${planoPeriodicidade}</div>
-      </div>`
-  }
-}
-
-function perfilTogglePlano(tipo) {
-  const btnM = document.getElementById('plano-toggle-mensal')
-  const btnA = document.getElementById('plano-toggle-anual')
-  const btnAssinar = document.getElementById('demo-btn-assinar')
-  const precoEl = document.getElementById('demo-preco-pro')
-  const precoDeEl = document.getElementById('demo-preco-de')
-  const subEl = document.getElementById('demo-sub-pro')
-  if (!btnM || !btnA) return
-  if (tipo === 'mensal') {
-    btnM.style.background = 'var(--green)'; btnM.style.color = '#fff'
-    btnA.style.background = 'transparent'; btnA.style.color = 'var(--text-muted)'
-    precoDeEl.textContent = 'R$ 49,90'
-    precoEl.innerHTML = 'R$ 37,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span>'
-    subEl.textContent = ''
-    btnAssinar.href = 'https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00'
-    btnAssinar.textContent = '⚡ Assinar Mensal — R$ 37,90/mês'
-  } else {
-    btnA.style.background = 'var(--green)'; btnA.style.color = '#fff'
-    btnM.style.background = 'transparent'; btnM.style.color = 'var(--text-muted)'
-    precoDeEl.textContent = ''
-    precoEl.innerHTML = 'R$ 247,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/ano</span>'
-    subEl.textContent = 'equivale a R$ 20,65/mês'
-    btnAssinar.href = 'https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01'
-    btnAssinar.textContent = '⚡ Assinar Anual — R$ 247,90/ano'
-  }
-}
+async function carregarPerfil() { aplicarUsuarioUI(App.usuario) }
 
 // ======================================
 // NAVIGATION
@@ -3704,8 +3611,7 @@ function countUp(el){
 // GAUGE
 function drawGauge(id,value){
   const canvas=document.getElementById(id); if(!canvas) return
-  const ctx=canvas.getContext('2d'); if(!ctx) return
-  const W=canvas.width, H=canvas.height
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height
   ctx.clearRect(0,0,W,H)
   const cx=W/2, cy=H-2, r=H-16
   ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI)
@@ -4686,9 +4592,8 @@ async function carregarInsightDiario() {
     // Remove insight anterior se já existir
     document.getElementById('ia-insight-live')?.remove()
 
-    const insight = data.insight || ''
-    const isPositive = insight.includes('📈') || insight.includes('💡') || insight.includes('🔥') || insight.includes('✅')
-    const color = isPositive ? 'green' : insight.includes('⚠️') ? 'amber' : 'blue'
+    const isPositive = data.insight.includes('📈') || data.insight.includes('💡') || data.insight.includes('🔥') || data.insight.includes('✅')
+    const color = isPositive ? 'green' : data.insight.includes('⚠️') ? 'amber' : 'blue'
 
     const div = document.createElement('div')
     div.id = 'ia-insight-live'
@@ -4701,7 +4606,7 @@ async function carregarInsightDiario() {
         <div class="smart-alert-title" style="display:flex;align-items:center;gap:6px">
           Nexor IA <span style="font-size:9px;font-weight:600;padding:1px 7px;background:rgba(99,102,241,0.15);color:#a78bfa;border-radius:10px;border:1px solid rgba(99,102,241,0.2)">insight do dia</span>
         </div>
-        <div class="smart-alert-desc">${insight}</div>
+        <div class="smart-alert-desc">${data.insight}</div>
       </div>`
     container.insertBefore(div, container.firstChild)
   } catch(e) { console.warn('insight diário:', e) }
@@ -5733,7 +5638,6 @@ function desenharScoreRingBig(score, color) {
   const canvas = document.getElementById('scoreRingBig')
   if (!canvas) return
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
   const W = 160, cx = W/2, cy = W/2, r = 68
   ctx.clearRect(0,0,W,W)
   const start = Math.PI*0.75, end = Math.PI*2.25
@@ -6366,7 +6270,6 @@ function initScoreCanvas(forceScore) {
   const ligaIcon  = score>=90?'💎':score>=80?'🥇':score>=70?'🥈':score>=60?'🥉':'⚡'
   const ligaColor = score>=90?'#22d3ee':score>=80?'#fbbf24':score>=70?'#a78bfa':score>=60?'#cd7f32':'#64748b'
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
   const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, r = 32
   ctx.clearRect(0, 0, W, H)
   const startAngle = Math.PI * 0.75, endAngle = Math.PI * 2.25
