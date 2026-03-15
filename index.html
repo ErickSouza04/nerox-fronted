@@ -2664,7 +2664,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="chart-card" id="perfil-plano-card">
           <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-            <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+            <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
               <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Mensal</div>
               <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
               <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
@@ -3551,7 +3551,7 @@ async function carregarPerfil() {
     card.innerHTML = `
       <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
           <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Mensal</div>
           <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
           <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
@@ -3580,33 +3580,6 @@ async function carregarPerfil() {
         <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${planoDesc}</div>
         <div style="font-size:20px;font-weight:800;color:#a78bfa;margin-top:10px">${planoPeriodicidade}</div>
       </div>`
-  }
-}
-
-function perfilTogglePlano(tipo) {
-  const btnM = document.getElementById('plano-toggle-mensal')
-  const btnA = document.getElementById('plano-toggle-anual')
-  const btnAssinar = document.getElementById('demo-btn-assinar')
-  const precoEl = document.getElementById('demo-preco-pro')
-  const precoDeEl = document.getElementById('demo-preco-de')
-  const subEl = document.getElementById('demo-sub-pro')
-  if (!btnM || !btnA) return
-  if (tipo === 'mensal') {
-    btnM.style.background = 'var(--green)'; btnM.style.color = '#fff'
-    btnA.style.background = 'transparent'; btnA.style.color = 'var(--text-muted)'
-    precoDeEl.textContent = 'R$ 49,90'
-    precoEl.innerHTML = 'R$ 37,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span>'
-    subEl.textContent = ''
-    btnAssinar.href = 'https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00'
-    btnAssinar.textContent = '⚡ Assinar Mensal — R$ 37,90/mês'
-  } else {
-    btnA.style.background = 'var(--green)'; btnA.style.color = '#fff'
-    btnM.style.background = 'transparent'; btnM.style.color = 'var(--text-muted)'
-    precoDeEl.textContent = ''
-    precoEl.innerHTML = 'R$ 247,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/ano</span>'
-    subEl.textContent = 'equivale a R$ 20,65/mês'
-    btnAssinar.href = 'https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01'
-    btnAssinar.textContent = '⚡ Assinar Anual — R$ 247,90/ano'
   }
 }
 
