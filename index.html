@@ -3930,7 +3930,7 @@ async function gerarRelatorioPDF() {
   const varDesp = s.varDesp     ?? 0
   const prog    = s.progresso   || 0
   const meta    = s.metaValor   || 0
-  const score   = s.indice      || 74
+  const score   = s.indice      || 0
   const diario  = s.diario      || []
   const nome    = u.nome        || 'Usuário'
   const negocio = u.tipo_negocio|| 'Meu Negócio'
@@ -4247,7 +4247,7 @@ async function abrirProfitCard() {
   const fill = $('pc-goal-fill'); if(fill) fill.style.width = Math.min(progresso,100)+'%'
 
   // ── Nexor Index ──
-  const score = s.indice || 74
+  const score = s.indice || 0
   const liga  = score>=90?'Elite':score>=80?'Ouro':score>=65?'Prata':'Bronze'
   const topPct = score>=90?5:score>=80?15:score>=70?30:score>=60?50:70
   $('pc-score').textContent      = score
@@ -4462,6 +4462,7 @@ function atualizarIAComDados() {
 // Gerar previsão IA real via backend (com insights textuais)
 async function gerarPrevisaoIA() {
   if (!App.token) return
+  if (!App.stats?.faturamento) return
   const btn = document.getElementById('prev-btn')
   if (btn) { btn.textContent = '⏳'; btn.disabled = true }
 
@@ -6398,7 +6399,7 @@ async function enviarMensagemIA() {
     const res = await fetch(API_URL + '/ia/chat', {
       method: 'POST',
       headers: {'Content-Type':'application/json', 'Authorization': 'Bearer ' + App.token},
-      body: JSON.stringify({ messages: iaMessages, context: buildIAContext() })
+      body: JSON.stringify({ messages: iaMessages.slice(-20), context: buildIAContext() })
     })
     if (!res.ok) throw new Error('HTTP ' + res.status)
     const data = await res.json()
@@ -6541,6 +6542,11 @@ function restaurarHistoriaIA() {
 // ======================================
 
 async function ativarCopiloto() {
+  if (!App.stats?.faturamento) {
+    const actions = document.getElementById('copilot-actions')
+    if (actions) actions.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Registre vendas primeiro para ativar o Copiloto de Lucro.</div>'
+    return
+  }
   const btn = document.getElementById('copilot-btn')
   const actions = document.getElementById('copilot-actions')
   btn.disabled = true; btn.textContent = '⏳ Analisando...'
