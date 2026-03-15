@@ -2662,9 +2662,29 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           </div>
         </div>
         <div class="chart-card" id="perfil-plano-card">
-          <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
-          <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.18);border-radius:var(--radius-sm);padding:15px"><div style="font-size:17px;font-weight:800">Essencial</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação · Relatórios</div><div style="font-size:22px;font-weight:800;color:var(--green);margin-top:10px">R$ 49<span style="font-size:13px;color:var(--text-muted);font-weight:400">/mês</span></div></div>
-          <button class="btn btn-primary" style="width:100%;margin-top:12px">🚀 Upgrade para Pro</button>
+          <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
+          <div style="display:flex;gap:6px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:14px">
+            <button id="plano-toggle-mensal" onclick="perfilTogglePlano('mensal')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:var(--green);color:#fff">Mensal</button>
+            <button id="plano-toggle-anual" onclick="perfilTogglePlano('anual')" style="flex:1;padding:7px;border-radius:7px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text-muted)">Anual <span style="font-size:10px;color:#fbbf24;font-weight:800">-47%</span></button>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:16px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div>
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span style="font-size:18px;font-weight:800;color:#fff">Pro</span>
+                  <span style="font-size:9px;font-weight:800;padding:2px 8px;background:rgba(99,102,241,0.25);color:#a78bfa;border-radius:20px;border:1px solid rgba(99,102,241,0.35)">COMPLETO</span>
+                </div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação<br>Relatórios · IA · Score · Metas · Cards</div>
+              </div>
+              <div style="text-align:right">
+                <div id="demo-preco-de" style="font-size:11px;color:var(--text-muted);text-decoration:line-through">R$ 49,90</div>
+                <div id="demo-preco-pro" style="font-size:22px;font-weight:800;color:#a78bfa;line-height:1.1">R$ 37,90<span style="font-size:11px;color:var(--text-muted);font-weight:400">/mês</span></div>
+                <div id="demo-sub-pro" style="font-size:10px;color:var(--text-muted);margin-top:2px"></div>
+              </div>
+            </div>
+          </div>
+          <a id="demo-btn-assinar" href="https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;margin-top:12px;display:block;text-align:center;text-decoration:none">⚡ Assinar Mensal — R$ 37,90/mês</a>
+          <div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:8px">Cancele quando quiser · Pagamento seguro via Stripe</div>
         </div>
       </div>
     </div>
