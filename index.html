@@ -3266,13 +3266,18 @@ async function finalizarCadastro() {
     const res=await fetch(API_URL+'/auth/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({nome:document.getElementById('cad-nome').value.trim(),email:document.getElementById('cad-email').value.trim(),
         senha:document.getElementById('cad-senha').value,tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento})
-    }).catch(()=>null)
-    if (!res) throw new Error('offline')
-    const data=await res.json()
-    if (!res.ok) { mostrarErroAuth(document.getElementById('cad-erro-1'),data.erro||'Erro ao criar conta.'); avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return }
+    }).catch((e)=>{ console.error('[cadastro] fetch falhou:', e); return null })
+    if (!res) { mostrarErroAuth(erro,'Servidor indisponível. Verifique sua conexão ou tente mais tarde.'); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return }
+    let data={}
+    try { data=await res.json() } catch { data={} }
+    if (!res.ok) {
+      const msg=data.erro||data.message||data.detail||('Erro '+res.status+'. Tente novamente.')
+      mostrarErroAuth(document.getElementById('cad-erro-1'),msg); avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
+    }
     salvarSessao(data); entrarApp(data.usuario, true)
-  } catch {
-    mostrarErroAuth(erro,'Erro de conexão. Tente novamente.')
+  } catch(e) {
+    console.error('[cadastro] erro inesperado:', e)
+    mostrarErroAuth(erro,'Erro inesperado. Tente novamente.')
     btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false
   }
 }
