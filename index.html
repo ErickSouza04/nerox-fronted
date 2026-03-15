@@ -2183,32 +2183,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">📈</div><div class="stat-label">Lucro Real</div><div class="stat-value green count-anim" data-target="3595" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 31%</span> vs mês anterior</div></div></div>
       <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">🎫</div><div class="stat-label">Ticket Médio</div><div class="stat-value count-anim" data-target="285" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ R$ 23</span> vs ant.</div></div></div>
     </div>
-    <div class="smart-alerts" id="smart-alerts">
-      <div class="smart-alert amber">
-        <button class="smart-alert-dismiss" onclick="this.parentElement.remove()">×</button>
-        <span class="smart-alert-icon">⚠️</span>
-        <div class="smart-alert-body">
-          <div class="smart-alert-title">Despesas subiram 18% esta semana</div>
-          <div class="smart-alert-desc">Matéria-prima subiu R$ 280 em relação à semana passada. Verifique fornecedores.</div>
-        </div>
-      </div>
-      <div class="smart-alert green">
-        <button class="smart-alert-dismiss" onclick="this.parentElement.remove()">×</button>
-        <span class="smart-alert-icon">🔥</span>
-        <div class="smart-alert-body">
-          <div class="smart-alert-title">Hoje pode ser o seu melhor dia do mês!</div>
-          <div class="smart-alert-desc">Com R$ 1.280 de lucro em poucas horas, você está no caminho para bater o recorde de sábado.</div>
-        </div>
-      </div>
-      <div class="smart-alert blue">
-        <button class="smart-alert-dismiss" onclick="this.parentElement.remove()">×</button>
-        <span class="smart-alert-icon">📈</span>
-        <div class="smart-alert-body">
-          <div class="smart-alert-title">Bolo Gourmet aumentou vendas em 22%</div>
-          <div class="smart-alert-desc">Seu produto mais lucrativo está vendendo mais. Considere aumentar o estoque para o fim de semana.</div>
-        </div>
-      </div>
-    </div>
+    <div class="smart-alerts" id="smart-alerts"></div>
 
     <!-- ═══ GRÁFICO FULL WIDTH ═══ -->
     <div class="perf-chart-card" style="margin-bottom:16px">
@@ -2263,7 +2238,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       <!-- 3: Mais Lucrativos -->
       <div class="chart-card">
         <div class="chart-header" style="margin-bottom:12px"><div><div class="chart-title">🏆 Mais Lucrativos</div><div class="chart-sub">Março 2026</div></div></div>
-        <div class="top-products">
+        <div class="top-products" id="top-products-list">
           <div class="top-product-item"><div class="top-product-rank rank-1">1°</div><div class="top-product-name">Bolo Gourmet 1kg</div><div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:100%"></div></div></div><div class="top-product-val">R$ 820</div></div>
           <div class="top-product-item"><div class="top-product-rank rank-2">2°</div><div class="top-product-name">Combo Festa</div><div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:63%"></div></div></div><div class="top-product-val">R$ 520</div></div>
           <div class="top-product-item"><div class="top-product-rank rank-3">3°</div><div class="top-product-name">Brigadeiro (50un)</div><div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:38%"></div></div></div><div class="top-product-val">R$ 310</div></div>
@@ -3370,9 +3345,20 @@ async function enviarRecuperacao() {
 async function iniciarDashboard() {
   const mes=new Date().getMonth()+1, ano=new Date().getFullYear()
 
-  // Anima valores com dados demo enquanto não tem token
+  // Anima valores: se logado parte de zero; se demo usa os valores do HTML
+  if (App.token) {
+    document.querySelectorAll('[data-target]').forEach(el => el.dataset.target = '0')
+    const hlEl = document.getElementById('hero-lucro')
+    const hrEl = document.getElementById('hero-receita')
+    const hdEl = document.getElementById('hero-despesas')
+    const hbEl = document.getElementById('hero-receita-badge')
+    if (hlEl) hlEl.textContent = 'R$ 0,00'
+    if (hrEl) hrEl.textContent = 'R$ 0,00'
+    if (hdEl) hdEl.textContent = 'R$ 0,00'
+    if (hbEl) hbEl.textContent = ''
+  }
   setTimeout(()=>{ document.querySelectorAll('[data-target]').forEach(el=>countUp(el)) },300)
-  drawGauge('gaugeCanvas',74)
+  drawGauge('gaugeCanvas', App.token ? 0 : 74)
 
   if (!App.token) return  // modo demo - para aqui
 
@@ -3430,6 +3416,18 @@ async function iniciarDashboard() {
       if(c){ c.data.labels=dados.map(d=>fmtData(d.data)); c.data.datasets[0].data=dados.map(d=>d.lucro); c.update() }
       // Salvar série diária para gráfico do Profit Card
       if (App.stats) App.stats.diario = dados.map(d => d.lucro || 0)
+      // Atualizar hero do dia com dados reais de hoje
+      const hoje = dados[dados.length - 1]
+      if (hoje) {
+        const hlEl = document.getElementById('hero-lucro')
+        const hrEl = document.getElementById('hero-receita')
+        const hdEl = document.getElementById('hero-despesas')
+        const hbEl = document.getElementById('hero-receita-badge')
+        if (hlEl) hlEl.textContent = fmtBRL(hoje.lucro || 0)
+        if (hrEl) hrEl.textContent = fmtBRL(hoje.faturamento || 0)
+        if (hdEl) hdEl.textContent = fmtBRL(hoje.despesas || 0)
+        if (hbEl) hbEl.textContent = ''
+      }
       // Insight IA dinâmico no dashboard (não bloqueia)
       setTimeout(carregarInsightDiario, 800)
       // Atualizar página IA se estiver aberta
@@ -3445,14 +3443,62 @@ async function iniciarDashboard() {
       const v=await vRes.json(), de=await deRes.json()
       const todos=[...v.dados.map(i=>({...i,_tipo:'venda'})),...de.dados.map(i=>({...i,_tipo:'despesa'}))]
         .sort((a,b)=>new Date(b.data)-new Date(a.data)).slice(0,5)
+
+      // Atualizar tabela de registros (aba de histórico)
       const tbody=document.getElementById('tabela-registros')
-      if(tbody && todos.length) {
-        tbody.innerHTML=todos.map(i=>`<tr>
-          <td>${fmtData(i.data)}</td>
-          <td>${i.produto||i.descricao||i.categoria}</td>
-          <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
-          <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
-        </tr>`).join('')
+      if(tbody) {
+        if (todos.length) {
+          tbody.innerHTML=todos.map(i=>`<tr>
+            <td>${fmtData(i.data)}</td>
+            <td>${i.produto||i.descricao||i.categoria}</td>
+            <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
+            <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
+          </tr>`).join('')
+        } else {
+          tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada ainda</td></tr>'
+        }
+      }
+
+      // Atualizar lista visual de atividade recente no dashboard
+      const rl=document.getElementById('recent-list-dash')
+      if(rl) {
+        if (todos.length) {
+          rl.innerHTML=todos.map(i=>`
+            <li class="recent-item">
+              <span class="recent-dot ${i._tipo}"></span>
+              <div style="flex:1">
+                <div class="recent-name">${i.produto||i.descricao||i.categoria}</div>
+                <div class="recent-cat">${i._tipo==='venda'?'Venda':'Despesa'} · ${fmtData(i.data)}</div>
+              </div>
+              <span class="recent-val ${i._tipo==='venda'?'pos':'neg'}">${i._tipo==='venda'?'+':'−'}${fmtBRL(i.valor)}</span>
+            </li>`).join('')
+        } else {
+          rl.innerHTML='<li style="color:var(--text-muted);font-size:13px;padding:16px 0;text-align:center">Nenhuma movimentação ainda</li>'
+        }
+      }
+
+      // Atualizar top produtos agrupando vendas por produto/categoria
+      const tpEl=document.getElementById('top-products-list')
+      if(tpEl) {
+        const porProduto={}
+        v.dados.forEach(venda=>{
+          const nome=venda.produto||venda.categoria||'Outros'
+          porProduto[nome]=(porProduto[nome]||0)+parseFloat(venda.valor)
+        })
+        const topProd=Object.entries(porProduto).sort((a,b)=>b[1]-a[1]).slice(0,4)
+        if(topProd.length) {
+          const maxVal=topProd[0][1]
+          const ranks=['rank-1','rank-2','rank-3','rank-other']
+          tpEl.innerHTML=topProd.map(([nome,val],i)=>`
+            <div class="top-product-item">
+              <div class="top-product-rank ${ranks[i]||'rank-other'}">${i+1}°</div>
+              <div class="top-product-name">${nome}</div>
+              <div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:${Math.round((val/maxVal)*100)}%"></div></div></div>
+              <div class="top-product-val">${fmtBRL(val)}</div>
+            </div>`).join('')
+        } else {
+          tpEl.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Nenhuma venda registrada ainda</div>'
+        }
       }
     }
 
