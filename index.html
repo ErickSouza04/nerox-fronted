@@ -3168,8 +3168,8 @@ async function api(path, opts = {}) {
 }
 
 // -- Formatadores ----------------------
-const fmtBRL = v => { const n = parseFloat(v); return 'R$ ' + (isNaN(n) ? '0,00' : n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})) }
-const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p.length >= 3 ? p[2]+'/'+p[1] : d }
+const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})
+const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
 
 // ======================================
 // AUTH
@@ -3391,8 +3391,8 @@ async function iniciarDashboard() {
       if(cards[3]){cards[3].dataset.target=Math.round(dados.margem);         countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.badge-up,.badge-down')
-      if(vars[0]&&dados.variacao?.faturamento!=null){vars[0].textContent=(dados.variacao.faturamento>=0?'↑':'↓')+Math.abs(dados.variacao.faturamento).toFixed(0)+'%'; vars[0].className=dados.variacao.faturamento>=0?'badge-up':'badge-down'}
-      if(vars[2]&&dados.variacao?.lucro!=null){vars[2].textContent=(dados.variacao.lucro>=0?'↑':'↓')+Math.abs(dados.variacao.lucro).toFixed(0)+'%'; vars[2].className=dados.variacao.lucro>=0?'badge-up':'badge-down'}
+      if(vars[0]){vars[0].textContent=(dados.variacao.faturamento>=0?'↑':'↓')+Math.abs(dados.variacao.faturamento).toFixed(0)+'%'; vars[0].className=dados.variacao.faturamento>=0?'badge-up':'badge-down'}
+      if(vars[2]){vars[2].textContent=(dados.variacao.lucro>=0?'↑':'↓')+Math.abs(dados.variacao.lucro).toFixed(0)+'%'; vars[2].className=dados.variacao.lucro>=0?'badge-up':'badge-down'}
       // Meta
       const pct=dados.progresso_meta||0
       const pf=document.querySelector('.progress-fill'); if(pf) pf.style.width=pct+'%'
@@ -3663,8 +3663,7 @@ function countUp(el){
 // GAUGE
 function drawGauge(id,value){
   const canvas=document.getElementById(id); if(!canvas) return
-  const ctx=canvas.getContext('2d'); if(!ctx) return
-  const W=canvas.width, H=canvas.height
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height
   ctx.clearRect(0,0,W,H)
   const cx=W/2, cy=H-2, r=H-16
   ctx.beginPath(); ctx.arc(cx,cy,r,Math.PI,2*Math.PI)
@@ -4645,9 +4644,8 @@ async function carregarInsightDiario() {
     // Remove insight anterior se já existir
     document.getElementById('ia-insight-live')?.remove()
 
-    const insight = data.insight || ''
-    const isPositive = insight.includes('📈') || insight.includes('💡') || insight.includes('🔥') || insight.includes('✅')
-    const color = isPositive ? 'green' : insight.includes('⚠️') ? 'amber' : 'blue'
+    const isPositive = data.insight.includes('📈') || data.insight.includes('💡') || data.insight.includes('🔥') || data.insight.includes('✅')
+    const color = isPositive ? 'green' : data.insight.includes('⚠️') ? 'amber' : 'blue'
 
     const div = document.createElement('div')
     div.id = 'ia-insight-live'
@@ -4660,7 +4658,7 @@ async function carregarInsightDiario() {
         <div class="smart-alert-title" style="display:flex;align-items:center;gap:6px">
           Nexor IA <span style="font-size:9px;font-weight:600;padding:1px 7px;background:rgba(99,102,241,0.15);color:#a78bfa;border-radius:10px;border:1px solid rgba(99,102,241,0.2)">insight do dia</span>
         </div>
-        <div class="smart-alert-desc">${insight}</div>
+        <div class="smart-alert-desc">${data.insight}</div>
       </div>`
     container.insertBefore(div, container.firstChild)
   } catch(e) { console.warn('insight diário:', e) }
@@ -5692,7 +5690,6 @@ function desenharScoreRingBig(score, color) {
   const canvas = document.getElementById('scoreRingBig')
   if (!canvas) return
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
   const W = 160, cx = W/2, cy = W/2, r = 68
   ctx.clearRect(0,0,W,W)
   const start = Math.PI*0.75, end = Math.PI*2.25
@@ -6325,7 +6322,6 @@ function initScoreCanvas(forceScore) {
   const ligaIcon  = score>=90?'💎':score>=80?'🥇':score>=70?'🥈':score>=60?'🥉':'⚡'
   const ligaColor = score>=90?'#22d3ee':score>=80?'#fbbf24':score>=70?'#a78bfa':score>=60?'#cd7f32':'#64748b'
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
   const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, r = 32
   ctx.clearRect(0, 0, W, H)
   const startAngle = Math.PI * 0.75, endAngle = Math.PI * 2.25
