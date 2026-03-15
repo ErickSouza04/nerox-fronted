@@ -3232,13 +3232,18 @@ async function fazerLogin() {
   const btn=document.querySelector('#auth-login .auth-btn') || document.querySelector('.auth-btn')
   if (btn) { btn.textContent='Entrando...'; btn.disabled=true }
   try {
-    const res=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})}).catch(()=>null)
-    if (!res) throw new Error('offline')
-    const data=await res.json()
-    if (!res.ok) { mostrarErroAuth(erro,data.erro||'E-mail ou senha incorretos.'); if(btn){btn.textContent='Entrar no Nexor';btn.disabled=false} return }
+    const res=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})}).catch((e)=>{ console.error('[login] fetch falhou:', e); return null })
+    if (!res) { mostrarErroAuth(erro,'Servidor indisponível. Verifique sua conexão ou tente mais tarde.'); if(btn){btn.textContent='Entrar no Nexor';btn.disabled=false} return }
+    let data={}
+    try { data=await res.json() } catch { data={} }
+    if (!res.ok) {
+      const msg=data.erro||data.message||data.detail||('Erro '+res.status+'. Tente novamente.')
+      mostrarErroAuth(erro,msg); if(btn){btn.textContent='Entrar no Nexor';btn.disabled=false} return
+    }
     salvarSessao(data); entrarApp(data.usuario, false)
-  } catch {
-    mostrarErroAuth(erro,'Erro de conexão. Tente o modo demo.')
+  } catch(e) {
+    console.error('[login] erro inesperado:', e)
+    mostrarErroAuth(erro,'Erro inesperado: '+e.message)
     if (btn) { btn.textContent='Entrar no Nexor'; btn.disabled=false }
   }
 }
