@@ -888,12 +888,13 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 
 .auth-card {
   width: 100%; max-width: 460px;
+  max-height: calc(100vh - 40px);
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: 24px;
   backdrop-filter: blur(20px);
   box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-  overflow: hidden;
+  overflow-y: auto; overflow-x: hidden;
   position: relative;
 }
 .auth-card::before {
@@ -963,20 +964,19 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 /* Categoria cards */
 .categoria-grid {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 10px; margin-bottom: 20px;
+  gap: 7px; margin-bottom: 14px;
 }
 .categoria-card {
-  padding: 14px 12px; border-radius: 13px;
+  padding: 8px 10px; border-radius: 10px;
   border: 1.5px solid var(--border);
   background: rgba(255,255,255,0.03);
   cursor: pointer; transition: all 0.2s;
-  text-align: center;
+  display: flex; align-items: center; gap: 8px;
   position: relative; overflow: hidden;
 }
 .categoria-card:hover {
   border-color: rgba(34,197,94,0.35);
   background: rgba(34,197,94,0.05);
-  transform: translateY(-2px);
 }
 .categoria-card.selected {
   border-color: var(--green);
@@ -985,12 +985,12 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 }
 .categoria-card.selected::after {
   content: '✓';
-  position: absolute; top: 7px; right: 9px;
-  font-size: 11px; font-weight: 800; color: var(--green);
+  position: absolute; top: 5px; right: 7px;
+  font-size: 10px; font-weight: 800; color: var(--green);
 }
-.cat-emoji { font-size: 26px; margin-bottom: 7px; display: block; }
-.cat-nome  { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
-.cat-desc  { font-size: 10.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.3; }
+.cat-emoji { font-size: 20px; flex-shrink: 0; }
+.cat-nome  { font-size: 11px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.cat-desc  { font-size: 9px; color: var(--text-muted); margin-top: 1px; line-height: 1.2; }
 
 /* Auth input */
 .auth-field { margin-bottom: 14px; }
@@ -2661,10 +2661,23 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Sessão Ativa</div><div style="font-size:11px;color:var(--text-muted)">Chrome · São Paulo, SP</div></div><button class="btn btn-ghost" style="font-size:11px;color:var(--red)">Encerrar</button></div>
           </div>
         </div>
-        <div class="chart-card">
-          <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
-          <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.18);border-radius:var(--radius-sm);padding:15px"><div style="font-size:17px;font-weight:800">Essencial</div><div style="font-size:12px;color:var(--text-muted);margin-top:4px">Dashboard · Registros · Precificação · Relatórios</div><div style="font-size:22px;font-weight:800;color:var(--green);margin-top:10px">R$ 49<span style="font-size:13px;color:var(--text-muted);font-weight:400">/mês</span></div></div>
-          <button class="btn btn-primary" style="width:100%;margin-top:12px">🚀 Upgrade para Pro</button>
+        <div class="chart-card" id="perfil-plano-card">
+          <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Mensal</div>
+              <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
+              <div style="margin-top:10px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">Assinar →</div>
+            </div>
+            <div onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Anual <span style="background:#f59e0b;color:#000;padding:1px 5px;border-radius:4px;font-size:9px">-40%</span></div>
+              <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 274<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">= R$ 22,90/mês</div>
+              <div style="margin-top:10px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">⭐ Melhor valor →</div>
+            </div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--text-muted)">Cancele quando quiser · Pagamento seguro via Stripe</div>
         </div>
       </div>
     </div>
@@ -3529,7 +3542,46 @@ async function salvarPerfil() {
   } catch { err.style.display='block'; setTimeout(()=>err.style.display='none',4000) }
 }
 
-async function carregarPerfil() { aplicarUsuarioUI(App.usuario) }
+async function carregarPerfil() {
+  aplicarUsuarioUI(App.usuario)
+  const card = document.getElementById('perfil-plano-card')
+  if (!card) return
+  const isDemo = !App.token
+  if (isDemo) {
+    card.innerHTML = `
+      <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
+          <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Mensal</div>
+          <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
+          <div style="margin-top:10px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">Assinar →</div>
+        </div>
+        <div onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
+          <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Anual <span style="background:#f59e0b;color:#000;padding:1px 5px;border-radius:4px;font-size:9px">-40%</span></div>
+          <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 274<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">= R$ 22,90/mês</div>
+          <div style="margin-top:10px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">⭐ Melhor valor →</div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text-muted)">Cancele quando quiser · Pagamento seguro via Stripe</div>`
+  } else {
+    const u = App.usuario || {}
+    const planoNome = u.plano_nome || 'Pro'
+    const planoDesc = u.plano_desc || 'Dashboard · Registros · Precificação · Relatórios · IA · Score · Metas · Cards'
+    const planoPeriodicidade = u.plano_periodo === 'anual' ? 'R$ 247,90/ano' : 'R$ 37,90/mês'
+    card.innerHTML = `
+      <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
+      <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:15px">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+          <span style="font-size:17px;font-weight:800">${planoNome}</span>
+          <span style="font-size:9px;font-weight:800;padding:2px 8px;background:rgba(99,102,241,0.25);color:#a78bfa;border-radius:20px;border:1px solid rgba(99,102,241,0.35)">ATIVO</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${planoDesc}</div>
+        <div style="font-size:20px;font-weight:800;color:#a78bfa;margin-top:10px">${planoPeriodicidade}</div>
+      </div>`
+  }
+}
 
 // ======================================
 // NAVIGATION
