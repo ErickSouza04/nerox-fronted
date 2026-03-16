@@ -3382,6 +3382,8 @@ async function iniciarDashboard() {
     if (_cD) { _cD.data.labels=['Sem despesas']; _cD.data.datasets[0].data=[1]; _cD.data.datasets[0].backgroundColor=['#1e2d45']; _cD.update() }
     const _cDi = Chart.getChart('chartDiario')
     if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
+    // Destruir chart de desempenho 30 dias para forçar reload com dados reais
+    if (typeof perf30Chart !== 'undefined' && perf30Chart) { perf30Chart.destroy(); perf30Chart = null; perf30Initing = false }
     // Zerar cards de texto com dados demo
     const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
     _set('idx-margem','—'); _set('idx-dias','—'); _set('idx-crescimento','—'); _set('idx-despesas','—')
@@ -3625,6 +3627,9 @@ async function iniciarDashboard() {
     }
 
   } catch(e) { console.error('Erro dashboard:',e) }
+
+  // Recriar chart de desempenho 30 dias com dados reais (foi destruído no início)
+  if (App.token) setTimeout(initPerf30Chart, 200)
 }
 
 // ======================================
