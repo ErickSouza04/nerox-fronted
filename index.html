@@ -2212,10 +2212,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:4px">Saúde Boa 🟢</div><div class="nexor-desc">Registre diariamente e reduza despesas para atingir 85+.</div></div>
         </div>
         <div class="nexor-mini-grid" style="margin-top:12px">
-          <div class="nexor-mini-cell"><div class="nexor-mini-label">Margem</div><div class="nexor-mini-value">28%</div></div>
-          <div class="nexor-mini-cell"><div class="nexor-mini-label">Dias ativos</div><div class="nexor-mini-value">18</div></div>
-          <div class="nexor-mini-cell"><div class="nexor-mini-label">Crescimento</div><div class="nexor-mini-value" style="color:var(--green)">+31%</div></div>
-          <div class="nexor-mini-cell"><div class="nexor-mini-label">Despesas</div><div class="nexor-mini-value" style="color:var(--amber)">+12%</div></div>
+          <div class="nexor-mini-cell"><div class="nexor-mini-label">Margem</div><div class="nexor-mini-value" id="idx-margem">28%</div></div>
+          <div class="nexor-mini-cell"><div class="nexor-mini-label">Dias ativos</div><div class="nexor-mini-value" id="idx-dias">18</div></div>
+          <div class="nexor-mini-cell"><div class="nexor-mini-label">Crescimento</div><div class="nexor-mini-value" id="idx-crescimento" style="color:var(--green)">+31%</div></div>
+          <div class="nexor-mini-cell"><div class="nexor-mini-label">Despesas</div><div class="nexor-mini-value" id="idx-despesas" style="color:var(--amber)">+12%</div></div>
         </div>
       </div>
 
@@ -2252,13 +2252,13 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="projections-grid">
           <div class="proj-card proj-card-1">
             <div class="proj-icon">📈</div><div class="proj-label">Receita Estimada</div>
-            <div class="proj-value">R$ 38.200</div><div class="proj-meta">+18% vs mês anterior</div>
-            <div class="proj-confidence"><div class="proj-conf-label">Confiança</div><div class="proj-conf-bar"><div class="proj-conf-fill"></div></div><div class="proj-conf-pct">78%</div></div>
+            <div class="proj-value" id="proj-receita-val">R$ 38.200</div><div class="proj-meta" id="proj-receita-meta">+18% vs mês anterior</div>
+            <div class="proj-confidence"><div class="proj-conf-label">Confiança</div><div class="proj-conf-bar"><div class="proj-conf-fill" id="proj-receita-fill" style="width:78%"></div></div><div class="proj-conf-pct" id="proj-receita-pct">78%</div></div>
           </div>
           <div class="proj-card proj-card-2">
             <div class="proj-icon">💚</div><div class="proj-label">Lucro Estimado</div>
-            <div class="proj-value">R$ 17.900</div><div class="proj-meta">Margem de 52%</div>
-            <div class="proj-confidence"><div class="proj-conf-label">Confiança</div><div class="proj-conf-bar"><div class="proj-conf-fill"></div></div><div class="proj-conf-pct">72%</div></div>
+            <div class="proj-value" id="proj-lucro-val">R$ 17.900</div><div class="proj-meta" id="proj-lucro-meta">Margem de 52%</div>
+            <div class="proj-confidence"><div class="proj-conf-label">Confiança</div><div class="proj-conf-bar"><div class="proj-conf-fill" id="proj-lucro-fill" style="width:72%"></div></div><div class="proj-conf-pct" id="proj-lucro-pct">72%</div></div>
           </div>
         </div>
       </div>
@@ -2284,7 +2284,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       <!-- 8: Dicas da IA -->
       <div class="chart-card" style="background:linear-gradient(135deg,rgba(167,139,250,0.07),rgba(96,165,250,0.04));border-color:rgba(167,139,250,0.18)">
         <div class="chart-header" style="margin-bottom:12px"><div><div class="chart-title">🤖 Dicas da Nexor IA</div><div class="chart-sub">Análise automática do mês</div></div></div>
-        <div style="display:flex;flex-direction:column;gap:8px">
+        <div id="dicas-dashboard" style="display:flex;flex-direction:column;gap:8px">
           <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(34,197,94,0.07);border-radius:10px;border:1px solid rgba(34,197,94,0.15)">
             <span style="font-size:16px;flex-shrink:0;margin-top:1px">💡</span>
             <div style="font-size:12px;color:var(--text-muted);line-height:1.5">Aumente o estoque do <strong style="color:var(--text)">Bolo Gourmet</strong> — é seu produto mais lucrativo e está em alta.</div>
@@ -2366,7 +2366,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <div class="form-group full"><label class="form-label">Descrição (opcional)</label><input class="form-input" type="text" placeholder="Ex: Farinha, ovos, manteiga" id="desc-despesa"></div>
             <div class="form-group"><label class="form-label">Data</label><input class="form-input" type="date" id="data-despesa"></div>
           </div>
-          <div style="margin-top:14px"><button class="btn btn-danger" style="width:100%">Registrar Despesa</button></div>
+          <div style="margin-top:14px"><button class="btn btn-danger" style="width:100%" onclick="registrarDespesa()">Registrar Despesa</button></div>
         </div>
       </div>
       <div>
@@ -2507,7 +2507,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
       <div>
         <div style="font-size:16px;font-weight:700;color:var(--text)">Relatório Mensal</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">Fevereiro 2026 · Gerado automaticamente</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px" id="rel-header-sub">Fevereiro 2026 · Gerado automaticamente</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-primary" style="font-size:12px" id="btn-relatorio-pdf" onclick="clickGerarPDF(this)">📄 Baixar PDF</button>
@@ -2522,8 +2522,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="sc-content">
           <div class="stat-icon blue">💰</div>
           <div class="stat-label">Faturamento</div>
-          <div class="stat-value">R$ 10.890</div>
-          <div class="stat-sub"><span class="badge-up">↑ 12%</span> vs janeiro</div>
+          <div class="stat-value" id="rel-faturamento">R$ 10.890</div>
+          <div class="stat-sub"><span id="rel-var-fat" class="badge-up">↑ 12%</span> vs mês ant.</div>
         </div>
       </div>
       <div class="stat-card c-red">
@@ -2531,8 +2531,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="sc-content">
           <div class="stat-icon red">📦</div>
           <div class="stat-label">Despesas</div>
-          <div class="stat-value red">R$ 8.240</div>
-          <div class="stat-sub"><span class="badge-down">↑ 8%</span> vs janeiro</div>
+          <div class="stat-value red" id="rel-despesas">R$ 8.240</div>
+          <div class="stat-sub"><span id="rel-var-desp" class="badge-down">↑ 8%</span> vs mês ant.</div>
         </div>
       </div>
       <div class="stat-card c-green">
@@ -2540,8 +2540,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="sc-content">
           <div class="stat-icon green">📈</div>
           <div class="stat-label">Lucro Real</div>
-          <div class="stat-value green">R$ 2.650</div>
-          <div class="stat-sub">Margem: <strong style="color:var(--text)">24%</strong></div>
+          <div class="stat-value green" id="rel-lucro">R$ 2.650</div>
+          <div class="stat-sub">Margem: <strong id="rel-margem" style="color:var(--text)">24%</strong></div>
         </div>
       </div>
       <div class="stat-card c-amber">
@@ -2549,7 +2549,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="sc-content">
           <div class="stat-icon amber">🚀</div>
           <div class="stat-label">Crescimento</div>
-          <div class="stat-value" style="color:var(--amber)">+22%</div>
+          <div class="stat-value" id="rel-crescimento" style="color:var(--amber)">+22%</div>
           <div class="stat-sub">vs mesmo mês ant.</div>
         </div>
       </div>
@@ -2581,7 +2581,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
               <th>Ação</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="rel-hist-tbody">
             <tr>
               <td>Fevereiro 2026</td>
               <td>R$ 10.890</td>
@@ -2658,7 +2658,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div style="display:flex;flex-direction:column;gap:9px">
             <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Senha</div><div style="font-size:11px;color:var(--text-muted)">Última alteração: 45 dias</div></div><button class="btn btn-secondary" style="font-size:11px;padding:5px 12px">Alterar</button></div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Backup Automático</div><div style="font-size:11px;color:var(--green)">✅ Ativo · Último: hoje 03:00</div></div><span class="tag green">On</span></div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Sessão Ativa</div><div style="font-size:11px;color:var(--text-muted)">Chrome · São Paulo, SP</div></div><button class="btn btn-ghost" style="font-size:11px;color:var(--red)">Encerrar</button></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:11px;background:var(--glass);border-radius:var(--radius-sm);border:1px solid var(--border)"><div><div style="font-size:13px;font-weight:600">Sessão Ativa</div><div style="font-size:11px;color:var(--text-muted)">Chrome · São Paulo, SP</div></div><button class="btn btn-ghost" style="font-size:11px;color:var(--red)" onclick="fazerLogout()">Encerrar</button></div>
           </div>
         </div>
         <div class="chart-card" id="perfil-plano-card">
@@ -3382,6 +3382,16 @@ async function iniciarDashboard() {
     if (_cD) { _cD.data.labels=['Sem despesas']; _cD.data.datasets[0].data=[1]; _cD.data.datasets[0].backgroundColor=['#1e2d45']; _cD.update() }
     const _cDi = Chart.getChart('chartDiario')
     if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
+    // Zerar cards de texto com dados demo
+    const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
+    _set('idx-margem','—'); _set('idx-dias','—'); _set('idx-crescimento','—'); _set('idx-despesas','—')
+    _set('proj-receita-val','—'); _set('proj-lucro-val','—')
+    // Limpar tabela de registros (demo rows)
+    const _tb = document.getElementById('tabela-registros')
+    if (_tb) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
+    // Limpar dicas demo
+    const _dc = document.getElementById('dicas-dashboard')
+    if (_dc) _dc.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Analisando seus dados...</div>'
   }
   setTimeout(()=>{ document.querySelectorAll('[data-target]').forEach(el=>countUp(el)) },300)
   drawGauge('gaugeCanvas', App.token ? 0 : 74)
@@ -3428,12 +3438,33 @@ async function iniciarDashboard() {
         metaValor:    Math.round(dados.meta_valor     || 0),
         diario:       [],  // preenchido abaixo
       }
+      // ── Índice Nexor mini-cards ──
+      const _vf = dados.variacao?.faturamento || 0, _vd = dados.variacao?.despesas || 0
+      const _im = document.getElementById('idx-margem'); if(_im) _im.textContent = Math.round(dados.margem||0)+'%'
+      const _ic = document.getElementById('idx-crescimento')
+      if(_ic){ _ic.textContent=((_vf>=0?'+':'')+_vf.toFixed(0)+'%'); _ic.style.color=_vf>=0?'var(--green)':'var(--red)' }
+      const _id = document.getElementById('idx-despesas')
+      if(_id){ _id.textContent=((_vd>=0?'+':'')+_vd.toFixed(0)+'%'); _id.style.color=_vd>10?'var(--amber)':_vd<=0?'var(--green)':'var(--text)' }
+      // ── Projeção do Mês ──
+      const _diasMes=new Date(ano,mes,0).getDate(), _diasDec=new Date().getDate()
+      const _fProj=_diasDec>0?_diasMes/_diasDec:1, _conf=Math.min(90,Math.round(_diasDec/_diasMes*100))
+      const _set2=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v }
+      _set2('proj-receita-val', fmtBRL(Math.round((dados.faturamento||0)*_fProj)))
+      _set2('proj-receita-meta', (_vf>=0?'+':'')+_vf.toFixed(0)+'% vs mês anterior')
+      _set2('proj-receita-pct', _conf+'%')
+      const _prf=document.getElementById('proj-receita-fill'); if(_prf) _prf.style.width=_conf+'%'
+      _set2('proj-lucro-val', fmtBRL(Math.round((dados.lucro||0)*_fProj)))
+      _set2('proj-lucro-meta', 'Margem de '+Math.round(dados.margem||0)+'%')
+      const _confL=Math.max(0,_conf-6)
+      _set2('proj-lucro-pct', _confL+'%')
+      const _plf=document.getElementById('proj-lucro-fill'); if(_plf) _plf.style.width=_confL+'%'
     }
 
     if (iRes?.ok) {
       const {dados} = await iRes.json()
       drawGauge('gaugeCanvas', dados.indice)
       const gn=document.getElementById('gaugeNum'); if(gn) gn.textContent=dados.indice
+      if (App.stats) App.stats.indice = dados.indice
     }
 
     if (dRes?.ok) {
@@ -3442,6 +3473,11 @@ async function iniciarDashboard() {
       if(c){ c.data.labels=dados.map(d=>fmtData(d.data)); c.data.datasets[0].data=dados.map(d=>d.lucro); c.update() }
       // Salvar série diária para gráfico do Profit Card
       if (App.stats) App.stats.diario = dados.map(d => d.lucro || 0)
+      // Dias ativos (dias com alguma movimentação)
+      const _diasAtivos = dados.filter(d=>(d.faturamento||0)>0||(d.lucro||0)>0).length
+      const _idi=document.getElementById('idx-dias'); if(_idi) _idi.textContent=_diasAtivos
+      // Dicas dinâmicas com dados reais
+      atualizarDicasDashboard()
       // Atualizar hero do dia com dados reais de hoje
       const hoje = dados[dados.length - 1]
       if (hoje) {
@@ -3656,7 +3692,7 @@ function navigate(page,el){
   const r=document.createElement('span'); r.className='ripple'
   r.style.cssText='width:80px;height:80px;left:calc(50% - 40px);top:calc(50% - 40px)'
   el.appendChild(r); setTimeout(()=>r.remove(),600)
-  if(page==='relatorios') setTimeout(initRelatorioChart,80)
+  if(page==='relatorios') { setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
   if(page==='metas')      setTimeout(()=>drawGauge('gaugeCanvas2',App.token?0:74),80)
   if(page==='perfil')     carregarPerfil()
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
@@ -3767,6 +3803,79 @@ new Chart(document.getElementById('chartDespesas'),{
     datasets:[{data:[4200,980,1800,650,420,1195],backgroundColor:['#3b82f6','#22c55e','#a78bfa','#fbbf24','#f87171','#64748b'],borderWidth:0,hoverOffset:10}]},
   options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{size:10},usePointStyle:true,pointStyleWidth:8,padding:12}},tooltip:tooltipStyle}}
 })
+
+// ── Dicas da Nexor IA — atualizadas com dados reais ──
+function atualizarDicasDashboard() {
+  if (!App.token) return
+  const container = document.getElementById('dicas-dashboard')
+  if (!container) return
+  const s = App.stats || {}
+  const dicas = []
+  if (!s.faturamento) {
+    dicas.push({icon:'💡',color:'green',text:'Registre sua primeira venda para ver análises personalizadas do seu negócio!'})
+    dicas.push({icon:'🎯',color:'blue',text:'Configure sua meta mensal na aba <strong>Metas</strong> para acompanhar o progresso.'})
+    dicas.push({icon:'🔮',color:'purple',text:'Quanto mais você registrar, mais precisas ficam as projeções automáticas.'})
+  } else {
+    if ((s.varDesp||0) > 10) dicas.push({icon:'⚠️',color:'amber',text:`Despesas subiram <strong style="color:var(--amber)">${(s.varDesp||0).toFixed(0)}%</strong> vs mês anterior. Revise seus custos.`})
+    if ((s.margem||0) < 25) dicas.push({icon:'📈',color:'green',text:`Margem em <strong>${s.margem||0}%</strong>. Ajuste preços ou reduza custos para chegar a 25%+.`})
+    else dicas.push({icon:'💡',color:'green',text:`Margem de <strong>${s.margem||0}%</strong> — saudável! Continue mantendo este ritmo.`})
+    const falta = (s.metaValor||0) - (s.lucro||0)
+    if (s.metaValor > 0 && falta > 0) dicas.push({icon:'🎯',color:'blue',text:`Faltam <strong style="color:var(--blue)">${fmtBRL(falta)}</strong> para bater a meta (${s.progresso||0}% concluído).`})
+    else if ((s.progresso||0) >= 100) dicas.push({icon:'🏆',color:'green',text:'Parabéns! Você bateu sua meta mensal! 🎉'})
+    else dicas.push({icon:'🎯',color:'blue',text:'Defina uma meta mensal em <strong>Metas</strong> para acompanhar seu progresso.'})
+  }
+  const cm={green:'rgba(34,197,94,',amber:'rgba(251,191,36,',blue:'rgba(96,165,250,',purple:'rgba(167,139,250,'}
+  container.innerHTML = dicas.map(d=>{ const c=cm[d.color]||cm.blue; return `<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:${c}0.07);border-radius:10px;border:1px solid ${c}0.15)"><span style="font-size:16px;flex-shrink:0;margin-top:1px">${d.icon}</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5">${d.text}</div></div>` }).join('')
+}
+
+// ── Relatórios — carrega dados reais ──
+async function carregarRelatorios() {
+  if (!App.token) return
+  const hoje = new Date(), mes = hoje.getMonth()+1, ano = hoje.getFullYear()
+  const mesesNomes = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
+  // Atualizar header
+  const hSub = document.getElementById('rel-header-sub')
+  if (hSub) hSub.textContent = mesesNomes[mes-1].charAt(0).toUpperCase()+mesesNomes[mes-1].slice(1)+' '+ano+' · Gerado automaticamente'
+  // Atualizar stats do mês atual via App.stats (já carregados)
+  const s = App.stats || {}
+  const _s=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v }
+  _s('rel-faturamento', fmtBRL(s.faturamento||0))
+  _s('rel-despesas', fmtBRL(s.despesas||0))
+  _s('rel-lucro', fmtBRL(s.lucro||0))
+  _s('rel-margem', (s.margem||0)+'%')
+  const _vf = s.varFat||0
+  const relVF = document.getElementById('rel-var-fat')
+  if (relVF) { relVF.textContent=((_vf>=0?'↑':'↓')+Math.abs(_vf).toFixed(0)+'%'); relVF.className=_vf>=0?'badge-up':'badge-down' }
+  const _vd = s.varDesp||0
+  const relVD = document.getElementById('rel-var-desp')
+  if (relVD) { relVD.textContent=((_vd>=0?'↑':'↓')+Math.abs(_vd).toFixed(0)+'%'); relVD.className=_vd>=0?'badge-down':'badge-up' }
+  _s('rel-crescimento', (_vf>=0?'+':'')+_vf.toFixed(0)+'%')
+  // Histórico dos últimos 6 meses
+  const tbody = document.getElementById('rel-hist-tbody')
+  if (!tbody) return
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:14px">Carregando histórico...</td></tr>'
+  try {
+    const reqs=[], meses=[]
+    for (let i=0; i<6; i++) {
+      const d = new Date(ano, mes-1-i, 1)
+      reqs.push(api('/dashboard/resumo?mes='+(d.getMonth()+1)+'&ano='+d.getFullYear()))
+      meses.push({label:mesesNomes[d.getMonth()].charAt(0).toUpperCase()+mesesNomes[d.getMonth()].slice(1)+' '+d.getFullYear()})
+    }
+    const results = await Promise.all(reqs)
+    const rows = []
+    for (let i=0; i<results.length; i++) {
+      if (results[i]?.ok) {
+        const {dados:hd} = await results[i].json()
+        if ((hd.faturamento||0) > 0 || (hd.total_despesas||0) > 0) {
+          const mg = (hd.faturamento||0) > 0 ? Math.round((hd.lucro||0)/(hd.faturamento)*100) : 0
+          const mgC = mg>=30?'green':mg>=20?'amber':'red'
+          rows.push(`<tr><td>${meses[i].label}</td><td>${fmtBRL(hd.faturamento||0)}</td><td style="color:var(--red)">${fmtBRL(hd.total_despesas||0)}</td><td style="color:var(--green);font-weight:700">${fmtBRL(hd.lucro||0)}</td><td><span class="tag ${mgC}">${mg}%</span></td><td><button class="btn btn-secondary" style="font-size:11px;padding:4px 10px" onclick="clickGerarPDF(this)">Ver PDF</button></td></tr>`)
+        }
+      }
+    }
+    tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px">Sem dados de meses anteriores ainda</td></tr>'
+  } catch(e) { console.error('carregarRelatorios:',e) }
+}
 
 let relInit=false
 async function initRelatorioChart(){
@@ -4697,8 +4806,8 @@ async function carregarInsightDiario() {
     const data = await res.json()
     if (!data.insight) return
 
-    // Injeta card de insight dinâmico no topo dos smart-alerts
-    const container = document.getElementById('smart-alerts')
+    // Injeta insight da IA no topo das dicas do dashboard
+    const container = document.getElementById('dicas-dashboard')
     if (!container) return
 
     // Remove insight anterior se já existir
@@ -4706,20 +4815,13 @@ async function carregarInsightDiario() {
 
     const isPositive = data.insight.includes('📈') || data.insight.includes('💡') || data.insight.includes('🔥') || data.insight.includes('✅')
     const color = isPositive ? 'green' : data.insight.includes('⚠️') ? 'amber' : 'blue'
+    const colorMap = {green:'rgba(34,197,94,',amber:'rgba(251,191,36,',blue:'rgba(96,165,250,'}
+    const c = colorMap[color]||colorMap.blue
 
     const div = document.createElement('div')
     div.id = 'ia-insight-live'
-    div.className = `smart-alert ${color}`
-    div.style.borderLeft = '3px solid var(--' + color + ')'
-    div.innerHTML = `
-      <button class="smart-alert-dismiss" onclick="this.parentElement.remove()">×</button>
-      <span class="smart-alert-icon">🤖</span>
-      <div class="smart-alert-body">
-        <div class="smart-alert-title" style="display:flex;align-items:center;gap:6px">
-          Nexor IA <span style="font-size:9px;font-weight:600;padding:1px 7px;background:rgba(99,102,241,0.15);color:#a78bfa;border-radius:10px;border:1px solid rgba(99,102,241,0.2)">insight do dia</span>
-        </div>
-        <div class="smart-alert-desc">${data.insight}</div>
-      </div>`
+    div.style.cssText = `display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:${c}0.07);border-radius:10px;border:1px solid ${c}0.15);position:relative`
+    div.innerHTML = `<span style="font-size:16px;flex-shrink:0;margin-top:1px">🤖</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;flex:1">${data.insight}</div><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>`
     container.insertBefore(div, container.firstChild)
   } catch(e) { console.warn('insight diário:', e) }
 }
@@ -6111,14 +6213,17 @@ async function registrarVenda() {
   mostrarToast('Venda registrada! 💚', 'success')
 
   if (App.token) {
-    try { await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) }) } catch {}
+    try {
+      await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+      iniciarDashboard()
+    } catch {}
   }
 }
 
 
 // REGISTRAR DESPESA
 async function registrarDespesa(){
-  const val=document.getElementById('val-despesa')?.value; if(!val) return
+  const val=document.getElementById('val-despesa')?.value; if(!val||parseFloat(val)<=0){mostrarToast('Informe o valor da despesa!','error');return}
   const cat=document.getElementById('cat-despesa')?.value||'Outros'
   const pag=document.getElementById('pag-despesa')?.value||'Pix'
   const desc=document.getElementById('desc-despesa')?.value||''
@@ -6128,7 +6233,14 @@ async function registrarDespesa(){
   tr.innerHTML=`<td>${fmtData(data)}</td><td>${desc||cat}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${fmtBRL(parseFloat(val))}</td>`
   tr.style.animation='pageIn 0.4s ease'; tbody.prepend(tr)
   document.getElementById('val-despesa').value=''
-  if(App.token) { try { await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})}) } catch{} }
+  if(document.getElementById('desc-despesa')) document.getElementById('desc-despesa').value=''
+  mostrarToast('Despesa registrada! 🔴', 'success')
+  if(App.token) {
+    try {
+      await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
+      iniciarDashboard()
+    } catch{}
+  }
 }
 
 
