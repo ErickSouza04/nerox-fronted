@@ -3098,12 +3098,12 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   <div class="modal">
     <div class="modal-header"><div class="modal-title">🔴 Nova Despesa</div><button class="modal-close" onclick="closeModal('nova-despesa')">×</button></div>
     <div class="form-grid">
-      <div class="form-group full"><label class="form-label">Valor *</label><input class="form-input" type="number" placeholder="R$ 0,00"></div>
-      <div class="form-group"><label class="form-label">Categoria</label><select class="form-select"><option>Matéria-prima</option><option>Embalagem</option><option>Aluguel</option><option>Marketing</option></select></div>
-      <div class="form-group"><label class="form-label">Pagamento</label><select class="form-select"><option>Pix</option><option>Dinheiro</option><option>Crédito</option><option>Débito</option></select></div>
-      <div class="form-group full"><label class="form-label">Descrição</label><input class="form-input" type="text" placeholder="Ex: Farinha, ovos..."></div>
+      <div class="form-group full"><label class="form-label">Valor *</label><input class="form-input" type="number" placeholder="R$ 0,00" id="modal-desp-val"></div>
+      <div class="form-group"><label class="form-label">Categoria</label><select class="form-select" id="modal-desp-cat"><option>Matéria-prima</option><option>Embalagem</option><option>Aluguel</option><option>Marketing</option><option>Transporte</option><option>Outros</option></select></div>
+      <div class="form-group"><label class="form-label">Pagamento</label><select class="form-select" id="modal-desp-pag"><option>Pix</option><option>Dinheiro</option><option>Crédito</option><option>Débito</option></select></div>
+      <div class="form-group full"><label class="form-label">Descrição</label><input class="form-input" type="text" placeholder="Ex: Farinha, ovos..." id="modal-desp-desc"></div>
     </div>
-    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('nova-despesa')">Cancelar</button><button class="btn btn-danger" onclick="closeModal('nova-despesa')">Registrar Despesa</button></div>
+    <div class="modal-actions"><button class="btn btn-secondary" onclick="closeModal('nova-despesa')">Cancelar</button><button class="btn btn-danger" onclick="modalRegistrarDespesa()">Registrar Despesa</button></div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-alertas">
@@ -3389,6 +3389,12 @@ async function iniciarDashboard() {
     // Limpar tabela de registros (demo rows)
     const _tb = document.getElementById('tabela-registros')
     if (_tb) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
+    // Limpar top produtos (demo)
+    const _tp = document.getElementById('top-products-list')
+    if (_tp) _tp.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Carregando...</div>'
+    // Limpar lista recente do meta card (demo)
+    const _rl = document.getElementById('recent-list-dash')
+    if (_rl) _rl.innerHTML=''
     // Limpar dicas demo
     const _dc = document.getElementById('dicas-dashboard')
     if (_dc) _dc.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Analisando seus dados...</div>'
@@ -3416,10 +3422,25 @@ async function iniciarDashboard() {
       const vars=document.querySelectorAll('.badge-up,.badge-down')
       if(vars[0]){vars[0].textContent=(dados.variacao.faturamento>=0?'↑':'↓')+Math.abs(dados.variacao.faturamento).toFixed(0)+'%'; vars[0].className=dados.variacao.faturamento>=0?'badge-up':'badge-down'}
       if(vars[2]){vars[2].textContent=(dados.variacao.lucro>=0?'↑':'↓')+Math.abs(dados.variacao.lucro).toFixed(0)+'%'; vars[2].className=dados.variacao.lucro>=0?'badge-up':'badge-down'}
-      // Meta
+      // Meta do mês
       const pct=dados.progresso_meta||0
       const pf=document.querySelector('.progress-fill'); if(pf) pf.style.width=pct+'%'
       const mc=document.querySelector('.meta-current'); if(mc) mc.textContent=fmtBRL(dados.lucro)
+      const _mMeses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+      const _mTit=document.querySelector('.meta-title'); if(_mTit) _mTit.textContent='🎯 Meta — '+_mMeses[mes-1]
+      const _mTag=document.querySelector('.meta-header .tag'); if(_mTag){ _mTag.textContent=pct+'%'; _mTag.className='tag '+(pct>=100?'green':pct>=50?'blue':'amber') }
+      if (dados.meta_valor > 0) {
+        const _mt=document.querySelector('.meta-total'); if(_mt) _mt.textContent='/ '+fmtBRL(dados.meta_valor)
+        const falta=Math.max(0,(dados.meta_valor||0)-(dados.lucro||0))
+        const _mi=document.querySelector('.meta-info')
+        if(_mi) {
+          const diasMes=new Date(ano,mes,0).getDate(), diaHoje=new Date().getDate(), diasRestantes=diasMes-diaHoje
+          _mi.innerHTML=falta>0?`<span>Faltam <strong>${fmtBRL(falta)}</strong></span><span>${diasRestantes} dias</span>`:'<span>🏆 Meta batida!</span>'
+        }
+      } else {
+        const _mt=document.querySelector('.meta-total'); if(_mt) _mt.textContent=''
+        const _mi=document.querySelector('.meta-info'); if(_mi) _mi.innerHTML='<span style="color:var(--text-muted)">Defina uma meta em Metas</span>'
+      }
       // Fluxo do dia (sidebar cards)
       const elV=document.querySelector('[data-fluxo="vendas"]'); if(elV) elV.textContent=fmtBRL(dados.faturamento)
       // ── Salvar stats globais para Profit Card e PDF ──
@@ -3537,8 +3558,8 @@ async function iniciarDashboard() {
 
     // Registros recentes
     const [vRes, deRes] = await Promise.all([
-      api('/vendas?mes='+mes+'&ano='+ano+'&limite=4'),
-      api('/despesas?mes='+mes+'&ano='+ano+'&limite=4')
+      api('/vendas?mes='+mes+'&ano='+ano),
+      api('/despesas?mes='+mes+'&ano='+ano+'&limite=8')
     ])
     if(vRes?.ok && deRes?.ok) {
       const v=await vRes.json(), de=await deRes.json()
@@ -6164,7 +6185,35 @@ async function modalRegistrarVenda() {
   mostrarToast('Venda registrada! 💚', 'success')
 
   if (App.token) {
-    try { await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) }) } catch {}
+    try {
+      await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+      iniciarDashboard()
+    } catch {}
+  }
+}
+
+async function modalRegistrarDespesa() {
+  const val = document.getElementById('modal-desp-val')?.value
+  if (!val || parseFloat(val) <= 0) { mostrarToast('Informe o valor da despesa!', 'error'); return }
+  const cat  = document.getElementById('modal-desp-cat')?.value  || 'Outros'
+  const pag  = document.getElementById('modal-desp-pag')?.value  || 'Pix'
+  const desc = document.getElementById('modal-desp-desc')?.value || ''
+  const data = _dataISO
+  const tbody = document.getElementById('tabela-registros')
+  if (tbody) {
+    const tr = document.createElement('tr')
+    tr.innerHTML = `<td>${fmtData(data)}</td><td>${desc||cat}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${fmtBRL(parseFloat(val))}</td>`
+    tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
+  }
+  closeModal('nova-despesa')
+  document.getElementById('modal-desp-val').value = ''
+  if (document.getElementById('modal-desp-desc')) document.getElementById('modal-desp-desc').value = ''
+  mostrarToast('Despesa registrada! 🔴', 'success')
+  if (App.token) {
+    try {
+      await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
+      iniciarDashboard()
+    } catch {}
   }
 }
 
