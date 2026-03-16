@@ -2454,27 +2454,27 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   
 <div class="page" id="page-metas">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:18px">
-      <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">🎯</div><div class="stat-label">Meta de Lucro</div><div class="stat-value green">R$ 5.000</div><div class="stat-sub">Mensal · Março 2026</div></div></div>
-      <div class="stat-card c-blue"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon blue">🛒</div><div class="stat-label">Vendas Necessárias</div><div class="stat-value">18</div><div class="stat-sub">Ticket médio: R$ 285</div></div></div>
-      <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">📅</div><div class="stat-label">Meta por Dia</div><div class="stat-value">R$ 167</div><div class="stat-sub">Para atingir a meta</div></div></div>
+      <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">🎯</div><div class="stat-label">Meta de Lucro</div><div class="stat-value green" id="metas-stat-valor">R$ 5.000</div><div class="stat-sub" id="metas-stat-sub">Mensal · Março 2026</div></div></div>
+      <div class="stat-card c-blue"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon blue">🛒</div><div class="stat-label">Vendas Necessárias</div><div class="stat-value" id="metas-stat-vendas">18</div><div class="stat-sub" id="metas-stat-ticket">Ticket médio: R$ 285</div></div></div>
+      <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">📅</div><div class="stat-label">Meta por Dia</div><div class="stat-value" id="metas-stat-pordia">R$ 167</div><div class="stat-sub">Para atingir a meta</div></div></div>
     </div>
     <div class="row-2">
       <div>
         <div class="chart-card meta-card" style="margin-bottom:14px">
-          <div class="meta-header"><div class="meta-title">🎯 Meta de Lucro — Março 2026</div><button class="btn btn-secondary" style="font-size:11px;padding:6px 12px">Editar Meta</button></div>
-          <div class="meta-values"><span class="meta-current">R$ 3.595</span><span class="meta-total">/ R$ 5.000</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
-          <div class="meta-info"><span>72% concluída · faltam <strong>R$ 1.405</strong></span><span>25 dias restantes</span></div>
+          <div class="meta-header"><div class="meta-title" id="metas-meta-title">🎯 Meta de Lucro — Março 2026</div></div>
+          <div class="meta-values"><span class="meta-current" id="metas-meta-current">R$ 3.595</span><span class="meta-total" id="metas-meta-total">/ R$ 5.000</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="metas-progress-fill" style="width:72%"></div></div>
+          <div class="meta-info" id="metas-meta-info"><span>72% concluída · faltam <strong>R$ 1.405</strong></span><span>25 dias restantes</span></div>
         </div>
         <div class="form-section">
           <div class="form-section-title">💸 Pró-labore</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" value="1500"></div>
-            <div class="form-group"><label class="form-label">Frequência</label><select class="form-select"><option>Mensal</option><option>Quinzenal</option><option>Semanal</option></select></div>
+            <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" id="metas-prolabore-input" value="1500" oninput="calcularProLabore()"></div>
+            <div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="metas-prolabore-freq"><option>Mensal</option><option>Quinzenal</option><option>Semanal</option></select></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px">
-            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:5px">R$ 3.595</div></div>
-            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Após retirada</div><div style="font-size:20px;font-weight:800;color:var(--blue);margin-top:5px">R$ 2.095</div></div>
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:5px" id="metas-lucro-antes">R$ 3.595</div></div>
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Após retirada</div><div style="font-size:20px;font-weight:800;color:var(--blue);margin-top:5px" id="metas-lucro-apos">R$ 2.095</div></div>
           </div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:11px;padding:11px;background:rgba(34,197,94,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--green);line-height:1.55">💡 <strong style="color:var(--text)">Dica:</strong> Reserve 20% do lucro antes de retirar o pró-labore para garantir capital de giro.</div>
         </div>
@@ -2483,13 +2483,13 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="nexor-card">
           <div class="nexor-label">Índice Nexor</div>
           <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
-            <div style="flex-shrink:0"><div class="gauge-wrap"><canvas id="gaugeCanvas2" width="160" height="88"></canvas><div class="gauge-number">74<span>/100</span></div></div></div>
-            <div class="nexor-desc">Aumente a frequência de registros e reduza despesas para melhorar sua pontuação.</div>
+            <div style="flex-shrink:0"><div class="gauge-wrap"><canvas id="gaugeCanvas2" width="160" height="88"></canvas><div class="gauge-number"><span id="gaugeNum2">0</span><span>/100</span></div></div></div>
+            <div class="nexor-desc" id="metas-nexor-desc">Aumente a frequência de registros e reduza despesas para melhorar sua pontuação.</div>
           </div>
         </div>
         <div class="chart-card">
           <div class="chart-title" style="margin-bottom:13px">🔔 Alertas Ativos</div>
-          <div style="display:flex;flex-direction:column;gap:9px">
+          <div id="metas-alertas" style="display:flex;flex-direction:column;gap:9px">
             <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:12px;display:flex;gap:10px"><span>⚠️</span><div><div style="font-size:12px;font-weight:700;color:var(--amber)">Margem abaixo do ideal</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">28% vs meta de 35%. Revise a precificação.</div></div></div>
             <div style="background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2);border-radius:10px;padding:12px;display:flex;gap:10px"><span>📊</span><div><div style="font-size:12px;font-weight:700;color:var(--blue)">Meta 72% atingida</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">Excelente progresso! Continue assim.</div></div></div>
             <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.18);border-radius:10px;padding:12px;display:flex;gap:10px"><span>📈</span><div><div style="font-size:12px;font-weight:700;color:var(--green)">Crescimento positivo</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">Lucro cresceu 31% vs mês anterior.</div></div></div>
@@ -3501,6 +3501,16 @@ async function iniciarDashboard() {
       const _idi=document.getElementById('idx-dias'); if(_idi) _idi.textContent=_diasAtivos
       // Dicas dinâmicas com dados reais
       atualizarDicasDashboard()
+      // Liga Nexor — notificar se meta foi batida
+      if ((App.stats?.progresso || 0) >= 100 && (App.stats?.indice || 0) > 0) {
+        const _score = App.stats.indice
+        const _liga = _score>=90?'Diamond 💎':_score>=80?'Gold 🥇':_score>=70?'Silver 🥈':_score>=60?'Bronze 🥉':'Starter ⚡'
+        const _jaNotif = sessionStorage.getItem('nexor_meta_notif_'+new Date().getMonth())
+        if (!_jaNotif) {
+          sessionStorage.setItem('nexor_meta_notif_'+new Date().getMonth(), '1')
+          setTimeout(()=>mostrarToast('🏆 Meta batida! Liga '+_liga+' conquistada!','success'),1200)
+        }
+      }
       // Atualizar hero do dia com dados reais de hoje
       const hoje = dados[dados.length - 1]
       if (hoje) {
@@ -3719,7 +3729,7 @@ function navigate(page,el){
   r.style.cssText='width:80px;height:80px;left:calc(50% - 40px);top:calc(50% - 40px)'
   el.appendChild(r); setTimeout(()=>r.remove(),600)
   if(page==='relatorios') { setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
-  if(page==='metas')      setTimeout(()=>drawGauge('gaugeCanvas2',App.token?0:74),80)
+  if(page==='metas')      setTimeout(carregarPaginaMetas, 80)
   if(page==='perfil')     carregarPerfil()
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
@@ -3775,7 +3785,7 @@ function countUp(el){
 }
 
 // GAUGE
-function drawGauge(id,value){
+function drawGauge(id,value,numElId='gaugeNum'){
   const canvas=document.getElementById(id); if(!canvas) return
   const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height
   ctx.clearRect(0,0,W,H)
@@ -3792,7 +3802,7 @@ function drawGauge(id,value){
   const ex=cx+r*Math.cos(vAngle), ey=cy+r*Math.sin(vAngle)
   ctx.beginPath(); ctx.arc(ex,ey,5.5,0,2*Math.PI)
   ctx.fillStyle='#22c55e'; ctx.shadowColor='#22c55e'; ctx.shadowBlur=14; ctx.fill(); ctx.shadowBlur=0
-  const numEl=document.getElementById('gaugeNum')
+  const numEl=document.getElementById(numElId)
   if(numEl){ let n=0; const t=setInterval(()=>{ n+=2; numEl.textContent=Math.min(n,value); if(n>=value) clearInterval(t) },18) }
 }
 
@@ -3901,6 +3911,104 @@ async function carregarRelatorios() {
     }
     tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:16px">Sem dados de meses anteriores ainda</td></tr>'
   } catch(e) { console.error('carregarRelatorios:',e) }
+}
+
+// ── Pró-labore — recalcular ao mudar input ──
+function calcularProLabore() {
+  const lucro = App.stats?.lucro || 0
+  const prolabore = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  const antes = document.getElementById('metas-lucro-antes')
+  const apos  = document.getElementById('metas-lucro-apos')
+  if (antes) antes.textContent = fmtBRL(lucro)
+  if (apos)  apos.textContent  = fmtBRL(Math.max(0, lucro - prolabore))
+}
+
+// ── Metas — carregar página com dados reais ──
+function carregarPaginaMetas() {
+  if (!App.token) return
+  const s    = App.stats || {}
+  const hoje = new Date()
+  const mes  = hoje.getMonth() + 1
+  const ano  = hoje.getFullYear()
+  const mesesNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const nomeMes = mesesNomes[mes - 1]
+  const _s = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v }
+
+  // ─ Gauge Índice Nexor ─
+  const score = s.indice || 0
+  drawGauge('gaugeCanvas2', score, 'gaugeNum2')
+  const nexorDesc = document.getElementById('metas-nexor-desc')
+  if (nexorDesc) {
+    if (score >= 85)      nexorDesc.textContent = 'Excelente! Mantenha a consistência para chegar ao topo.'
+    else if (score >= 70) nexorDesc.textContent = 'Registre diariamente e reduza despesas para superar 85+'
+    else if (score >= 50) nexorDesc.textContent = 'Aumente a frequência de registros para melhorar sua pontuação.'
+    else                  nexorDesc.textContent = 'Comece a registrar vendas e despesas para calcular seu índice.'
+  }
+
+  // ─ Verificar se meta foi batida → atualizar liga ─
+  const progresso = s.progresso || 0
+  const metaValor = s.metaValor || 0
+  const lucro     = s.lucro     || 0
+  const diasMes   = new Date(ano, mes, 0).getDate()
+  const diasRestantes = diasMes - hoje.getDate()
+
+  // ─ Header cards de topo ─
+  _s('metas-stat-valor', metaValor > 0 ? fmtBRL(metaValor) : '—')
+  _s('metas-stat-sub', 'Mensal · ' + nomeMes + ' ' + ano)
+  const ticket = s.ticketMedio || 0
+  const vendasNecessarias = ticket > 0 && metaValor > 0 ? Math.ceil((metaValor - lucro) / ticket) : '—'
+  _s('metas-stat-vendas', vendasNecessarias > 0 ? vendasNecessarias : (lucro >= metaValor && metaValor > 0 ? '🏆' : '—'))
+  _s('metas-stat-ticket', ticket > 0 ? 'Ticket médio: ' + fmtBRL(ticket) : 'Sem vendas este mês')
+  const falta = Math.max(0, metaValor - lucro)
+  const porDia = diasRestantes > 0 && falta > 0 ? fmtBRL(Math.ceil(falta / diasRestantes)) : (lucro >= metaValor && metaValor > 0 ? '🏆' : '—')
+  _s('metas-stat-pordia', porDia)
+
+  // ─ Meta card principal ─
+  _s('metas-meta-title', '🎯 Meta de Lucro — ' + nomeMes + ' ' + ano)
+  _s('metas-meta-current', fmtBRL(lucro))
+  _s('metas-meta-total', metaValor > 0 ? '/ ' + fmtBRL(metaValor) : '')
+  const pf = document.getElementById('metas-progress-fill')
+  if (pf) pf.style.width = Math.min(100, progresso) + '%'
+  const mi = document.getElementById('metas-meta-info')
+  if (mi) {
+    if (metaValor <= 0) {
+      mi.innerHTML = '<span style="color:var(--text-muted)">Defina sua meta em Configurações</span>'
+    } else if (progresso >= 100) {
+      mi.innerHTML = '<span style="color:var(--green);font-weight:700">🏆 Meta batida! Parabéns!</span>'
+    } else {
+      mi.innerHTML = `<span>${progresso}% concluída · faltam <strong>${fmtBRL(falta)}</strong></span><span>${diasRestantes} dias restantes</span>`
+    }
+  }
+
+  // ─ Pró-labore ─
+  const prolabore = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  _s('metas-lucro-antes', fmtBRL(lucro))
+  _s('metas-lucro-apos',  fmtBRL(Math.max(0, lucro - prolabore)))
+
+  // ─ Alertas dinâmicos ─
+  const alertasEl = document.getElementById('metas-alertas')
+  if (alertasEl) {
+    const alertas = []
+    if (metaValor > 0 && progresso >= 100) {
+      const ligaAtual = score >= 90 ? 'Diamond' : score >= 80 ? 'Gold' : score >= 70 ? 'Silver' : score >= 60 ? 'Bronze' : 'Starter'
+      alertas.push({bg:'rgba(34,197,94,', icon:'🏆', cor:'var(--green)', titulo:'Meta batida! Liga atualizada', sub:`Você atingiu sua meta e está na Liga ${ligaAtual} (Índice ${score}/100)`})
+    }
+    if ((s.margem || 0) < 25)
+      alertas.push({bg:'rgba(251,191,36,', icon:'⚠️', cor:'var(--amber)', titulo:'Margem abaixo do ideal', sub:`${s.margem || 0}% vs recomendado de 25%. Revise a precificação.`})
+    else if ((s.margem || 0) >= 35)
+      alertas.push({bg:'rgba(34,197,94,', icon:'✅', cor:'var(--green)', titulo:'Margem excelente!', sub:`${s.margem || 0}% de margem — acima da média de mercado.`})
+    if (metaValor > 0 && progresso < 100)
+      alertas.push({bg:'rgba(96,165,250,', icon:'📊', cor:'var(--blue)', titulo:`Meta ${progresso}% atingida`, sub: progresso >= 70 ? 'Excelente progresso! Mantenha o ritmo.' : 'Continue registrando para acelerar o progresso.'})
+    if ((s.varLucro || 0) > 0)
+      alertas.push({bg:'rgba(34,197,94,', icon:'📈', cor:'var(--green)', titulo:'Crescimento positivo', sub:`Lucro cresceu ${(s.varLucro||0).toFixed(0)}% vs mês anterior.`})
+    else if ((s.varLucro || 0) < -5)
+      alertas.push({bg:'rgba(248,113,113,', icon:'📉', cor:'var(--red)', titulo:'Lucro em queda', sub:`Queda de ${Math.abs(s.varLucro||0).toFixed(0)}% vs mês anterior. Analise os custos.`})
+    if (!alertas.length)
+      alertas.push({bg:'rgba(96,165,250,', icon:'💡', cor:'var(--blue)', titulo:'Comece a registrar', sub:'Registre vendas e despesas para ver seus alertas aqui.'})
+    alertasEl.innerHTML = alertas.map(a =>
+      `<div style="background:${a.bg}0.07);border:1px solid ${a.bg}0.2);border-radius:10px;padding:12px;display:flex;gap:10px"><span>${a.icon}</span><div><div style="font-size:12px;font-weight:700;color:${a.cor}">${a.titulo}</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">${a.sub}</div></div></div>`
+    ).join('')
+  }
 }
 
 let relInit=false
