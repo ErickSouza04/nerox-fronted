@@ -3302,8 +3302,10 @@ async function entrarApp(usuario, isNewUser = false) {
     atualizarHeroHora()
     setTimeout(initPerf30Chart, 300)
     // Mostra onboarding para novos cadastros ou primeira visita
-    const jaViu = localStorage.getItem('nexor_onboarding_done')
-    if (isNewUser && !jaViu) {
+    if (isNewUser) {
+      localStorage.removeItem('nexor_onboarding_done')
+      setTimeout(() => mostrarBoasVindas(usuario), 1200)
+    } else if (!localStorage.getItem('nexor_onboarding_done')) {
       setTimeout(() => mostrarBoasVindas(usuario), 1200)
     }
   },400)
