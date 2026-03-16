@@ -3369,6 +3369,19 @@ async function iniciarDashboard() {
     if (hrEl) hrEl.textContent = 'R$ 0,00'
     if (hdEl) hdEl.textContent = 'R$ 0,00'
     if (hbEl) hbEl.textContent = ''
+    // Zerar gráficos com labels corretos para o mês atual
+    const _mesesLabels = []
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date(ano, mes-1-i, 1)
+      const nm = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][d.getMonth()]
+      _mesesLabels.push(nm+'/'+String(d.getFullYear()).slice(2))
+    }
+    const _cM = Chart.getChart('chartMensal')
+    if (_cM) { _cM.data.labels=_mesesLabels; _cM.data.datasets[0].data=[0,0,0,0,0]; _cM.data.datasets[1].data=[0,0,0,0,0]; _cM.data.datasets[2].data=[0,0,0,0,0]; _cM.update() }
+    const _cD = Chart.getChart('chartDespesas')
+    if (_cD) { _cD.data.labels=['Sem despesas']; _cD.data.datasets[0].data=[1]; _cD.data.datasets[0].backgroundColor=['#1e2d45']; _cD.update() }
+    const _cDi = Chart.getChart('chartDiario')
+    if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
   }
   setTimeout(()=>{ document.querySelectorAll('[data-target]').forEach(el=>countUp(el)) },300)
   drawGauge('gaugeCanvas', App.token ? 0 : 74)
@@ -3446,6 +3459,45 @@ async function iniciarDashboard() {
       // Atualizar página IA se estiver aberta
       if (document.getElementById('page-ia')?.classList.contains('active')) atualizarIAComDados()
     }
+
+    // ── Gráfico Mensal: últimos 5 meses com dados reais ──
+    try {
+      const hReqs = [], hLabels = []
+      for (let i = 4; i >= 0; i--) {
+        const d = new Date(ano, mes-1-i, 1)
+        const nm = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][d.getMonth()]
+        hLabels.push(nm+'/'+String(d.getFullYear()).slice(2))
+        hReqs.push(api('/dashboard/resumo?mes='+(d.getMonth()+1)+'&ano='+d.getFullYear()))
+      }
+      const hRes = await Promise.all(hReqs)
+      const hFat=[], hDesp=[], hLucro=[]
+      for (const r of hRes) {
+        if (r?.ok) { const {dados:hd}=await r.json(); hFat.push(Math.round(hd.faturamento||0)); hDesp.push(Math.round(hd.total_despesas||0)); hLucro.push(Math.round(hd.lucro||0)) }
+        else { hFat.push(0); hDesp.push(0); hLucro.push(0) }
+      }
+      const cM=Chart.getChart('chartMensal')
+      if(cM){ cM.data.labels=hLabels; cM.data.datasets[0].data=hFat; cM.data.datasets[1].data=hDesp; cM.data.datasets[2].data=hLucro; cM.update() }
+    } catch(e) { console.error('Erro chartMensal:',e) }
+
+    // ── Gráfico Despesas por Categoria ──
+    try {
+      const dcRes = await api('/despesas?mes='+mes+'&ano='+ano+'&limite=200')
+      if (dcRes?.ok) {
+        const {dados:dc} = await dcRes.json()
+        const porCat = {}
+        dc.forEach(d => { const c=d.categoria||'Outros'; porCat[c]=(porCat[c]||0)+parseFloat(d.valor||0) })
+        const cats=Object.keys(porCat), vals=Object.values(porCat)
+        const cD=Chart.getChart('chartDespesas')
+        if(cD) {
+          if (cats.length) {
+            const colors=['#3b82f6','#22c55e','#a78bfa','#fbbf24','#f87171','#64748b']
+            cD.data.labels=cats; cD.data.datasets[0].data=vals; cD.data.datasets[0].backgroundColor=cats.map((_,i)=>colors[i%colors.length]); cD.update()
+          } else {
+            cD.data.labels=['Sem despesas este mês']; cD.data.datasets[0].data=[1]; cD.data.datasets[0].backgroundColor=['#1e2d45']; cD.update()
+          }
+        }
+      }
+    } catch(e) { console.error('Erro chartDespesas:',e) }
 
     // Registros recentes
     const [vRes, deRes] = await Promise.all([
@@ -3720,10 +3772,18 @@ let relInit=false
 async function initRelatorioChart(){
   if (typeof Chart === 'undefined') return
   if(relInit) return; relInit=true
+  let rLabels = Array.from({length:28},(_,i)=>(i+1)+'/02')
+  let rData = App.token ? [] : [40,95,60,140,80,210,165,120,200,90,180,250,130,310,170,195,120,260,145,300,180,220,140,280,160,320,200,230]
+  if (App.token) {
+    try {
+      const r = await api('/dashboard/diario')
+      if (r?.ok) { const {dados}=await r.json(); if(dados?.length){ rLabels=dados.map(d=>fmtData(d.data)); rData=dados.map(d=>d.lucro||0) } }
+    } catch(e) {}
+  }
   new Chart(document.getElementById('chartRelatorio'),{
     type:'line',
-    data:{labels:Array.from({length:28},(_,i)=>(i+1)+'/02'),
-      datasets:[{data:[40,95,60,140,80,210,165,120,200,90,180,250,130,310,170,195,120,260,145,300,180,220,140,280,160,320,200,230],
+    data:{labels:rLabels,
+      datasets:[{data:rData,
         borderColor:'#22c55e',
         backgroundColor:(ctx)=>{ const g=ctx.chart.ctx.createLinearGradient(0,0,0,180); g.addColorStop(0,'rgba(34,197,94,0.15)'); g.addColorStop(1,'rgba(34,197,94,0)'); return g },
         borderWidth:2.5,tension:0.4,fill:true,pointRadius:0}]},
