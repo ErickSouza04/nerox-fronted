@@ -6327,18 +6327,33 @@ setInterval(atualizarHeroHora, 60000)
 // ======================================
 // PERFORMANCE 30 DIAS - Gráfico
 // ======================================
-let perf30Chart = null
-function initPerf30Chart() {
+let perf30Chart = null, perf30Initing = false
+async function initPerf30Chart() {
   if (typeof Chart === 'undefined') return
   const el = document.getElementById('chartPerf30')
-  if (!el || perf30Chart) return
-  const labels = Array.from({length:30},(_,i)=>{
+  if (!el || perf30Chart || perf30Initing) return
+  perf30Initing = true
+  let labels = Array.from({length:30},(_,i)=>{
     const d = new Date(); d.setDate(d.getDate()-29+i)
     return (d.getDate()).toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')
   })
-  const receita  = [680,920,780,1100,850,1400,960,1250,1080,1560,890,1320,1150,1480,1020,1380,950,1620,1100,1780,1230,1560,1040,1890,1340,1720,1150,2100,1580,2430]
-  const despesas = [420,580,510,680,530,820,600,740,660,890,550,780,710,850,640,810,600,930,680,1020,750,900,640,1080,820,1000,700,1150,950,1150]
-  const lucro    = receita.map((r,i)=>r-despesas[i])
+  let receita  = App.token ? new Array(30).fill(0) : [680,920,780,1100,850,1400,960,1250,1080,1560,890,1320,1150,1480,1020,1380,950,1620,1100,1780,1230,1560,1040,1890,1340,1720,1150,2100,1580,2430]
+  let despesas = App.token ? new Array(30).fill(0) : [420,580,510,680,530,820,600,740,660,890,550,780,710,850,640,810,600,930,680,1020,750,900,640,1080,820,1000,700,1150,950,1150]
+  let lucro    = receita.map((r,i)=>r-despesas[i])
+  if (App.token) {
+    try {
+      const r = await api('/dashboard/diario')
+      if (r?.ok) {
+        const {dados} = await r.json()
+        if (dados?.length) {
+          labels   = dados.map(d => fmtData(d.data))
+          receita  = dados.map(d => d.faturamento || 0)
+          despesas = dados.map(d => d.despesas    || 0)
+          lucro    = dados.map(d => d.lucro       || 0)
+        }
+      }
+    } catch(e) {}
+  }
   const makeGrad = (ctx, color) => {
     const g = ctx.chart.ctx.createLinearGradient(0,0,0,200)
     g.addColorStop(0, color.replace('1)','0.18)')); g.addColorStop(1, color.replace('1)','0)'))
