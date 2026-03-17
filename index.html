@@ -3439,6 +3439,14 @@ async function iniciarDashboard() {
     const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
     _set('idx-margem','—'); _set('idx-dias','—'); _set('idx-crescimento','—'); _set('idx-despesas','—')
     _set('proj-receita-val','—'); _set('proj-lucro-val','—')
+    _set('proj-receita-meta','—'); _set('proj-receita-pct','—')
+    _set('proj-lucro-meta','—');  _set('proj-lucro-pct','—')
+    const _prf0=document.getElementById('proj-receita-fill'); if(_prf0) _prf0.style.width='0%'
+    const _plf0=document.getElementById('proj-lucro-fill');   if(_plf0) _plf0.style.width='0%'
+    // Limpar meta card (demo hardcoded no HTML)
+    const _mc0=document.querySelector('.meta-current'); if(_mc0) _mc0.textContent='—'
+    const _mt0=document.querySelector('.meta-total');   if(_mt0) _mt0.textContent=''
+    const _mi0=document.querySelector('.meta-info');    if(_mi0) _mi0.textContent=''
     // Limpar badges de variação (demo data estático do HTML)
     document.querySelectorAll('.stats-grid .badge-up, .stats-grid .badge-down').forEach(el => { el.textContent = '—' })
     // Limpar tabela de registros (demo rows)
@@ -3630,6 +3638,10 @@ async function iniciarDashboard() {
       api('/despesas?mes='+mes+'&ano='+ano+'&limite=8')
     ])
     if(reqId !== _dashReqId) return  // chamada mais recente em andamento, abortar esta
+    if(!(vRes?.ok && deRes?.ok)) {
+      const _tpFail=document.getElementById('top-products-list')
+      if(_tpFail) _tpFail.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Nenhuma venda registrada ainda</div>'
+    }
     if(vRes?.ok && deRes?.ok) {
       const v=await vRes.json(), de=await deRes.json()
       const todos=[...v.dados.map(i=>({...i,_tipo:'venda'})),...de.dados.map(i=>({...i,_tipo:'despesa'}))]
@@ -3640,10 +3652,10 @@ async function iniciarDashboard() {
       if(tbody) {
         if (todos.length) {
           tbody.innerHTML=todos.map(i=>`<tr>
-            <td>${fmtData(i.data)}</td>
-            <td>${i.produto||i.descricao||i.categoria}</td>
+            <td>${esc(fmtData(i.data))}</td>
+            <td>${esc(i.produto||i.descricao||i.categoria)}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
-            <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
+            <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${esc(fmtBRL(i.valor))}</td>
           </tr>`).join('')
         } else {
           tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
@@ -3695,10 +3707,14 @@ async function iniciarDashboard() {
 
   } catch(e) {
     console.error('Erro dashboard:',e)
-    // Garantir que tabela não fique presa em "Carregando..."
+    // Garantir que nenhum elemento fique preso em "Carregando..."
     const _tbErr = document.getElementById('tabela-registros')
     if (_tbErr && _tbErr.textContent.includes('Carregando')) {
       _tbErr.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
+    }
+    const _tpErr = document.getElementById('top-products-list')
+    if (_tpErr && _tpErr.textContent.includes('Carregando')) {
+      _tpErr.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Nenhuma venda registrada ainda</div>'
     }
   }
 
