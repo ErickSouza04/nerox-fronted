@@ -108,6 +108,51 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .alert-text strong { font-size: 12.5px; font-weight: 700; color: var(--amber); display: block; }
 .alert-text p { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
 
+/* ═══ SMART ALERTS — Nexor AI ═══ */
+@keyframes alertIn   { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+@keyframes scanSweep { 0%{left:-60%} 100%{left:150%} }
+@keyframes glowBeat  { 0%,100%{opacity:0.55;box-shadow:0 0 6px currentColor} 50%{opacity:1;box-shadow:0 0 12px currentColor} }
+.smart-alerts { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+.nexor-ai-alert { display:flex; align-items:center; gap:11px; padding:11px 15px; border-radius:12px; position:relative; overflow:hidden; animation:alertIn 0.45s cubic-bezier(0.16,1,0.3,1) both; backdrop-filter:blur(8px); transition:transform 0.2s,box-shadow 0.2s; }
+.nexor-ai-alert:hover { transform:translateX(3px); }
+.nexor-ai-alert::after { content:''; position:absolute; top:0; bottom:0; width:55%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent); animation:scanSweep 5s ease-in-out infinite; pointer-events:none; }
+.nexor-alert-critical { background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.2); border-left:3px solid var(--red); }
+.nexor-alert-critical:hover { box-shadow:0 4px 20px rgba(248,113,113,0.12); }
+.nexor-alert-warning  { background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.2); border-left:3px solid var(--amber); }
+.nexor-alert-warning:hover  { box-shadow:0 4px 20px rgba(251,191,36,0.1); }
+.nexor-alert-success  { background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2); border-left:3px solid var(--green); }
+.nexor-alert-success:hover  { box-shadow:0 4px 20px rgba(34,197,94,0.12); }
+.naa-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.nexor-alert-critical .naa-dot { background:var(--red);   color:var(--red);   animation:blink 1.4s ease-in-out infinite; box-shadow:0 0 8px rgba(248,113,113,0.8); }
+.nexor-alert-warning  .naa-dot { background:var(--amber); color:var(--amber); animation:blink 2s ease-in-out infinite;   box-shadow:0 0 7px rgba(251,191,36,0.8); }
+.nexor-alert-success  .naa-dot { background:var(--green); color:var(--green); animation:glowBeat 3s ease-in-out infinite; box-shadow:0 0 7px rgba(34,197,94,0.7); }
+.naa-content { display:flex; align-items:center; gap:8px; flex:1; flex-wrap:wrap; min-width:0; }
+.naa-level { font-size:9px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase; padding:2px 7px; border-radius:4px; flex-shrink:0; white-space:nowrap; }
+.nexor-alert-critical .naa-level { background:rgba(248,113,113,0.14); color:var(--red); }
+.nexor-alert-warning  .naa-level { background:rgba(251,191,36,0.14); color:var(--amber); }
+.nexor-alert-success  .naa-level { background:rgba(34,197,94,0.14); color:var(--green); }
+.naa-msg { font-size:12.5px; color:var(--text); line-height:1.4; }
+.naa-brand { font-size:11px; font-weight:700; color:var(--text-muted); margin-right:4px; font-family:'Syne',sans-serif; letter-spacing:0.2px; }
+
+/* ═══ EFEITOS FUTURÍSTICOS ═══ */
+@keyframes heroScan { 0%{top:-2px;opacity:0} 3%{opacity:1} 92%{opacity:0.6} 100%{top:102%;opacity:0} }
+@keyframes cornerPing { 0%,100%{transform:scale(1);opacity:0.4} 50%{transform:scale(1.6);opacity:0} }
+/* Scan line animada no hero */
+.hero-metric { position:relative; overflow:hidden; }
+.hero-metric::after { content:''; position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 0%,rgba(34,197,94,0.45) 35%,rgba(34,197,94,0.85) 50%,rgba(34,197,94,0.45) 65%,transparent 100%); animation:heroScan 9s ease-in-out infinite 1.5s; pointer-events:none; z-index:3; }
+/* Brilho suave no valor principal */
+.hero-main-value { text-shadow:0 0 35px rgba(34,197,94,0.18); }
+/* Glow mais intenso no hover dos stat cards */
+.stat-card.c-green:hover .sc-glow { opacity:0.44; transition:opacity 0.3s; }
+.stat-card.c-blue:hover  .sc-glow { opacity:0.40; transition:opacity 0.3s; }
+.stat-card.c-red:hover   .sc-glow { opacity:0.40; transition:opacity 0.3s; }
+.stat-card.c-amber:hover .sc-glow { opacity:0.40; transition:opacity 0.3s; }
+/* Borda top dos stat cards com brilho */
+.stat-card::before { transition:opacity 0.3s; }
+.stat-card:hover::before { opacity:1.8; }
+/* Corner indicators no hero */
+.hero-metric-glow { background:radial-gradient(ellipse 80% 60% at 50% 130%,rgba(34,197,94,0.14),transparent 70%); }
+
 /* STAT CARDS */
 .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 18px; }
 .stat-card { padding: 19px; border-radius: var(--radius); position: relative; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; }
@@ -3563,6 +3608,8 @@ async function iniciarDashboard() {
       const _confL=Math.max(0,_conf-6)
       _set2('proj-lucro-pct', _confL+'%')
       const _plf=document.getElementById('proj-lucro-fill'); if(_plf) _plf.style.width=_confL+'%'
+      // Exibir alertas inteligentes da Nexor AI com base nos dados do mês
+      atualizarSmartAlerts()
     }
 
     if (iRes?.ok) {
@@ -3931,6 +3978,54 @@ new Chart(document.getElementById('chartDespesas'),{
     datasets:[{data:[4200,980,1800,650,420,1195],backgroundColor:['#3b82f6','#22c55e','#a78bfa','#fbbf24','#f87171','#64748b'],borderWidth:0,hoverOffset:10}]},
   options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{size:10},usePointStyle:true,pointStyleWidth:8,padding:12}},tooltip:tooltipStyle}}
 })
+
+// ── Smart Alerts — Nexor AI Inteligência ──────────────────────────────────
+function atualizarSmartAlerts() {
+  if (!App.token) return
+  const container = document.getElementById('smart-alerts')
+  if (!container) return
+  const s = App.stats || {}
+  if (!s.faturamento) { container.innerHTML = ''; return }
+
+  const alerts = []
+
+  // ── 🔴 Crítico ──────────────────────────────────────────────────────────
+  if ((s.lucro || 0) < 0)
+    alerts.push({ level:'critical', msg:'Você está operando no prejuízo' })
+  if ((s.despesas || 0) > (s.faturamento || 1) && (s.lucro || 0) >= 0)
+    alerts.push({ level:'critical', msg:'Seus custos estão maiores que sua receita' })
+  if ((s.margem || 0) < 10 && (s.faturamento || 0) > 0 && alerts.length < 2)
+    alerts.push({ level:'critical', msg:'Sua margem está perigosamente baixa' })
+
+  // ── 🟡 Atenção ───────────────────────────────────────────────────────────
+  if ((s.varDesp || 0) > 15 && !alerts.find(a => a.level === 'critical'))
+    alerts.push({ level:'warning', msg:`Seus custos subiram ${Math.round(s.varDesp||0)}% vs mês anterior` })
+  if ((s.margem || 0) >= 10 && (s.margem || 0) < 25)
+    alerts.push({ level:'warning', msg:'Sua margem caiu abaixo de 25% — revise preços ou custos' })
+  if ((s.varLucro || 0) < -10 && alerts.filter(a=>a.level!=='success').length < 2)
+    alerts.push({ level:'warning', msg:`Seu lucro caiu ${Math.abs(Math.round(s.varLucro||0))}% em relação ao mês anterior` })
+
+  // ── 🟢 Oportunidade ──────────────────────────────────────────────────────
+  if ((s.margem || 0) >= 40 && (s.lucro || 0) > 0)
+    alerts.push({ level:'success', msg:'Seu negócio está saudável para escalar' })
+  else if ((s.margem || 0) >= 25 && (s.lucro || 0) > 0 && !alerts.length)
+    alerts.push({ level:'success', msg:'Sua margem permite crescimento com segurança' })
+  if ((s.varFat || 0) > 20 && (s.lucro || 0) > 0)
+    alerts.push({ level:'success', msg:`Receita cresceu ${Math.round(s.varFat||0)}% — você tem espaço para investir mais` })
+
+  const shown = alerts.slice(0, 3)
+  if (!shown.length) { container.innerHTML = ''; return }
+
+  const labels = { critical:'● CRÍTICO', warning:'◆ ATENÇÃO', success:'▲ OPORTUNIDADE' }
+  container.innerHTML = shown.map((a, i) => `
+    <div class="nexor-ai-alert nexor-alert-${a.level}" style="animation-delay:${i*0.08}s">
+      <div class="naa-dot"></div>
+      <div class="naa-content">
+        <span class="naa-level">${labels[a.level]}</span>
+        <span class="naa-msg"><span class="naa-brand">Nexor AI ›</span>${esc(a.msg)}</span>
+      </div>
+    </div>`).join('')
+}
 
 // ── Dicas da Nexor IA — atualizadas com dados reais ──
 function atualizarDicasDashboard() {
