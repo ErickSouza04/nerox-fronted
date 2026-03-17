@@ -2,6 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+  <!-- ═══ SEGURANÇA ═══ -->
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://nexor-api-production.up.railway.app https://wa.me; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
   <!-- ═══ FAVICON + PWA ═══ -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nexor">
@@ -11,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -3170,6 +3176,8 @@ async function api(path, opts = {}) {
 // -- Formatadores ----------------------
 const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})
 const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
+// Escapa HTML entities — usar sempre que texto do usuário/API for colocado em innerHTML
+const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
 
 // ======================================
 // AUTH
@@ -5017,7 +5025,7 @@ async function carregarInsightDiario() {
     const div = document.createElement('div')
     div.id = 'ia-insight-live'
     div.style.cssText = `display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:${c}0.07);border-radius:10px;border:1px solid ${c}0.15);position:relative`
-    div.innerHTML = `<span style="font-size:16px;flex-shrink:0;margin-top:1px">🤖</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;flex:1">${data.insight}</div><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>`
+    div.innerHTML = `<span style="font-size:16px;flex-shrink:0;margin-top:1px">🤖</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;flex:1">${DOMPurify.sanitize(data.insight, {ALLOWED_TAGS:['strong','em','br'],ALLOWED_ATTR:[]})}</div><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>`
     container.insertBefore(div, container.firstChild)
   } catch(e) { console.warn('insight diário:', e) }
 }
@@ -6363,7 +6371,7 @@ async function modalRegistrarVenda() {
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${fmtData(data)}</td><td>${prod||cat}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${fmtBRL(parseFloat(val))}</td>`
+    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'
     tbody.prepend(tr)
   }
@@ -6391,7 +6399,7 @@ async function modalRegistrarDespesa() {
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${fmtData(data)}</td><td>${desc||cat}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${fmtBRL(parseFloat(val))}</td>`
+    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
   }
   closeModal('nova-despesa')
@@ -6434,7 +6442,7 @@ async function registrarVenda() {
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${fmtData(data)}</td><td>${prod || cat}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${fmtBRL(parseFloat(val))}</td>`
+    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'
     tbody.prepend(tr)
   }
@@ -6468,7 +6476,7 @@ async function registrarDespesa(){
   const data=document.getElementById('data-despesa')?.value||_dataISO
   const tbody=document.getElementById('tabela-registros')
   const tr=document.createElement('tr')
-  tr.innerHTML=`<td>${fmtData(data)}</td><td>${desc||cat}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${fmtBRL(parseFloat(val))}</td>`
+  tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
   tr.style.animation='pageIn 0.4s ease'; tbody.prepend(tr)
   document.getElementById('val-despesa').value=''
   if(document.getElementById('desc-despesa')) document.getElementById('desc-despesa').value=''
@@ -6529,7 +6537,11 @@ let tourStep = 0
 function mostrarBoasVindas(usuario) {
   // Personaliza o título com o nome
   const primeiroNome = (usuario?.nome || 'empreendedora').split(' ')[0]
-  document.getElementById('welcome-title').innerHTML = `Bem-vinda ao <span>Nexor</span>, ${primeiroNome}! 🎉`
+  const _wt = document.getElementById('welcome-title')
+  if (_wt) {
+    _wt.innerHTML = 'Bem-vinda ao <span>Nexor</span>, '
+    _wt.appendChild(document.createTextNode(primeiroNome + '! 🎉'))
+  }
   document.getElementById('welcome-subtitle').textContent =
     `Sua conta está pronta, ${primeiroNome}. Agora você tem tudo para organizar suas finanças, precificar seus produtos e crescer com inteligência.`
 
@@ -6913,10 +6925,15 @@ async function digitarRespostaIA(texto) {
   div.appendChild(bubble)
   msgs.appendChild(div)
 
+  // Sanitiza o texto antes de converter markdown → HTML (evita XSS da API)
+  const textoSafe = DOMPurify.sanitize(texto, { ALLOWED_TAGS: [] })
   // Renderiza o HTML processado progressivamente por palavras
-  const htmlFull = texto
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')
+  const htmlFull = DOMPurify.sanitize(
+    textoSafe
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>'),
+    { ALLOWED_TAGS: ['strong','br'], ALLOWED_ATTR: [] }
+  )
 
   // Divide em "tokens" (palavras + espaços), anima rápido
   const words = htmlFull.split(/(?<=\s)|(?=\s)/)
@@ -6928,7 +6945,7 @@ async function digitarRespostaIA(texto) {
     await new Promise(r => setTimeout(r, word.trim() ? 18 : 6))
   }
   // Finaliza sem cursor, adiciona hora
-  bubble.innerHTML = htmlFull + `<span class="ia-bubble-time">${hora}</span>`
+  bubble.innerHTML = htmlFull + `<span class="ia-bubble-time">${esc(hora)}</span>`
   msgs.scrollTop = msgs.scrollHeight
   salvarHistoriaIA()
 }
@@ -6990,7 +7007,7 @@ function limparChat() {
 function salvarHistoriaIA() {
   try {
     const msgs = document.getElementById('ia-messages')
-    if (msgs) sessionStorage.setItem('nexor_ia_history', msgs.innerHTML)
+    if (msgs) sessionStorage.setItem('nexor_ia_history', DOMPurify.sanitize(msgs.innerHTML, {ALLOWED_TAGS:['div','span','strong','em','br','p'],ALLOWED_ATTR:['class','style']}))
     sessionStorage.setItem('nexor_ia_messages', JSON.stringify(iaMessages))
   } catch(e) {}
 }
@@ -7003,7 +7020,7 @@ function restaurarHistoriaIA() {
     if (html && msgs) {
       const container = document.getElementById('ia-messages')
       if (container && container.children.length <= 1) {
-        container.innerHTML = html
+        container.innerHTML = DOMPurify.sanitize(html, {ALLOWED_TAGS:['div','span','strong','em','br','p'],ALLOWED_ATTR:['class','style']})
         container.scrollTop = container.scrollHeight
         const parsed = JSON.parse(msgs)
         iaMessages.length = 0
