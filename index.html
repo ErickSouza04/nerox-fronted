@@ -3477,6 +3477,14 @@ async function iniciarDashboard() {
       if (hrEl) hrEl.textContent = 'R$ 0,00'
       if (hdEl) hdEl.textContent = 'R$ 0,00'
       if (hbEl) hbEl.textContent = ''
+      const _hdb = document.getElementById('hero-desp-badge')
+      const _hmv = document.getElementById('hero-margem-val')
+      const _hmf = document.getElementById('hero-margin-fill')
+      const _hmp = document.querySelector('.hero-margin-pct')
+      if (_hdb) _hdb.textContent = ''
+      if (_hmv) _hmv.textContent = '—'
+      if (_hmf) _hmf.style.width = '0%'
+      if (_hmp) _hmp.textContent = '—'
     }
     // Zerar gráficos com labels corretos para o mês atual
     const _mesesLabels = []
@@ -3647,10 +3655,30 @@ async function iniciarDashboard() {
         const hrEl = document.getElementById('hero-receita')
         const hdEl = document.getElementById('hero-despesas')
         const hbEl = document.getElementById('hero-receita-badge')
+        const hdbEl = document.getElementById('hero-desp-badge')
+        const hmvEl = document.getElementById('hero-margem-val')
+        const hmfEl = document.getElementById('hero-margin-fill')
+        const hmpEl = document.querySelector('.hero-margin-pct')
         if (hlEl) hlEl.textContent = fmtBRL(hoje.lucro || 0)
         if (hrEl) hrEl.textContent = fmtBRL(hoje.faturamento || 0)
         if (hdEl) hdEl.textContent = fmtBRL(hoje.despesas || 0)
-        if (hbEl) hbEl.textContent = ''
+        // Margem de hoje
+        const margemHoje = (hoje.faturamento || 0) > 0
+          ? Math.round((hoje.lucro || 0) / hoje.faturamento * 100) : 0
+        if (hmvEl) hmvEl.textContent = margemHoje + '%'
+        if (hmfEl) hmfEl.style.width = Math.max(0, Math.min(100, margemHoje)) + '%'
+        if (hmpEl) hmpEl.textContent = margemHoje + '%'
+        // Variação vs ontem (badges)
+        const ontem = dados[dados.length - 2]
+        if (ontem) {
+          const vRec  = (ontem.faturamento||0) > 0 ? ((hoje.faturamento||0)-(ontem.faturamento||0))/(ontem.faturamento)*100 : 0
+          const vDesp = (ontem.despesas||0)    > 0 ? ((hoje.despesas||0)   -(ontem.despesas||0))   /(ontem.despesas)*100    : 0
+          if (hbEl)  { hbEl.textContent  = (vRec>=0?'↑ ':'↓ ')+Math.abs(vRec).toFixed(0)+'% vs ontem';  hbEl.className  = 'hero-stat-badge '+(vRec>=0?'up':'down') }
+          if (hdbEl) { hdbEl.textContent = (vDesp>=0?'↑ ':'↓ ')+Math.abs(vDesp).toFixed(0)+'% vs ontem'; hdbEl.className = 'hero-stat-badge '+(vDesp>0?'down':'up') }
+        } else {
+          if (hbEl)  hbEl.textContent  = ''
+          if (hdbEl) hdbEl.textContent = ''
+        }
       }
       // Insight IA dinâmico no dashboard (não bloqueia)
       setTimeout(carregarInsightDiario, 800)
