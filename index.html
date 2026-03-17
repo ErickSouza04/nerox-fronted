@@ -3420,15 +3420,19 @@ async function iniciarDashboard() {
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
   if (App.token) {
+    // Primeiro carregamento: limpa dados demo. Refresh pós-registro: preserva valores atuais.
+    const _isFirstLoad = _lastDashLoad === 0
     document.querySelectorAll('[data-target]').forEach(el => el.dataset.target = '0')
     const hlEl = document.getElementById('hero-lucro')
     const hrEl = document.getElementById('hero-receita')
     const hdEl = document.getElementById('hero-despesas')
     const hbEl = document.getElementById('hero-receita-badge')
-    if (hlEl) hlEl.textContent = 'R$ 0,00'
-    if (hrEl) hrEl.textContent = 'R$ 0,00'
-    if (hdEl) hdEl.textContent = 'R$ 0,00'
-    if (hbEl) hbEl.textContent = ''
+    if (_isFirstLoad) {
+      if (hlEl) hlEl.textContent = 'R$ 0,00'
+      if (hrEl) hrEl.textContent = 'R$ 0,00'
+      if (hdEl) hdEl.textContent = 'R$ 0,00'
+      if (hbEl) hbEl.textContent = ''
+    }
     // Zerar gráficos com labels corretos para o mês atual
     const _mesesLabels = []
     for (let i = 4; i >= 0; i--) {
@@ -3450,9 +3454,9 @@ async function iniciarDashboard() {
     _set('proj-receita-val','—'); _set('proj-lucro-val','—')
     // Limpar badges de variação (demo data estático do HTML)
     document.querySelectorAll('.stats-grid .badge-up, .stats-grid .badge-down').forEach(el => { el.textContent = '—' })
-    // Limpar tabela de registros (demo rows)
+    // Limpar tabela de registros (apenas no primeiro carregamento, para remover dados demo)
     const _tb = document.getElementById('tabela-registros')
-    if (_tb) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
+    if (_tb && _isFirstLoad) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
     // Limpar top produtos (demo)
     const _tp = document.getElementById('top-products-list')
     if (_tp) _tp.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Carregando...</div>'
