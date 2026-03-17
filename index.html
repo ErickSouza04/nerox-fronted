@@ -3785,7 +3785,7 @@ function navigate(page,el){
   const r=document.createElement('span'); r.className='ripple'
   r.style.cssText='width:80px;height:80px;left:calc(50% - 40px);top:calc(50% - 40px)'
   el.appendChild(r); setTimeout(()=>r.remove(),600)
-  if(page==='relatorios') { setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
+  if(page==='relatorios') { relInit=false; setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
   if(page==='metas')      setTimeout(carregarPaginaMetas, 80)
   if(page==='perfil')     carregarPerfil()
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
@@ -4073,7 +4073,10 @@ let relInit=false
 async function initRelatorioChart(){
   if (typeof Chart === 'undefined') return
   if(relInit) return; relInit=true
-  let rLabels = Array.from({length:28},(_,i)=>(i+1)+'/02')
+  const _rNow = new Date()
+  const _rDias = new Date(_rNow.getFullYear(), _rNow.getMonth()+1, 0).getDate()
+  const _rMm = String(_rNow.getMonth()+1).padStart(2,'0')
+  let rLabels = Array.from({length:_rDias},(_,i)=>(i+1)+'/'+_rMm)
   let rData = App.token ? [] : [40,95,60,140,80,210,165,120,200,90,180,250,130,310,170,195,120,260,145,300,180,220,140,280,160,320,200,230]
   if (App.token) {
     try {
@@ -6327,7 +6330,7 @@ async function modalRegistrarVenda() {
 
   const cat  = document.getElementById('modal-cat')?.value  || 'Produto'
   const pag  = document.getElementById('modal-pag')?.value  || 'Pix'
-  const data = _dataISO
+  const data = new Date().toISOString().split('T')[0]
 
   const modoAvulso = document.getElementById('modal-modo-avulso')?.style.display !== 'none'
   let prod = ''
@@ -6369,7 +6372,7 @@ async function modalRegistrarDespesa() {
   const cat  = document.getElementById('modal-desp-cat')?.value  || 'Outros'
   const pag  = document.getElementById('modal-desp-pag')?.value  || 'Pix'
   const desc = document.getElementById('modal-desp-desc')?.value || ''
-  const data = _dataISO
+  const data = new Date().toISOString().split('T')[0]
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
@@ -6715,6 +6718,7 @@ async function initPerf30Chart() {
       }
     }
   })
+  perf30Initing = false
 }
 
 // ======================================
