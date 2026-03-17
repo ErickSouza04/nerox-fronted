@@ -3420,15 +3420,19 @@ async function iniciarDashboard() {
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
   if (App.token) {
+    // Primeiro carregamento: limpa dados demo. Refresh pós-registro: preserva valores atuais.
+    const _isFirstLoad = _lastDashLoad === 0
     document.querySelectorAll('[data-target]').forEach(el => el.dataset.target = '0')
     const hlEl = document.getElementById('hero-lucro')
     const hrEl = document.getElementById('hero-receita')
     const hdEl = document.getElementById('hero-despesas')
     const hbEl = document.getElementById('hero-receita-badge')
-    if (hlEl) hlEl.textContent = 'R$ 0,00'
-    if (hrEl) hrEl.textContent = 'R$ 0,00'
-    if (hdEl) hdEl.textContent = 'R$ 0,00'
-    if (hbEl) hbEl.textContent = ''
+    if (_isFirstLoad) {
+      if (hlEl) hlEl.textContent = 'R$ 0,00'
+      if (hrEl) hrEl.textContent = 'R$ 0,00'
+      if (hdEl) hdEl.textContent = 'R$ 0,00'
+      if (hbEl) hbEl.textContent = ''
+    }
     // Zerar gráficos com labels corretos para o mês atual
     const _mesesLabels = []
     for (let i = 4; i >= 0; i--) {
@@ -3444,21 +3448,34 @@ async function iniciarDashboard() {
     if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
     // Destruir chart de desempenho 30 dias para forçar reload com dados reais
     if (typeof perf30Chart !== 'undefined' && perf30Chart) { perf30Chart.destroy(); perf30Chart = null; perf30Initing = false }
-    // Zerar cards de texto com dados demo
+    // Zerar cards de texto com dados demo (apenas no primeiro carregamento)
     const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
-    _set('idx-margem','—'); _set('idx-dias','—'); _set('idx-crescimento','—'); _set('idx-despesas','—')
-    _set('proj-receita-val','—'); _set('proj-lucro-val','—')
+    if (_isFirstLoad) {
+      _set('idx-margem','—'); _set('idx-dias','—'); _set('idx-crescimento','—'); _set('idx-despesas','—')
+      _set('proj-receita-val','—'); _set('proj-receita-meta','—'); _set('proj-receita-pct','—')
+      _set('proj-lucro-val','—');   _set('proj-lucro-meta','—');   _set('proj-lucro-pct','—')
+      const _prf=document.getElementById('proj-receita-fill'); if(_prf) _prf.style.width='0%'
+      const _plf=document.getElementById('proj-lucro-fill');   if(_plf) _plf.style.width='0%'
+    }
     // Limpar badges de variação (demo data estático do HTML)
     document.querySelectorAll('.stats-grid .badge-up, .stats-grid .badge-down').forEach(el => { el.textContent = '—' })
-    // Limpar tabela de registros (demo rows)
+    // Limpar tabela de registros (apenas no primeiro carregamento, para remover dados demo)
     const _tb = document.getElementById('tabela-registros')
-    if (_tb) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
+    if (_tb && _isFirstLoad) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
     // Limpar top produtos (demo)
     const _tp = document.getElementById('top-products-list')
     if (_tp) _tp.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Carregando...</div>'
-    // Limpar lista recente do meta card (demo)
+    // Limpar valores demo do card de meta (apenas no primeiro carregamento)
+    if (_isFirstLoad) {
+      const _mc=document.querySelector('.meta-current'); if(_mc) _mc.textContent='—'
+      const _mt=document.querySelector('.meta-total');   if(_mt) _mt.textContent=''
+      const _mTag=document.querySelector('.meta-header .tag'); if(_mTag){ _mTag.textContent='—%'; _mTag.className='tag' }
+      const _pf=document.querySelector('.progress-fill'); if(_pf) _pf.style.width='0%'
+      const _mInfo=document.querySelector('.meta-info'); if(_mInfo) _mInfo.innerHTML=''
+    }
+    // Limpar lista recente do meta card (apenas no primeiro carregamento, preserva em refresh)
     const _rl = document.getElementById('recent-list-dash')
-    if (_rl) _rl.innerHTML=''
+    if (_rl && _isFirstLoad) _rl.innerHTML=''
     // Limpar dicas demo
     const _dc = document.getElementById('dicas-dashboard')
     if (_dc) _dc.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Analisando seus dados...</div>'
