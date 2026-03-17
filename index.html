@@ -3212,8 +3212,9 @@ async function avancarEtapa(etapa) {
 }
 
 function mostrarErroAuth(el, msg) {
+  clearTimeout(el._erroTimer)
   el.textContent=msg; el.classList.add('show')
-  setTimeout(()=>el.classList.remove('show'),4000)
+  el._erroTimer=setTimeout(()=>el.classList.remove('show'),4000)
 }
 
 // ======================================
@@ -3308,7 +3309,15 @@ async function finalizarCadastro() {
     }).catch(()=>null)
     if (!res) throw new Error('offline')
     const data=await res.json()
-    if (!res.ok) { mostrarErroAuth(document.getElementById('cad-erro-1'),data.erro||'Erro ao criar conta.'); avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return }
+    if (!res.ok) {
+      const errMsg = res.status===409
+        ? 'Este e-mail já está cadastrado. Clique em "Entrar" para fazer login.'
+        : (data.erro==='Dados inválidos'
+          ? 'Dados inválidos. Verifique nome, e-mail e senha (mín. 8 caracteres) e tente novamente.'
+          : (data.erro||'Erro ao criar conta. Tente novamente.'))
+      mostrarErroAuth(document.getElementById('cad-erro-1'),errMsg)
+      avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
+    }
     salvarSessao(data); entrarApp(data.usuario, true)
   } catch {
     mostrarErroAuth(erro,'Erro de conexão. Tente novamente.')
