@@ -6385,23 +6385,30 @@ async function modalRegistrarVenda() {
 
   // Adiciona no histórico se estiver na página de registrar
   const tbody = document.getElementById('tabela-registros')
+  let _addedRow = null
   if (tbody) {
     const tr = document.createElement('tr')
     tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'
     tbody.prepend(tr)
+    _addedRow = tr
   }
 
   closeModal('nova-venda')
   document.getElementById('modal-val').value = ''
   if (document.getElementById('modal-prod-avulso')) document.getElementById('modal-prod-avulso').value = ''
-  mostrarToast('Venda registrada! 💚', 'success')
 
   if (App.token) {
-    try {
-      await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+    const res = await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+    if (res?.ok) {
+      mostrarToast('Venda registrada! 💚', 'success')
       agendarDashboard()
-    } catch {}
+    } else {
+      _addedRow?.remove()
+      mostrarToast('Erro ao salvar venda. Tente novamente.', 'error')
+    }
+  } else {
+    mostrarToast('Venda registrada! 💚', 'success')
   }
 }
 
@@ -6413,20 +6420,27 @@ async function modalRegistrarDespesa() {
   const desc = document.getElementById('modal-desp-desc')?.value || ''
   const data = new Date().toISOString().split('T')[0]
   const tbody = document.getElementById('tabela-registros')
+  let _addedRowDesp = null
   if (tbody) {
     const tr = document.createElement('tr')
     tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
+    _addedRowDesp = tr
   }
   closeModal('nova-despesa')
   document.getElementById('modal-desp-val').value = ''
   if (document.getElementById('modal-desp-desc')) document.getElementById('modal-desp-desc').value = ''
-  mostrarToast('Despesa registrada! 🔴', 'success')
   if (App.token) {
-    try {
-      await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
+    const res = await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
+    if (res?.ok) {
+      mostrarToast('Despesa registrada! 🔴', 'success')
       agendarDashboard()
-    } catch {}
+    } else {
+      _addedRowDesp?.remove()
+      mostrarToast('Erro ao salvar despesa. Tente novamente.', 'error')
+    }
+  } else {
+    mostrarToast('Despesa registrada! 🔴', 'success')
   }
 }
 
@@ -6456,11 +6470,13 @@ async function registrarVenda() {
 
   // Adiciona na tabela de histórico
   const tbody = document.getElementById('tabela-registros')
+  let _addedTr = null
   if (tbody) {
     const tr = document.createElement('tr')
     tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'
     tbody.prepend(tr)
+    _addedTr = tr
   }
 
   // Limpar campos
@@ -6472,13 +6488,17 @@ async function registrarVenda() {
   const preview = document.getElementById('produto-preview')
   if (preview) preview.style.display = 'none'
 
-  mostrarToast('Venda registrada! 💚', 'success')
-
   if (App.token) {
-    try {
-      await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+    const res = await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+    if (res?.ok) {
+      mostrarToast('Venda registrada! 💚', 'success')
       agendarDashboard()
-    } catch {}
+    } else {
+      _addedTr?.remove()
+      mostrarToast('Erro ao salvar venda. Tente novamente.', 'error')
+    }
+  } else {
+    mostrarToast('Venda registrada! 💚', 'success')
   }
 }
 
@@ -6491,17 +6511,26 @@ async function registrarDespesa(){
   const desc=document.getElementById('desc-despesa')?.value||''
   const data=document.getElementById('data-despesa')?.value||_dataISO
   const tbody=document.getElementById('tabela-registros')
-  const tr=document.createElement('tr')
-  tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
-  tr.style.animation='pageIn 0.4s ease'; tbody.prepend(tr)
+  let _addedDesp = null
+  if (tbody) {
+    const tr=document.createElement('tr')
+    tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
+    tr.style.animation='pageIn 0.4s ease'; tbody.prepend(tr)
+    _addedDesp = tr
+  }
   document.getElementById('val-despesa').value=''
   if(document.getElementById('desc-despesa')) document.getElementById('desc-despesa').value=''
-  mostrarToast('Despesa registrada! 🔴', 'success')
   if(App.token) {
-    try {
-      await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
+    const res = await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
+    if (res?.ok) {
+      mostrarToast('Despesa registrada! 🔴', 'success')
       agendarDashboard()
-    } catch{}
+    } else {
+      _addedDesp?.remove()
+      mostrarToast('Erro ao salvar despesa. Tente novamente.', 'error')
+    }
+  } else {
+    mostrarToast('Despesa registrada! 🔴', 'success')
   }
 }
 
