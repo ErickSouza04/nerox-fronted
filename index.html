@@ -2,6 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+  <!-- ═══ SEGURANÇA ═══ -->
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://nexor-api-production.up.railway.app https://wa.me; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
   <!-- ═══ FAVICON + PWA ═══ -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nexor">
@@ -11,6 +16,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -28,10 +34,10 @@
 }
 html { scroll-behavior: smooth; background: #090E1A; }
 body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
-.bg-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); opacity: 0.1; }
-.bg-orb-1 { width: 700px; height: 700px; background: #1d4ed8; top: -250px; left: -150px; }
-.bg-orb-2 { width: 450px; height: 450px; background: #16a34a; bottom: -80px; right: 80px; }
-.bg-orb-3 { width: 300px; height: 300px; background: #7c3aed; top: 45%; right: -60px; }
+.bg-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); opacity: 0.16; }
+.bg-orb-1 { width: 800px; height: 800px; background: #1d4ed8; top: -280px; left: -180px; }
+.bg-orb-2 { width: 520px; height: 520px; background: #16a34a; bottom: -80px; right: 80px; }
+.bg-orb-3 { width: 360px; height: 360px; background: #7c3aed; top: 45%; right: -80px; }
 ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 100px; }
 
 /* SIDEBAR */
@@ -75,8 +81,8 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 
 /* BUTTONS */
 .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; font-family: inherit; }
-.btn-primary { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; box-shadow: 0 4px 14px rgba(34,197,94,0.3); }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(34,197,94,0.4); }
+.btn-primary { background: linear-gradient(135deg,#22c55e,#10b981); color: #fff; box-shadow: 0 4px 18px rgba(34,197,94,0.35); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(34,197,94,0.5); }
 .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
 .btn-secondary:hover { background: var(--surface-hov); color: var(--text); border-color: var(--border-2); }
 .btn-danger { background: var(--red-dim); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
@@ -106,8 +112,8 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 18px; }
 .stat-card { padding: 19px; border-radius: var(--radius); position: relative; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; }
 .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-.sc-bg { position: absolute; inset: 0; background: var(--glass); border: 1px solid var(--glass-b); border-radius: var(--radius); backdrop-filter: blur(10px); }
-.sc-glow { position: absolute; width: 130px; height: 130px; border-radius: 50%; filter: blur(40px); opacity: 0.14; top: -25px; right: -25px; }
+.sc-bg { position: absolute; inset: 0; background: var(--glass) padding-box, linear-gradient(145deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.09) 100%) border-box; border: 1px solid transparent; border-radius: var(--radius); backdrop-filter: blur(10px); }
+.sc-glow { position: absolute; width: 150px; height: 150px; border-radius: 50%; filter: blur(45px); opacity: 0.24; top: -30px; right: -30px; }
 .sc-content { position: relative; z-index: 1; }
 .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; z-index:2; }
 .stat-card.c-blue::before  { background:linear-gradient(90deg,transparent,var(--blue),transparent); } .c-blue  .sc-glow { background:var(--blue); }
@@ -118,13 +124,13 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .stat-icon.blue  { background:var(--blue-dim);  } .stat-icon.red   { background:var(--red-dim);   }
 .stat-icon.green { background:var(--green-dim); } .stat-icon.amber { background:var(--amber-dim); }
 .stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
-.stat-value { font-size: 26px; font-weight: 800; color: var(--text); margin-top: 10px; line-height: 1; font-feature-settings: "tnum"; }
+.stat-value { font-size: 26px; font-weight: 800; color: var(--text); margin-top: 10px; line-height: 1; font-feature-settings: "tnum"; letter-spacing: -0.02em; }
 .stat-value.green { color:var(--green); } .stat-value.red { color:var(--red); }
 .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
 .badge-up { color:var(--green); font-weight:700; } .badge-down { color:var(--red); font-weight:700; }
 
 /* CHART CARD */
-.chart-card { padding: 20px; background: var(--glass); border: 1px solid var(--glass-b); border-radius: var(--radius); backdrop-filter: blur(10px); box-shadow: var(--shadow); overflow: hidden; max-width: 100%; min-width: 0; }
+.chart-card { padding: 20px; background: var(--glass) padding-box, linear-gradient(145deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.08) 100%) border-box; border: 1px solid transparent; border-radius: var(--radius); backdrop-filter: blur(10px); box-shadow: var(--shadow); overflow: hidden; max-width: 100%; min-width: 0; }
 .table-wrap { overflow-x: auto; max-width: 100%; }
 .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .chart-title { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -239,17 +245,17 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 /* ══════════════════════════════════════
    HERO METRIC
 ══════════════════════════════════════ */
-.hero-metric { background: linear-gradient(135deg, rgba(13,21,37,0.95) 0%, rgba(9,14,26,0.98) 100%); border: 1px solid rgba(255,255,255,0.09); border-radius: 22px; padding: 28px 28px 24px; margin-bottom: 16px; position: relative; overflow: hidden; }
+.hero-metric { background: linear-gradient(135deg, rgba(13,21,37,0.95) 0%, rgba(9,14,26,0.98) 100%) padding-box, linear-gradient(145deg, rgba(34,197,94,0.25) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.08) 100%) border-box; border: 1px solid transparent; border-radius: 22px; padding: 28px 28px 24px; margin-bottom: 16px; position: relative; overflow: hidden; }
 .hero-metric::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(34,197,94,0.7), transparent); }
-.hero-metric-glow { position: absolute; top: -60px; right: -40px; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.1) 0%, transparent 65%); pointer-events: none; }
+.hero-metric-glow { position: absolute; top: -60px; right: -40px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, transparent 65%); pointer-events: none; }
 .hero-label { font-size: 11px; font-weight: 700; color: rgba(34,197,94,0.8); text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .hero-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
-.hero-main-value { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -1px; }
+.hero-main-value { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; }
 .hero-main-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
 .hero-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-.hero-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 13px; padding: 14px; }
+.hero-stat { background: rgba(255,255,255,0.04) padding-box, linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.03)) border-box; border: 1px solid transparent; border-radius: 13px; padding: 14px; }
 .hero-stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
-.hero-stat-val { font-size: 19px; font-weight: 800; line-height: 1; font-feature-settings: 'tnum'; }
+.hero-stat-val { font-size: 19px; font-weight: 800; line-height: 1; font-feature-settings: 'tnum'; letter-spacing: -0.02em; }
 .hero-stat-val.pos { color: var(--green); }
 .hero-stat-val.neg { color: var(--red); }
 .hero-stat-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; margin-top: 6px; padding: 3px 8px; border-radius: 100px; }
@@ -257,7 +263,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .hero-stat-badge.down { background: rgba(248,113,113,0.12); color: var(--red); }
 .hero-margin-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 .hero-margin-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; }
-.hero-margin-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,#22c55e,#16a34a); transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+.hero-margin-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,#22c55e,#10b981); transition: width 1s cubic-bezier(0.4,0,0.2,1); }
 .hero-margin-pct { font-size: 13px; font-weight: 800; color: var(--green); min-width: 36px; text-align: right; }
 
 /* ALERTAS INTELIGENTES */
@@ -2454,27 +2460,27 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   
 <div class="page" id="page-metas">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:18px">
-      <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">🎯</div><div class="stat-label">Meta de Lucro</div><div class="stat-value green">R$ 5.000</div><div class="stat-sub">Mensal · Março 2026</div></div></div>
-      <div class="stat-card c-blue"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon blue">🛒</div><div class="stat-label">Vendas Necessárias</div><div class="stat-value">18</div><div class="stat-sub">Ticket médio: R$ 285</div></div></div>
-      <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">📅</div><div class="stat-label">Meta por Dia</div><div class="stat-value">R$ 167</div><div class="stat-sub">Para atingir a meta</div></div></div>
+      <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">🎯</div><div class="stat-label">Meta de Lucro</div><div class="stat-value green" id="metas-stat-valor">R$ 5.000</div><div class="stat-sub" id="metas-stat-sub">Mensal · Março 2026</div></div></div>
+      <div class="stat-card c-blue"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon blue">🛒</div><div class="stat-label">Vendas Necessárias</div><div class="stat-value" id="metas-stat-vendas">18</div><div class="stat-sub" id="metas-stat-ticket">Ticket médio: R$ 285</div></div></div>
+      <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">📅</div><div class="stat-label">Meta por Dia</div><div class="stat-value" id="metas-stat-pordia">R$ 167</div><div class="stat-sub">Para atingir a meta</div></div></div>
     </div>
     <div class="row-2">
       <div>
         <div class="chart-card meta-card" style="margin-bottom:14px">
-          <div class="meta-header"><div class="meta-title">🎯 Meta de Lucro — Março 2026</div><button class="btn btn-secondary" style="font-size:11px;padding:6px 12px">Editar Meta</button></div>
-          <div class="meta-values"><span class="meta-current">R$ 3.595</span><span class="meta-total">/ R$ 5.000</span></div>
-          <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
-          <div class="meta-info"><span>72% concluída · faltam <strong>R$ 1.405</strong></span><span>25 dias restantes</span></div>
+          <div class="meta-header"><div class="meta-title" id="metas-meta-title">🎯 Meta de Lucro — Março 2026</div></div>
+          <div class="meta-values"><span class="meta-current" id="metas-meta-current">R$ 3.595</span><span class="meta-total" id="metas-meta-total">/ R$ 5.000</span></div>
+          <div class="progress-bar"><div class="progress-fill" id="metas-progress-fill" style="width:72%"></div></div>
+          <div class="meta-info" id="metas-meta-info"><span>72% concluída · faltam <strong>R$ 1.405</strong></span><span>25 dias restantes</span></div>
         </div>
         <div class="form-section">
           <div class="form-section-title">💸 Pró-labore</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" value="1500"></div>
-            <div class="form-group"><label class="form-label">Frequência</label><select class="form-select"><option>Mensal</option><option>Quinzenal</option><option>Semanal</option></select></div>
+            <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" id="metas-prolabore-input" value="1500" oninput="calcularProLabore()"></div>
+            <div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="metas-prolabore-freq"><option>Mensal</option><option>Quinzenal</option><option>Semanal</option></select></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px">
-            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:5px">R$ 3.595</div></div>
-            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Após retirada</div><div style="font-size:20px;font-weight:800;color:var(--blue);margin-top:5px">R$ 2.095</div></div>
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:5px" id="metas-lucro-antes">R$ 3.595</div></div>
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Após retirada</div><div style="font-size:20px;font-weight:800;color:var(--blue);margin-top:5px" id="metas-lucro-apos">R$ 2.095</div></div>
           </div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:11px;padding:11px;background:rgba(34,197,94,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--green);line-height:1.55">💡 <strong style="color:var(--text)">Dica:</strong> Reserve 20% do lucro antes de retirar o pró-labore para garantir capital de giro.</div>
         </div>
@@ -2483,13 +2489,13 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="nexor-card">
           <div class="nexor-label">Índice Nexor</div>
           <div style="display:flex;align-items:center;gap:14px;margin-top:6px">
-            <div style="flex-shrink:0"><div class="gauge-wrap"><canvas id="gaugeCanvas2" width="160" height="88"></canvas><div class="gauge-number">74<span>/100</span></div></div></div>
-            <div class="nexor-desc">Aumente a frequência de registros e reduza despesas para melhorar sua pontuação.</div>
+            <div style="flex-shrink:0"><div class="gauge-wrap"><canvas id="gaugeCanvas2" width="160" height="88"></canvas><div class="gauge-number"><span id="gaugeNum2">0</span><span>/100</span></div></div></div>
+            <div class="nexor-desc" id="metas-nexor-desc">Aumente a frequência de registros e reduza despesas para melhorar sua pontuação.</div>
           </div>
         </div>
         <div class="chart-card">
           <div class="chart-title" style="margin-bottom:13px">🔔 Alertas Ativos</div>
-          <div style="display:flex;flex-direction:column;gap:9px">
+          <div id="metas-alertas" style="display:flex;flex-direction:column;gap:9px">
             <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;padding:12px;display:flex;gap:10px"><span>⚠️</span><div><div style="font-size:12px;font-weight:700;color:var(--amber)">Margem abaixo do ideal</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">28% vs meta de 35%. Revise a precificação.</div></div></div>
             <div style="background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2);border-radius:10px;padding:12px;display:flex;gap:10px"><span>📊</span><div><div style="font-size:12px;font-weight:700;color:var(--blue)">Meta 72% atingida</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">Excelente progresso! Continue assim.</div></div></div>
             <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.18);border-radius:10px;padding:12px;display:flex;gap:10px"><span>📈</span><div><div style="font-size:12px;font-weight:700;color:var(--green)">Crescimento positivo</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">Lucro cresceu 31% vs mês anterior.</div></div></div>
@@ -3170,6 +3176,8 @@ async function api(path, opts = {}) {
 // -- Formatadores ----------------------
 const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})
 const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
+// Escapa HTML entities — usar sempre que texto do usuário/API for colocado em innerHTML
+const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
 
 // ======================================
 // AUTH
@@ -3206,6 +3214,37 @@ async function avancarEtapa(etapa) {
 function mostrarErroAuth(el, msg) {
   el.textContent=msg; el.classList.add('show')
   setTimeout(()=>el.classList.remove('show'),4000)
+}
+
+// ======================================
+// TOAST — feedback visual global
+// ======================================
+let _toastTimer = null
+function mostrarToast(msg, tipo = 'success') {
+  let el = document.getElementById('nexor-toast')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'nexor-toast'
+    el.style.cssText = [
+      'position:fixed','bottom:80px','left:50%','transform:translateX(-50%) translateY(20px)',
+      'padding:11px 20px','border-radius:12px','font-size:13px','font-weight:600',
+      'color:#fff','z-index:9999','pointer-events:none','opacity:0',
+      'transition:opacity 0.25s ease,transform 0.25s ease',
+      'max-width:90vw','text-align:center','white-space:nowrap',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.35)'
+    ].join(';')
+    document.body.appendChild(el)
+  }
+  const colors = { success:'rgba(34,197,94,0.92)', error:'rgba(248,113,113,0.92)', info:'rgba(96,165,250,0.92)' }
+  el.style.background = colors[tipo] || colors.info
+  el.textContent = msg
+  el.style.opacity = '1'
+  el.style.transform = 'translateX(-50%) translateY(0)'
+  clearTimeout(_toastTimer)
+  _toastTimer = setTimeout(() => {
+    el.style.opacity = '0'
+    el.style.transform = 'translateX(-50%) translateY(10px)'
+  }, tipo === 'error' ? 3500 : 2500)
 }
 
 function selecionarCategoria(el, cat) {
@@ -3302,8 +3341,10 @@ async function entrarApp(usuario, isNewUser = false) {
     atualizarHeroHora()
     setTimeout(initPerf30Chart, 300)
     // Mostra onboarding para novos cadastros ou primeira visita
-    const jaViu = localStorage.getItem('nexor_onboarding_done')
-    if (isNewUser && !jaViu) {
+    if (isNewUser) {
+      localStorage.removeItem('nexor_onboarding_done')
+      setTimeout(() => mostrarBoasVindas(usuario), 1200)
+    } else if (!localStorage.getItem('nexor_onboarding_done')) {
       setTimeout(() => mostrarBoasVindas(usuario), 1200)
     }
   },400)
@@ -3355,7 +3396,17 @@ async function enviarRecuperacao() {
 // ======================================
 // DASHBOARD - carrega dados reais
 // ======================================
+let _dashTimer = null
+let _dashReqId = 0
+let _lastDashLoad = 0
+
+// Debounce: evita chamadas concorrentes após registros rápidos
+function agendarDashboard() {
+  clearTimeout(_dashTimer)
+  _dashTimer = setTimeout(iniciarDashboard, 400)
+}
 async function iniciarDashboard() {
+  const reqId = ++_dashReqId
   const mes=new Date().getMonth()+1, ano=new Date().getFullYear()
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
@@ -3382,10 +3433,14 @@ async function iniciarDashboard() {
     if (_cD) { _cD.data.labels=['Sem despesas']; _cD.data.datasets[0].data=[1]; _cD.data.datasets[0].backgroundColor=['#1e2d45']; _cD.update() }
     const _cDi = Chart.getChart('chartDiario')
     if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
+    // Destruir chart de desempenho 30 dias para forçar reload com dados reais
+    if (typeof perf30Chart !== 'undefined' && perf30Chart) { perf30Chart.destroy(); perf30Chart = null; perf30Initing = false }
     // Zerar cards de texto com dados demo
     const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
     _set('idx-margem','—'); _set('idx-dias','—'); _set('idx-crescimento','—'); _set('idx-despesas','—')
     _set('proj-receita-val','—'); _set('proj-lucro-val','—')
+    // Limpar badges de variação (demo data estático do HTML)
+    document.querySelectorAll('.stats-grid .badge-up, .stats-grid .badge-down').forEach(el => { el.textContent = '—' })
     // Limpar tabela de registros (demo rows)
     const _tb = document.getElementById('tabela-registros')
     if (_tb) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
@@ -3419,9 +3474,12 @@ async function iniciarDashboard() {
       if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(dados.margem);         countUp(cards[3])}
       // Variações
-      const vars=document.querySelectorAll('.badge-up,.badge-down')
-      if(vars[0]){vars[0].textContent=(dados.variacao.faturamento>=0?'↑':'↓')+Math.abs(dados.variacao.faturamento).toFixed(0)+'%'; vars[0].className=dados.variacao.faturamento>=0?'badge-up':'badge-down'}
-      if(vars[2]){vars[2].textContent=(dados.variacao.lucro>=0?'↑':'↓')+Math.abs(dados.variacao.lucro).toFixed(0)+'%'; vars[2].className=dados.variacao.lucro>=0?'badge-up':'badge-down'}
+      const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
+      const _vFat=dados.variacao?.faturamento||0, _vDesp=dados.variacao?.despesas||0, _vLuc=dados.variacao?.lucro||0
+      if(vars[0]){vars[0].textContent=(_vFat>=0?'↑':'↓')+Math.abs(_vFat).toFixed(0)+'%'; vars[0].className=_vFat>=0?'badge-up':'badge-down'}
+      if(vars[1]){vars[1].textContent=(_vDesp>=0?'↑':'↓')+Math.abs(_vDesp).toFixed(0)+'%'; vars[1].className=_vDesp>0?'badge-down':'badge-up'}
+      if(vars[2]){vars[2].textContent=(_vLuc>=0?'↑':'↓')+Math.abs(_vLuc).toFixed(0)+'%'; vars[2].className=_vLuc>=0?'badge-up':'badge-down'}
+      if(vars[3]){vars[3].textContent=dados.ticket_medio_anterior>0?(dados.ticket_medio>=dados.ticket_medio_anterior?'↑':'↓')+'R$ '+Math.abs((dados.ticket_medio||0)-(dados.ticket_medio_anterior||0)).toFixed(0):'—'; vars[3].className=dados.ticket_medio>=(dados.ticket_medio_anterior||0)?'badge-up':'badge-down'}
       // Meta do mês
       const pct=dados.progresso_meta||0
       const pf=document.querySelector('.progress-fill'); if(pf) pf.style.width=pct+'%'
@@ -3499,6 +3557,16 @@ async function iniciarDashboard() {
       const _idi=document.getElementById('idx-dias'); if(_idi) _idi.textContent=_diasAtivos
       // Dicas dinâmicas com dados reais
       atualizarDicasDashboard()
+      // Liga Nexor — notificar se meta foi batida
+      if ((App.stats?.progresso || 0) >= 100 && (App.stats?.indice || 0) > 0) {
+        const _score = App.stats.indice
+        const _liga = _score>=90?'Diamond 💎':_score>=80?'Gold 🥇':_score>=70?'Silver 🥈':_score>=60?'Bronze 🥉':'Starter ⚡'
+        const _jaNotif = sessionStorage.getItem('nexor_meta_notif_'+new Date().getMonth())
+        if (!_jaNotif) {
+          sessionStorage.setItem('nexor_meta_notif_'+new Date().getMonth(), '1')
+          setTimeout(()=>mostrarToast('🏆 Meta batida! Liga '+_liga+' conquistada!','success'),1200)
+        }
+      }
       // Atualizar hero do dia com dados reais de hoje
       const hoje = dados[dados.length - 1]
       if (hoje) {
@@ -3561,6 +3629,7 @@ async function iniciarDashboard() {
       api('/vendas?mes='+mes+'&ano='+ano),
       api('/despesas?mes='+mes+'&ano='+ano+'&limite=8')
     ])
+    if(reqId !== _dashReqId) return  // chamada mais recente em andamento, abortar esta
     if(vRes?.ok && deRes?.ok) {
       const v=await vRes.json(), de=await deRes.json()
       const todos=[...v.dados.map(i=>({...i,_tipo:'venda'})),...de.dados.map(i=>({...i,_tipo:'despesa'}))]
@@ -3577,7 +3646,7 @@ async function iniciarDashboard() {
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
         } else {
-          tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada ainda</td></tr>'
+          tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
         }
       }
 
@@ -3624,7 +3693,18 @@ async function iniciarDashboard() {
       }
     }
 
-  } catch(e) { console.error('Erro dashboard:',e) }
+  } catch(e) {
+    console.error('Erro dashboard:',e)
+    // Garantir que tabela não fique presa em "Carregando..."
+    const _tbErr = document.getElementById('tabela-registros')
+    if (_tbErr && _tbErr.textContent.includes('Carregando')) {
+      _tbErr.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
+    }
+  }
+
+  // Recriar chart de desempenho 30 dias com dados reais (foi destruído no início)
+  if (App.token) setTimeout(initPerf30Chart, 200)
+  _lastDashLoad = Date.now()
 }
 
 // ======================================
@@ -3713,12 +3793,13 @@ function navigate(page,el){
   const r=document.createElement('span'); r.className='ripple'
   r.style.cssText='width:80px;height:80px;left:calc(50% - 40px);top:calc(50% - 40px)'
   el.appendChild(r); setTimeout(()=>r.remove(),600)
-  if(page==='relatorios') { setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
-  if(page==='metas')      setTimeout(()=>drawGauge('gaugeCanvas2',App.token?0:74),80)
+  if(page==='relatorios') { relInit=false; setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
+  if(page==='metas')      setTimeout(carregarPaginaMetas, 80)
   if(page==='perfil')     carregarPerfil()
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
   if(page==='ia')     {} // já tem hook abaixo
+  if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 120000) setTimeout(iniciarDashboard, 80)
   if(page==='ia') {
     setTimeout(initScoreCanvas, 80)
     setTimeout(() => carregarPaginaIA().then(() => {
@@ -3770,7 +3851,7 @@ function countUp(el){
 }
 
 // GAUGE
-function drawGauge(id,value){
+function drawGauge(id,value,numElId='gaugeNum'){
   const canvas=document.getElementById(id); if(!canvas) return
   const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height
   ctx.clearRect(0,0,W,H)
@@ -3787,7 +3868,7 @@ function drawGauge(id,value){
   const ex=cx+r*Math.cos(vAngle), ey=cy+r*Math.sin(vAngle)
   ctx.beginPath(); ctx.arc(ex,ey,5.5,0,2*Math.PI)
   ctx.fillStyle='#22c55e'; ctx.shadowColor='#22c55e'; ctx.shadowBlur=14; ctx.fill(); ctx.shadowBlur=0
-  const numEl=document.getElementById('gaugeNum')
+  const numEl=document.getElementById(numElId)
   if(numEl){ let n=0; const t=setInterval(()=>{ n+=2; numEl.textContent=Math.min(n,value); if(n>=value) clearInterval(t) },18) }
 }
 
@@ -3898,11 +3979,112 @@ async function carregarRelatorios() {
   } catch(e) { console.error('carregarRelatorios:',e) }
 }
 
+// ── Pró-labore — recalcular ao mudar input ──
+function calcularProLabore() {
+  const lucro = App.stats?.lucro || 0
+  const prolabore = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  const antes = document.getElementById('metas-lucro-antes')
+  const apos  = document.getElementById('metas-lucro-apos')
+  if (antes) antes.textContent = fmtBRL(lucro)
+  if (apos)  apos.textContent  = fmtBRL(Math.max(0, lucro - prolabore))
+}
+
+// ── Metas — carregar página com dados reais ──
+function carregarPaginaMetas() {
+  if (!App.token) return
+  const s    = App.stats || {}
+  const hoje = new Date()
+  const mes  = hoje.getMonth() + 1
+  const ano  = hoje.getFullYear()
+  const mesesNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const nomeMes = mesesNomes[mes - 1]
+  const _s = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v }
+
+  // ─ Gauge Índice Nexor ─
+  const score = s.indice || 0
+  drawGauge('gaugeCanvas2', score, 'gaugeNum2')
+  const nexorDesc = document.getElementById('metas-nexor-desc')
+  if (nexorDesc) {
+    if (score >= 85)      nexorDesc.textContent = 'Excelente! Mantenha a consistência para chegar ao topo.'
+    else if (score >= 70) nexorDesc.textContent = 'Registre diariamente e reduza despesas para superar 85+'
+    else if (score >= 50) nexorDesc.textContent = 'Aumente a frequência de registros para melhorar sua pontuação.'
+    else                  nexorDesc.textContent = 'Comece a registrar vendas e despesas para calcular seu índice.'
+  }
+
+  // ─ Verificar se meta foi batida → atualizar liga ─
+  const progresso = s.progresso || 0
+  const metaValor = s.metaValor || 0
+  const lucro     = s.lucro     || 0
+  const diasMes   = new Date(ano, mes, 0).getDate()
+  const diasRestantes = diasMes - hoje.getDate()
+
+  // ─ Header cards de topo ─
+  _s('metas-stat-valor', metaValor > 0 ? fmtBRL(metaValor) : '—')
+  _s('metas-stat-sub', 'Mensal · ' + nomeMes + ' ' + ano)
+  const ticket = s.ticketMedio || 0
+  const vendasNecessarias = ticket > 0 && metaValor > 0 ? Math.ceil((metaValor - lucro) / ticket) : '—'
+  _s('metas-stat-vendas', vendasNecessarias > 0 ? vendasNecessarias : (lucro >= metaValor && metaValor > 0 ? '🏆' : '—'))
+  _s('metas-stat-ticket', ticket > 0 ? 'Ticket médio: ' + fmtBRL(ticket) : 'Sem vendas este mês')
+  const falta = Math.max(0, metaValor - lucro)
+  const porDia = diasRestantes > 0 && falta > 0 ? fmtBRL(Math.ceil(falta / diasRestantes)) : (lucro >= metaValor && metaValor > 0 ? '🏆' : '—')
+  _s('metas-stat-pordia', porDia)
+
+  // ─ Meta card principal ─
+  _s('metas-meta-title', '🎯 Meta de Lucro — ' + nomeMes + ' ' + ano)
+  _s('metas-meta-current', fmtBRL(lucro))
+  _s('metas-meta-total', metaValor > 0 ? '/ ' + fmtBRL(metaValor) : '')
+  const pf = document.getElementById('metas-progress-fill')
+  if (pf) pf.style.width = Math.min(100, progresso) + '%'
+  const mi = document.getElementById('metas-meta-info')
+  if (mi) {
+    if (metaValor <= 0) {
+      mi.innerHTML = '<span style="color:var(--text-muted)">Defina sua meta em Configurações</span>'
+    } else if (progresso >= 100) {
+      mi.innerHTML = '<span style="color:var(--green);font-weight:700">🏆 Meta batida! Parabéns!</span>'
+    } else {
+      mi.innerHTML = `<span>${progresso}% concluída · faltam <strong>${fmtBRL(falta)}</strong></span><span>${diasRestantes} dias restantes</span>`
+    }
+  }
+
+  // ─ Pró-labore ─
+  const prolabore = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  _s('metas-lucro-antes', fmtBRL(lucro))
+  _s('metas-lucro-apos',  fmtBRL(Math.max(0, lucro - prolabore)))
+
+  // ─ Alertas dinâmicos ─
+  const alertasEl = document.getElementById('metas-alertas')
+  if (alertasEl) {
+    const alertas = []
+    if (metaValor > 0 && progresso >= 100) {
+      const ligaAtual = score >= 90 ? 'Diamond' : score >= 80 ? 'Gold' : score >= 70 ? 'Silver' : score >= 60 ? 'Bronze' : 'Starter'
+      alertas.push({bg:'rgba(34,197,94,', icon:'🏆', cor:'var(--green)', titulo:'Meta batida! Liga atualizada', sub:`Você atingiu sua meta e está na Liga ${ligaAtual} (Índice ${score}/100)`})
+    }
+    if ((s.margem || 0) < 25)
+      alertas.push({bg:'rgba(251,191,36,', icon:'⚠️', cor:'var(--amber)', titulo:'Margem abaixo do ideal', sub:`${s.margem || 0}% vs recomendado de 25%. Revise a precificação.`})
+    else if ((s.margem || 0) >= 35)
+      alertas.push({bg:'rgba(34,197,94,', icon:'✅', cor:'var(--green)', titulo:'Margem excelente!', sub:`${s.margem || 0}% de margem — acima da média de mercado.`})
+    if (metaValor > 0 && progresso < 100)
+      alertas.push({bg:'rgba(96,165,250,', icon:'📊', cor:'var(--blue)', titulo:`Meta ${progresso}% atingida`, sub: progresso >= 70 ? 'Excelente progresso! Mantenha o ritmo.' : 'Continue registrando para acelerar o progresso.'})
+    if ((s.varLucro || 0) > 0)
+      alertas.push({bg:'rgba(34,197,94,', icon:'📈', cor:'var(--green)', titulo:'Crescimento positivo', sub:`Lucro cresceu ${(s.varLucro||0).toFixed(0)}% vs mês anterior.`})
+    else if ((s.varLucro || 0) < -5)
+      alertas.push({bg:'rgba(248,113,113,', icon:'📉', cor:'var(--red)', titulo:'Lucro em queda', sub:`Queda de ${Math.abs(s.varLucro||0).toFixed(0)}% vs mês anterior. Analise os custos.`})
+    if (!alertas.length)
+      alertas.push({bg:'rgba(96,165,250,', icon:'💡', cor:'var(--blue)', titulo:'Comece a registrar', sub:'Registre vendas e despesas para ver seus alertas aqui.'})
+    alertasEl.innerHTML = alertas.map(a =>
+      `<div style="background:${a.bg}0.07);border:1px solid ${a.bg}0.2);border-radius:10px;padding:12px;display:flex;gap:10px"><span>${a.icon}</span><div><div style="font-size:12px;font-weight:700;color:${a.cor}">${a.titulo}</div><div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">${a.sub}</div></div></div>`
+    ).join('')
+  }
+}
+
 let relInit=false
 async function initRelatorioChart(){
   if (typeof Chart === 'undefined') return
   if(relInit) return; relInit=true
-  let rLabels = Array.from({length:28},(_,i)=>(i+1)+'/02')
+  const _rNow = new Date()
+  const _rDias = new Date(_rNow.getFullYear(), _rNow.getMonth()+1, 0).getDate()
+  const _rMm = String(_rNow.getMonth()+1).padStart(2,'0')
+  let rLabels = Array.from({length:_rDias},(_,i)=>(i+1)+'/'+_rMm)
   let rData = App.token ? [] : [40,95,60,140,80,210,165,120,200,90,180,250,130,310,170,195,120,260,145,300,180,220,140,280,160,320,200,230]
   if (App.token) {
     try {
@@ -4447,14 +4629,15 @@ async function abrirProfitCard() {
   // Dados reais ou demo
   const u   = App.usuario || {}
   const s   = App.stats   || {}
-  const fat        = s.faturamento || 12840
-  const desp       = s.despesas   || 9245
-  const lucro      = s.lucro      || 3595
-  const margem     = s.margem     || (fat > 0 ? Math.round((lucro/fat)*100) : 28)
-  const ticket     = s.ticketMedio|| (s.totalVendas > 0 ? Math.round(fat/s.totalVendas) : 285)
-  const varLucro   = s.varLucro   || 18
-  const varFat     = s.varFat     || 14
-  const progresso  = s.progresso  || 86
+  const _demo      = !App.token
+  const fat        = s.faturamento || (_demo ? 12840 : 0)
+  const desp       = s.despesas   || (_demo ? 9245  : 0)
+  const lucro      = s.lucro      || (_demo ? 3595  : 0)
+  const margem     = s.margem     || (fat > 0 ? Math.round((lucro/fat)*100) : (_demo ? 28 : 0))
+  const ticket     = s.ticketMedio|| (s.totalVendas > 0 ? Math.round(fat/s.totalVendas) : (_demo ? 285 : 0))
+  const varLucro   = s.varLucro   || (_demo ? 18 : 0)
+  const varFat     = s.varFat     || (_demo ? 14 : 0)
+  const progresso  = s.progresso  || (_demo ? 86 : 0)
   const metaValor  = s.metaValor  || Math.round(fat * 1.15)
   const nome       = u.nome       || 'Usuário'
   const empresa    = u.tipo_negocio || u.empresa || 'Meu Negócio'
@@ -4842,7 +5025,7 @@ async function carregarInsightDiario() {
     const div = document.createElement('div')
     div.id = 'ia-insight-live'
     div.style.cssText = `display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:${c}0.07);border-radius:10px;border:1px solid ${c}0.15);position:relative`
-    div.innerHTML = `<span style="font-size:16px;flex-shrink:0;margin-top:1px">🤖</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;flex:1">${data.insight}</div><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>`
+    div.innerHTML = `<span style="font-size:16px;flex-shrink:0;margin-top:1px">🤖</span><div style="font-size:12px;color:var(--text-muted);line-height:1.5;flex:1">${DOMPurify.sanitize(data.insight, {ALLOWED_TAGS:['strong','em','br'],ALLOWED_ATTR:[]})}</div><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;padding:0;line-height:1">×</button>`
     container.insertBefore(div, container.firstChild)
   } catch(e) { console.warn('insight diário:', e) }
 }
@@ -4866,7 +5049,7 @@ function calcularDadosCard() {
   const mg    = s.margem     || (fat > 0 ? Math.round(lucro / fat * 100) : 0)
   const vl    = s.varLucro   ?? 0
   const vf    = s.varFat     ?? 0
-  const score = s.indice     || 74
+  const score = s.indice     || (App.token ? 0 : 74)
   const prog  = s.progresso  || 0
 
   // Liga e cor
@@ -5059,6 +5242,17 @@ function drawNexorLogo(ctx, W, H) {
   ctx.beginPath(); ctx.moveTo(80, 106); ctx.lineTo(W-80, 106); ctx.stroke()
 }
 
+function drawUserInfo(ctx, W, d) {
+  // Truncar nome e tipo para caber no card
+  const maxChars = 22
+  const nome = d.nome.length > maxChars ? d.nome.slice(0, maxChars) + '…' : d.nome
+  const tipo = d.tipo.length > maxChars ? d.tipo.slice(0, maxChars) + '…' : d.tipo
+  ctx.font = '500 26px system-ui, sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.38)'
+  ctx.textAlign = 'center'
+  ctx.fillText(`${nome}  ·  ${tipo}`, W/2, 148)
+}
+
 function drawFooter(ctx, W, H) {
   // Linha separadora
   ctx.strokeStyle = 'rgba(255,255,255,0.07)'
@@ -5116,6 +5310,7 @@ function desenharCardIndex(ctx, canvas, d) {
   drawBg(ctx, W, H)
   drawTopBar(ctx, W, accent)
   drawNexorLogo(ctx, W, H)
+  drawUserInfo(ctx, W, d)
 
   // Label "NEXOR INDEX"
   ctx.font = '700 30px system-ui, sans-serif'
@@ -5226,6 +5421,7 @@ function desenharCardRanking(ctx, canvas, d) {
   drawBg(ctx, W, H)
   drawTopBar(ctx, W, accent)
   drawNexorLogo(ctx, W, H)
+  drawUserInfo(ctx, W, d)
 
   // Label
   ctx.font = '700 30px system-ui, sans-serif'
@@ -5340,6 +5536,7 @@ function desenharCardEvolucao(ctx, canvas, d) {
   drawBg(ctx, W, H)
   drawTopBar(ctx, W, accent)
   drawNexorLogo(ctx, W, H)
+  drawUserInfo(ctx, W, d)
 
   // Label
   ctx.font = '700 30px system-ui, sans-serif'
@@ -6156,7 +6353,7 @@ async function modalRegistrarVenda() {
 
   const cat  = document.getElementById('modal-cat')?.value  || 'Produto'
   const pag  = document.getElementById('modal-pag')?.value  || 'Pix'
-  const data = _dataISO
+  const data = new Date().toISOString().split('T')[0]
 
   const modoAvulso = document.getElementById('modal-modo-avulso')?.style.display !== 'none'
   let prod = ''
@@ -6174,7 +6371,7 @@ async function modalRegistrarVenda() {
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${fmtData(data)}</td><td>${prod||cat}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${fmtBRL(parseFloat(val))}</td>`
+    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'
     tbody.prepend(tr)
   }
@@ -6187,7 +6384,7 @@ async function modalRegistrarVenda() {
   if (App.token) {
     try {
       await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
-      iniciarDashboard()
+      agendarDashboard()
     } catch {}
   }
 }
@@ -6198,11 +6395,11 @@ async function modalRegistrarDespesa() {
   const cat  = document.getElementById('modal-desp-cat')?.value  || 'Outros'
   const pag  = document.getElementById('modal-desp-pag')?.value  || 'Pix'
   const desc = document.getElementById('modal-desp-desc')?.value || ''
-  const data = _dataISO
+  const data = new Date().toISOString().split('T')[0]
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${fmtData(data)}</td><td>${desc||cat}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${fmtBRL(parseFloat(val))}</td>`
+    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
   }
   closeModal('nova-despesa')
@@ -6212,7 +6409,7 @@ async function modalRegistrarDespesa() {
   if (App.token) {
     try {
       await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
-      iniciarDashboard()
+      agendarDashboard()
     } catch {}
   }
 }
@@ -6245,7 +6442,7 @@ async function registrarVenda() {
   const tbody = document.getElementById('tabela-registros')
   if (tbody) {
     const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${fmtData(data)}</td><td>${prod || cat}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${fmtBRL(parseFloat(val))}</td>`
+    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
     tr.style.animation = 'pageIn 0.4s ease'
     tbody.prepend(tr)
   }
@@ -6264,7 +6461,7 @@ async function registrarVenda() {
   if (App.token) {
     try {
       await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
-      iniciarDashboard()
+      agendarDashboard()
     } catch {}
   }
 }
@@ -6279,7 +6476,7 @@ async function registrarDespesa(){
   const data=document.getElementById('data-despesa')?.value||_dataISO
   const tbody=document.getElementById('tabela-registros')
   const tr=document.createElement('tr')
-  tr.innerHTML=`<td>${fmtData(data)}</td><td>${desc||cat}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${fmtBRL(parseFloat(val))}</td>`
+  tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
   tr.style.animation='pageIn 0.4s ease'; tbody.prepend(tr)
   document.getElementById('val-despesa').value=''
   if(document.getElementById('desc-despesa')) document.getElementById('desc-despesa').value=''
@@ -6287,7 +6484,7 @@ async function registrarDespesa(){
   if(App.token) {
     try {
       await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
-      iniciarDashboard()
+      agendarDashboard()
     } catch{}
   }
 }
@@ -6340,7 +6537,11 @@ let tourStep = 0
 function mostrarBoasVindas(usuario) {
   // Personaliza o título com o nome
   const primeiroNome = (usuario?.nome || 'empreendedora').split(' ')[0]
-  document.getElementById('welcome-title').innerHTML = `Bem-vinda ao <span>Nexor</span>, ${primeiroNome}! 🎉`
+  const _wt = document.getElementById('welcome-title')
+  if (_wt) {
+    _wt.innerHTML = 'Bem-vinda ao <span>Nexor</span>, '
+    _wt.appendChild(document.createTextNode(primeiroNome + '! 🎉'))
+  }
   document.getElementById('welcome-subtitle').textContent =
     `Sua conta está pronta, ${primeiroNome}. Agora você tem tudo para organizar suas finanças, precificar seus produtos e crescer com inteligência.`
 
@@ -6544,6 +6745,7 @@ async function initPerf30Chart() {
       }
     }
   })
+  perf30Initing = false
 }
 
 // ======================================
@@ -6723,10 +6925,15 @@ async function digitarRespostaIA(texto) {
   div.appendChild(bubble)
   msgs.appendChild(div)
 
+  // Sanitiza o texto antes de converter markdown → HTML (evita XSS da API)
+  const textoSafe = DOMPurify.sanitize(texto, { ALLOWED_TAGS: [] })
   // Renderiza o HTML processado progressivamente por palavras
-  const htmlFull = texto
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>')
+  const htmlFull = DOMPurify.sanitize(
+    textoSafe
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>'),
+    { ALLOWED_TAGS: ['strong','br'], ALLOWED_ATTR: [] }
+  )
 
   // Divide em "tokens" (palavras + espaços), anima rápido
   const words = htmlFull.split(/(?<=\s)|(?=\s)/)
@@ -6738,7 +6945,7 @@ async function digitarRespostaIA(texto) {
     await new Promise(r => setTimeout(r, word.trim() ? 18 : 6))
   }
   // Finaliza sem cursor, adiciona hora
-  bubble.innerHTML = htmlFull + `<span class="ia-bubble-time">${hora}</span>`
+  bubble.innerHTML = htmlFull + `<span class="ia-bubble-time">${esc(hora)}</span>`
   msgs.scrollTop = msgs.scrollHeight
   salvarHistoriaIA()
 }
@@ -6800,7 +7007,7 @@ function limparChat() {
 function salvarHistoriaIA() {
   try {
     const msgs = document.getElementById('ia-messages')
-    if (msgs) sessionStorage.setItem('nexor_ia_history', msgs.innerHTML)
+    if (msgs) sessionStorage.setItem('nexor_ia_history', DOMPurify.sanitize(msgs.innerHTML, {ALLOWED_TAGS:['div','span','strong','em','br','p'],ALLOWED_ATTR:['class','style']}))
     sessionStorage.setItem('nexor_ia_messages', JSON.stringify(iaMessages))
   } catch(e) {}
 }
@@ -6813,7 +7020,7 @@ function restaurarHistoriaIA() {
     if (html && msgs) {
       const container = document.getElementById('ia-messages')
       if (container && container.children.length <= 1) {
-        container.innerHTML = html
+        container.innerHTML = DOMPurify.sanitize(html, {ALLOWED_TAGS:['div','span','strong','em','br','p'],ALLOWED_ATTR:['class','style']})
         container.scrollTop = container.scrollHeight
         const parsed = JSON.parse(msgs)
         iaMessages.length = 0
