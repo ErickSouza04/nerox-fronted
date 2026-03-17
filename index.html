@@ -3208,6 +3208,37 @@ function mostrarErroAuth(el, msg) {
   setTimeout(()=>el.classList.remove('show'),4000)
 }
 
+// ======================================
+// TOAST — feedback visual global
+// ======================================
+let _toastTimer = null
+function mostrarToast(msg, tipo = 'success') {
+  let el = document.getElementById('nexor-toast')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'nexor-toast'
+    el.style.cssText = [
+      'position:fixed','bottom:80px','left:50%','transform:translateX(-50%) translateY(20px)',
+      'padding:11px 20px','border-radius:12px','font-size:13px','font-weight:600',
+      'color:#fff','z-index:9999','pointer-events:none','opacity:0',
+      'transition:opacity 0.25s ease,transform 0.25s ease',
+      'max-width:90vw','text-align:center','white-space:nowrap',
+      'box-shadow:0 4px 20px rgba(0,0,0,0.35)'
+    ].join(';')
+    document.body.appendChild(el)
+  }
+  const colors = { success:'rgba(34,197,94,0.92)', error:'rgba(248,113,113,0.92)', info:'rgba(96,165,250,0.92)' }
+  el.style.background = colors[tipo] || colors.info
+  el.textContent = msg
+  el.style.opacity = '1'
+  el.style.transform = 'translateX(-50%) translateY(0)'
+  clearTimeout(_toastTimer)
+  _toastTimer = setTimeout(() => {
+    el.style.opacity = '0'
+    el.style.transform = 'translateX(-50%) translateY(10px)'
+  }, tipo === 'error' ? 3500 : 2500)
+}
+
 function selecionarCategoria(el, cat) {
   document.querySelectorAll('.categoria-card').forEach(c=>c.classList.remove('selected'))
   el.classList.add('selected'); cadCategoria=cat
