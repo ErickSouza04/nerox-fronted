@@ -4621,14 +4621,15 @@ async function abrirProfitCard() {
   // Dados reais ou demo
   const u   = App.usuario || {}
   const s   = App.stats   || {}
-  const fat        = s.faturamento || 12840
-  const desp       = s.despesas   || 9245
-  const lucro      = s.lucro      || 3595
-  const margem     = s.margem     || (fat > 0 ? Math.round((lucro/fat)*100) : 28)
-  const ticket     = s.ticketMedio|| (s.totalVendas > 0 ? Math.round(fat/s.totalVendas) : 285)
-  const varLucro   = s.varLucro   || 18
-  const varFat     = s.varFat     || 14
-  const progresso  = s.progresso  || 86
+  const _demo      = !App.token
+  const fat        = s.faturamento || (_demo ? 12840 : 0)
+  const desp       = s.despesas   || (_demo ? 9245  : 0)
+  const lucro      = s.lucro      || (_demo ? 3595  : 0)
+  const margem     = s.margem     || (fat > 0 ? Math.round((lucro/fat)*100) : (_demo ? 28 : 0))
+  const ticket     = s.ticketMedio|| (s.totalVendas > 0 ? Math.round(fat/s.totalVendas) : (_demo ? 285 : 0))
+  const varLucro   = s.varLucro   || (_demo ? 18 : 0)
+  const varFat     = s.varFat     || (_demo ? 14 : 0)
+  const progresso  = s.progresso  || (_demo ? 86 : 0)
   const metaValor  = s.metaValor  || Math.round(fat * 1.15)
   const nome       = u.nome       || 'Usuário'
   const empresa    = u.tipo_negocio || u.empresa || 'Meu Negócio'
@@ -5040,7 +5041,7 @@ function calcularDadosCard() {
   const mg    = s.margem     || (fat > 0 ? Math.round(lucro / fat * 100) : 0)
   const vl    = s.varLucro   ?? 0
   const vf    = s.varFat     ?? 0
-  const score = s.indice     || 74
+  const score = s.indice     || (App.token ? 0 : 74)
   const prog  = s.progresso  || 0
 
   // Liga e cor
