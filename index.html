@@ -3357,7 +3357,17 @@ async function enviarRecuperacao() {
 // ======================================
 // DASHBOARD - carrega dados reais
 // ======================================
+let _dashTimer = null
+let _dashReqId = 0
+let _lastDashLoad = 0
+
+// Debounce: evita chamadas concorrentes após registros rápidos
+function agendarDashboard() {
+  clearTimeout(_dashTimer)
+  _dashTimer = setTimeout(iniciarDashboard, 400)
+}
 async function iniciarDashboard() {
+  const reqId = ++_dashReqId
   const mes=new Date().getMonth()+1, ano=new Date().getFullYear()
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
@@ -3580,6 +3590,7 @@ async function iniciarDashboard() {
       api('/vendas?mes='+mes+'&ano='+ano),
       api('/despesas?mes='+mes+'&ano='+ano+'&limite=8')
     ])
+    if(reqId !== _dashReqId) return  // chamada mais recente em andamento, abortar esta
     if(vRes?.ok && deRes?.ok) {
       const v=await vRes.json(), de=await deRes.json()
       const todos=[...v.dados.map(i=>({...i,_tipo:'venda'})),...de.dados.map(i=>({...i,_tipo:'despesa'}))]
@@ -3596,7 +3607,7 @@ async function iniciarDashboard() {
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
         } else {
-          tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada ainda</td></tr>'
+          tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
         }
       }
 
@@ -3643,10 +3654,18 @@ async function iniciarDashboard() {
       }
     }
 
-  } catch(e) { console.error('Erro dashboard:',e) }
+  } catch(e) {
+    console.error('Erro dashboard:',e)
+    // Garantir que tabela não fique presa em "Carregando..."
+    const _tbErr = document.getElementById('tabela-registros')
+    if (_tbErr && _tbErr.textContent.includes('Carregando')) {
+      _tbErr.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
+    }
+  }
 
   // Recriar chart de desempenho 30 dias com dados reais (foi destruído no início)
   if (App.token) setTimeout(initPerf30Chart, 200)
+  _lastDashLoad = Date.now()
 }
 
 // ======================================
@@ -3741,6 +3760,7 @@ function navigate(page,el){
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
   if(page==='ia')     {} // já tem hook abaixo
+  if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 120000) setTimeout(iniciarDashboard, 80)
   if(page==='ia') {
     setTimeout(initScoreCanvas, 80)
     setTimeout(() => carregarPaginaIA().then(() => {
@@ -6307,7 +6327,7 @@ async function modalRegistrarVenda() {
   if (App.token) {
     try {
       await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
-      iniciarDashboard()
+      agendarDashboard()
     } catch {}
   }
 }
@@ -6332,7 +6352,7 @@ async function modalRegistrarDespesa() {
   if (App.token) {
     try {
       await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
-      iniciarDashboard()
+      agendarDashboard()
     } catch {}
   }
 }
@@ -6384,7 +6404,7 @@ async function registrarVenda() {
   if (App.token) {
     try {
       await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
-      iniciarDashboard()
+      agendarDashboard()
     } catch {}
   }
 }
@@ -6407,7 +6427,7 @@ async function registrarDespesa(){
   if(App.token) {
     try {
       await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
-      iniciarDashboard()
+      agendarDashboard()
     } catch{}
   }
 }
