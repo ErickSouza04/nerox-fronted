@@ -3460,9 +3460,17 @@ async function iniciarDashboard() {
     // Limpar top produtos (demo)
     const _tp = document.getElementById('top-products-list')
     if (_tp) _tp.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Carregando...</div>'
-    // Limpar lista recente do meta card (demo)
+    // Limpar valores demo do card de meta (apenas no primeiro carregamento)
+    if (_isFirstLoad) {
+      const _mc=document.querySelector('.meta-current'); if(_mc) _mc.textContent='—'
+      const _mt=document.querySelector('.meta-total');   if(_mt) _mt.textContent=''
+      const _mTag=document.querySelector('.meta-header .tag'); if(_mTag){ _mTag.textContent='—%'; _mTag.className='tag' }
+      const _pf=document.querySelector('.progress-fill'); if(_pf) _pf.style.width='0%'
+      const _mInfo=document.querySelector('.meta-info'); if(_mInfo) _mInfo.innerHTML=''
+    }
+    // Limpar lista recente do meta card (apenas no primeiro carregamento, preserva em refresh)
     const _rl = document.getElementById('recent-list-dash')
-    if (_rl) _rl.innerHTML=''
+    if (_rl && _isFirstLoad) _rl.innerHTML=''
     // Limpar dicas demo
     const _dc = document.getElementById('dicas-dashboard')
     if (_dc) _dc.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Analisando seus dados...</div>'
