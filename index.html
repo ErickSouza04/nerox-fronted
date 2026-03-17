@@ -5234,6 +5234,17 @@ function drawNexorLogo(ctx, W, H) {
   ctx.beginPath(); ctx.moveTo(80, 106); ctx.lineTo(W-80, 106); ctx.stroke()
 }
 
+function drawUserInfo(ctx, W, d) {
+  // Truncar nome e tipo para caber no card
+  const maxChars = 22
+  const nome = d.nome.length > maxChars ? d.nome.slice(0, maxChars) + '…' : d.nome
+  const tipo = d.tipo.length > maxChars ? d.tipo.slice(0, maxChars) + '…' : d.tipo
+  ctx.font = '500 26px system-ui, sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.38)'
+  ctx.textAlign = 'center'
+  ctx.fillText(`${nome}  ·  ${tipo}`, W/2, 148)
+}
+
 function drawFooter(ctx, W, H) {
   // Linha separadora
   ctx.strokeStyle = 'rgba(255,255,255,0.07)'
@@ -5291,6 +5302,7 @@ function desenharCardIndex(ctx, canvas, d) {
   drawBg(ctx, W, H)
   drawTopBar(ctx, W, accent)
   drawNexorLogo(ctx, W, H)
+  drawUserInfo(ctx, W, d)
 
   // Label "NEXOR INDEX"
   ctx.font = '700 30px system-ui, sans-serif'
@@ -5401,6 +5413,7 @@ function desenharCardRanking(ctx, canvas, d) {
   drawBg(ctx, W, H)
   drawTopBar(ctx, W, accent)
   drawNexorLogo(ctx, W, H)
+  drawUserInfo(ctx, W, d)
 
   // Label
   ctx.font = '700 30px system-ui, sans-serif'
@@ -5515,6 +5528,7 @@ function desenharCardEvolucao(ctx, canvas, d) {
   drawBg(ctx, W, H)
   drawTopBar(ctx, W, accent)
   drawNexorLogo(ctx, W, H)
+  drawUserInfo(ctx, W, d)
 
   // Label
   ctx.font = '700 30px system-ui, sans-serif'
