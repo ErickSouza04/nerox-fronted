@@ -3194,6 +3194,7 @@ const App = {
 // Lock global: garante que só um refresh roda por vez
 let _refreshPromise = null
 let _loggingOut = false
+let _logoutTimer = null
 
 async function api(path, opts = {}) {
   if (_loggingOut) return null
@@ -3215,7 +3216,14 @@ async function api(path, opts = {}) {
             localStorage.setItem('nexor_token', d.token)
             localStorage.setItem('nexor_refresh', d.refresh_token)
           } else {
-            App.token = null // sinaliza falha para outras chamadas
+            // Verifica se outra aba já renovou o token antes de deslogar
+            const _lt = localStorage.getItem('nexor_token')
+            const _lr = localStorage.getItem('nexor_refresh')
+            if (_lt && _lt !== App.token) {
+              App.token = _lt; App.refresh = _lr
+            } else {
+              App.token = null // sinaliza falha para outras chamadas
+            }
           }
           _refreshPromise = null
         })
@@ -3231,18 +3239,31 @@ async function api(path, opts = {}) {
         if (!_loggingOut) {
           _loggingOut = true
           mostrarToast('Sessão expirada. Faça login novamente.', 'error')
-          setTimeout(fazerLogout, 1500)
+          _logoutTimer = setTimeout(fazerLogout, 1500)
         }
         return null
       }
     } else {
-      // Sem refresh token — sessão inválida, força logout imediato
-      if (!_loggingOut) {
-        _loggingOut = true
-        mostrarToast('Sessão expirada. Faça login novamente.', 'error')
-        setTimeout(fazerLogout, 1500)
+      // Sem refresh token — tenta recuperar do localStorage (outra aba pode ter renovado)
+      const _lt = localStorage.getItem('nexor_token')
+      const _lr = localStorage.getItem('nexor_refresh')
+      if (_lt && _lr && _lt !== App.token) {
+        App.token = _lt; App.refresh = _lr
+        headers['Authorization'] = 'Bearer ' + App.token
+        res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
+        if (!res || res.status === 401) {
+          if (!_loggingOut) { _loggingOut = true; mostrarToast('Sessão expirada. Faça login novamente.', 'error'); _logoutTimer = setTimeout(fazerLogout, 1500) }
+          return null
+        }
+      } else {
+        // Sessão inválida — força logout
+        if (!_loggingOut) {
+          _loggingOut = true
+          mostrarToast('Sessão expirada. Faça login novamente.', 'error')
+          _logoutTimer = setTimeout(fazerLogout, 1500)
+        }
+        return null
       }
-      return null
     }
   }
   if (res && res.status === 402) {
@@ -3419,6 +3440,7 @@ function fazerLogout() {
 }
 
 async function entrarApp(usuario, isNewUser = false) {
+  if (_logoutTimer) { clearTimeout(_logoutTimer); _logoutTimer = null }
   _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
@@ -7402,10 +7424,13 @@ function aplicarStatusPlano(usuario) {
 }
 
 // Checa plano no backend (garante que não houve expiração desde o último login)
+// Usa fetch direto para não disparar logout global em caso de erro neste endpoint
 async function verificarPlano() {
   if (!App.token) return
   try {
-    const res = await api('/auth/plano')
+    const res = await fetch(API_URL + '/auth/plano', {
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + App.token }
+    }).catch(() => null)
     if (res?.ok) {
       const data = await res.json()
       if (App.usuario) {
