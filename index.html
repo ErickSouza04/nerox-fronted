@@ -6639,10 +6639,17 @@ async function registrarVenda() {
         }
         mostrarToast('Venda registrada! 💚', 'success')
         agendarDashboard()
+      } else if (res) {
+        let errMsg = 'Erro ao salvar venda.'
+        try { const e = await res.json(); errMsg = e.erro || e.message || errMsg } catch {}
+        console.error('[Nexor] POST /vendas status', res.status, errMsg)
+        mostrarToast(errMsg, 'error')
       } else {
-        mostrarToast('Erro ao salvar venda. Tente novamente.', 'error')
+        console.error('[Nexor] POST /vendas sem resposta (rede ou plano expirado)')
+        mostrarToast('Sem resposta da API. Verifique sua conexão.', 'error')
       }
-    } catch {
+    } catch(err) {
+      console.error('[Nexor] POST /vendas exception:', err)
       mostrarToast('Erro de conexão. Tente novamente.', 'error')
     }
   } else {
@@ -6676,10 +6683,17 @@ async function registrarDespesa(){
         if(tbody){const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`;tr.style.animation='pageIn 0.4s ease';tbody.prepend(tr)}
         mostrarToast('Despesa registrada! 🔴', 'success')
         agendarDashboard()
+      } else if(res) {
+        let errMsg='Erro ao salvar despesa.'
+        try{const e=await res.json();errMsg=e.erro||e.message||errMsg}catch{}
+        console.error('[Nexor] POST /despesas status',res.status,errMsg)
+        mostrarToast(errMsg,'error')
       } else {
-        mostrarToast('Erro ao salvar despesa. Tente novamente.', 'error')
+        console.error('[Nexor] POST /despesas sem resposta (rede ou plano expirado)')
+        mostrarToast('Sem resposta da API. Verifique sua conexão.','error')
       }
-    } catch{
+    } catch(err){
+      console.error('[Nexor] POST /despesas exception:',err)
       mostrarToast('Erro de conexão. Tente novamente.', 'error')
     }
   } else {
