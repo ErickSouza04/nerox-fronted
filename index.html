@@ -3201,33 +3201,42 @@ async function api(path, opts = {}) {
   if (App.token) headers['Authorization'] = 'Bearer ' + App.token
   let res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
   if (!res) return null
-  if (res.status === 401 && App.refresh) {
-    // Se já existe um refresh em andamento, aguarda ele terminar
-    if (!_refreshPromise) {
-      _refreshPromise = fetch(API_URL + '/auth/refresh', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ refresh_token: App.refresh })
-      }).catch(()=>null).then(async r => {
-        if (r && r.ok) {
-          const d = await r.json()
-          App.token = d.token; App.refresh = d.refresh_token
-          localStorage.setItem('nexor_token', d.token)
-          localStorage.setItem('nexor_refresh', d.refresh_token)
-        } else {
-          App.token = null // sinaliza falha para outras chamadas
+  if (res.status === 401) {
+    if (App.refresh) {
+      // Tenta renovar o token — só um refresh por vez
+      if (!_refreshPromise) {
+        _refreshPromise = fetch(API_URL + '/auth/refresh', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ refresh_token: App.refresh })
+        }).catch(()=>null).then(async r => {
+          if (r && r.ok) {
+            const d = await r.json()
+            App.token = d.token; App.refresh = d.refresh_token
+            localStorage.setItem('nexor_token', d.token)
+            localStorage.setItem('nexor_refresh', d.refresh_token)
+          } else {
+            App.token = null // sinaliza falha para outras chamadas
+          }
+          _refreshPromise = null
+        })
+      }
+      await _refreshPromise
+      if (!App.token) {
+        if (!_loggingOut) { _loggingOut = true; fazerLogout() }
+        return null
+      }
+      headers['Authorization'] = 'Bearer ' + App.token
+      res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
+      if (res && res.status === 401) {
+        if (!_loggingOut) {
+          _loggingOut = true
+          mostrarToast('Sessão expirada. Faça login novamente.', 'error')
+          setTimeout(fazerLogout, 1500)
         }
-        _refreshPromise = null
-      })
-    }
-    await _refreshPromise
-    if (!App.token) { // refresh falhou
-      if (!_loggingOut) { _loggingOut = true; fazerLogout() }
-      return null
-    }
-    headers['Authorization'] = 'Bearer ' + App.token
-    res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
-    // Retry também retornou 401 — sessão expirada definitivamente
-    if (res && res.status === 401) {
+        return null
+      }
+    } else {
+      // Sem refresh token — sessão inválida, força logout imediato
       if (!_loggingOut) {
         _loggingOut = true
         mostrarToast('Sessão expirada. Faça login novamente.', 'error')
