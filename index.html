@@ -7402,10 +7402,13 @@ function aplicarStatusPlano(usuario) {
 }
 
 // Checa plano no backend (garante que não houve expiração desde o último login)
+// Usa fetch direto para não disparar logout global em caso de erro neste endpoint
 async function verificarPlano() {
   if (!App.token) return
   try {
-    const res = await api('/auth/plano')
+    const res = await fetch(API_URL + '/auth/plano', {
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + App.token }
+    }).catch(() => null)
     if (res?.ok) {
       const data = await res.json()
       if (App.usuario) {
