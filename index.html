@@ -3533,7 +3533,9 @@ async function iniciarDashboard() {
     const _dc = document.getElementById('dicas-dashboard')
     if (_dc) _dc.innerHTML='<div style="text-align:center;color:var(--text-muted);font-size:12px;padding:12px">Analisando seus dados...</div>'
   }
-  setTimeout(()=>{ document.querySelectorAll('[data-target]').forEach(el=>countUp(el)) },300)
+  // Demo mode only: animate demo values. For logged-in users countUp is called
+  // directly from the API response, avoiding a race that would overwrite with R$0.
+  if (!App.token) setTimeout(()=>{ document.querySelectorAll('[data-target]').forEach(el=>countUp(el)) },300)
   drawGauge('gaugeCanvas', App.token ? 0 : 74)
 
   if (!App.token) return  // modo demo - para aqui
@@ -3792,6 +3794,12 @@ async function iniciarDashboard() {
           tpEl.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Nenhuma venda registrada ainda</div>'
         }
       }
+    } else {
+      // API de vendas/despesas falhou (null ou non-ok) — desbloqueia tabela
+      const _tbFail = document.getElementById('tabela-registros')
+      if (_tbFail && _tbFail.textContent.includes('Carregando')) {
+        _tbFail.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
+      }
     }
 
   } catch(e) {
@@ -3901,6 +3909,7 @@ function navigate(page,el){
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
   if(page==='ia')     {} // já tem hook abaixo
   if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 120000) setTimeout(iniciarDashboard, 80)
+  if(page==='registrar' && App.token && Date.now() - _lastDashLoad > 120000) setTimeout(iniciarDashboard, 80)
   if(page==='ia') {
     setTimeout(initScoreCanvas, 80)
     setTimeout(() => carregarPaginaIA().then(() => {
