@@ -3191,27 +3191,61 @@ const App = {
 }
 
 // -- Fetch autenticado com refresh automático --
+// Lock global: garante que só um refresh roda por vez
+let _refreshPromise = null
+let _loggingOut = false
+
 async function api(path, opts = {}) {
+  if (_loggingOut) return null
   const headers = { 'Content-Type': 'application/json', ...(opts.headers||{}) }
   if (App.token) headers['Authorization'] = 'Bearer ' + App.token
   let res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
   if (!res) return null
-  if (res.status === 401 && App.refresh) {
-    const r = await fetch(API_URL + '/auth/refresh', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ refresh_token: App.refresh })
-    }).catch(()=>null)
-    if (r && r.ok) {
-      const d = await r.json()
-      App.token = d.token; App.refresh = d.refresh_token
-      localStorage.setItem('nexor_token', d.token)
-      localStorage.setItem('nexor_refresh', d.refresh_token)
+  if (res.status === 401) {
+    if (App.refresh) {
+      // Tenta renovar o token — só um refresh por vez
+      if (!_refreshPromise) {
+        _refreshPromise = fetch(API_URL + '/auth/refresh', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ refresh_token: App.refresh })
+        }).catch(()=>null).then(async r => {
+          if (r && r.ok) {
+            const d = await r.json()
+            App.token = d.token; App.refresh = d.refresh_token
+            localStorage.setItem('nexor_token', d.token)
+            localStorage.setItem('nexor_refresh', d.refresh_token)
+          } else {
+            App.token = null // sinaliza falha para outras chamadas
+          }
+          _refreshPromise = null
+        })
+      }
+      await _refreshPromise
+      if (!App.token) {
+        if (!_loggingOut) { _loggingOut = true; fazerLogout() }
+        return null
+      }
       headers['Authorization'] = 'Bearer ' + App.token
       res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
-    } else { fazerLogout(); return null }
+      if (res && res.status === 401) {
+        if (!_loggingOut) {
+          _loggingOut = true
+          mostrarToast('Sessão expirada. Faça login novamente.', 'error')
+          setTimeout(fazerLogout, 1500)
+        }
+        return null
+      }
+    } else {
+      // Sem refresh token — sessão inválida, força logout imediato
+      if (!_loggingOut) {
+        _loggingOut = true
+        mostrarToast('Sessão expirada. Faça login novamente.', 'error')
+        setTimeout(fazerLogout, 1500)
+      }
+      return null
+    }
   }
   if (res && res.status === 402) {
-    // Trial expirado - mostra paywall imediatamente
     if (App.usuario) { App.usuario.plano = 'expirado'; aplicarStatusPlano(App.usuario) }
     return null
   }
@@ -3379,12 +3413,13 @@ function salvarSessao(data) {
 
 function fazerLogout() {
   if (App.token&&App.refresh) fetch(API_URL+'/auth/logout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+App.token},body:JSON.stringify({refresh_token:App.refresh})}).catch(()=>{})
-  ['nexor_token','nexor_refresh','nexor_usuario'].forEach(k=>localStorage.removeItem(k))
+  ;['nexor_token','nexor_refresh','nexor_usuario'].forEach(k=>localStorage.removeItem(k))
   App.token=null; App.refresh=null; App.usuario=null
   location.reload()
 }
 
 async function entrarApp(usuario, isNewUser = false) {
+  _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
   const screen=document.getElementById('auth-screen')
@@ -6639,10 +6674,17 @@ async function registrarVenda() {
         }
         mostrarToast('Venda registrada! 💚', 'success')
         agendarDashboard()
+      } else if (res) {
+        let errMsg = 'Erro ao salvar venda.'
+        try { const e = await res.json(); errMsg = e.erro || e.message || errMsg } catch {}
+        console.error('[Nexor] POST /vendas status', res.status, errMsg)
+        mostrarToast(errMsg, 'error')
       } else {
-        mostrarToast('Erro ao salvar venda. Tente novamente.', 'error')
+        console.error('[Nexor] POST /vendas sem resposta (rede ou plano expirado)')
+        mostrarToast('Sem resposta da API. Verifique sua conexão.', 'error')
       }
-    } catch {
+    } catch(err) {
+      console.error('[Nexor] POST /vendas exception:', err)
       mostrarToast('Erro de conexão. Tente novamente.', 'error')
     }
   } else {
@@ -6676,10 +6718,17 @@ async function registrarDespesa(){
         if(tbody){const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`;tr.style.animation='pageIn 0.4s ease';tbody.prepend(tr)}
         mostrarToast('Despesa registrada! 🔴', 'success')
         agendarDashboard()
+      } else if(res) {
+        let errMsg='Erro ao salvar despesa.'
+        try{const e=await res.json();errMsg=e.erro||e.message||errMsg}catch{}
+        console.error('[Nexor] POST /despesas status',res.status,errMsg)
+        mostrarToast(errMsg,'error')
       } else {
-        mostrarToast('Erro ao salvar despesa. Tente novamente.', 'error')
+        console.error('[Nexor] POST /despesas sem resposta (rede ou plano expirado)')
+        mostrarToast('Sem resposta da API. Verifique sua conexão.','error')
       }
-    } catch{
+    } catch(err){
+      console.error('[Nexor] POST /despesas exception:',err)
       mostrarToast('Erro de conexão. Tente novamente.', 'error')
     }
   } else {
