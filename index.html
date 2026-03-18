@@ -3881,7 +3881,7 @@ const _hoje=new Date()
 const _diaSem=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado']
 const _mesesNome=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
 const _dataFormatada=`${_diaSem[_hoje.getDay()]}, ${_hoje.getDate()} de ${_mesesNome[_hoje.getMonth()]} de ${_hoje.getFullYear()}`
-const _dataISO=_hoje.toISOString().split('T')[0]
+const _dataISO=`${_hoje.getFullYear()}-${String(_hoje.getMonth()+1).padStart(2,'0')}-${String(_hoje.getDate()).padStart(2,'0')}`
 const pageSubs={dashboard:_dataFormatada,registrar:'Registre vendas e despesas rapidamente',precificacao:'Calcule o preço ideal dos seus produtos',metas:'Acompanhe e gerencie suas metas',relatorios:'Análises completas do seu negócio',ia:'Inteligência financeira e consultoria com IA',score:'Reputação financeira e ranking do seu negócio',cards:'Gere e compartilhe seus cards de performance financeira',perfil:'Configurações da sua conta'}
 
 function navigate(page,el){
@@ -3900,7 +3900,7 @@ function navigate(page,el){
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
   if(page==='ia')     {} // já tem hook abaixo
-  if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 120000) setTimeout(iniciarDashboard, 80)
+  if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 30000) setTimeout(iniciarDashboard, 80)
   if(page==='ia') {
     setTimeout(initScoreCanvas, 80)
     setTimeout(() => carregarPaginaIA().then(() => {
@@ -6502,7 +6502,7 @@ async function modalRegistrarVenda() {
 
   const cat  = document.getElementById('modal-cat')?.value  || 'Produto'
   const pag  = document.getElementById('modal-pag')?.value  || 'Pix'
-  const data = new Date().toISOString().split('T')[0]
+  const data = _dataISO
 
   const modoAvulso = document.getElementById('modal-modo-avulso')?.style.display !== 'none'
   let prod = ''
@@ -6516,25 +6516,39 @@ async function modalRegistrarVenda() {
     }
   }
 
-  // Adiciona no histórico se estiver na página de registrar
-  const tbody = document.getElementById('tabela-registros')
-  if (tbody) {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
-    tr.style.animation = 'pageIn 0.4s ease'
-    tbody.prepend(tr)
-  }
-
   closeModal('nova-venda')
   document.getElementById('modal-val').value = ''
   if (document.getElementById('modal-prod-avulso')) document.getElementById('modal-prod-avulso').value = ''
-  mostrarToast('Venda registrada! 💚', 'success')
 
   if (App.token) {
     try {
-      await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
-      agendarDashboard()
-    } catch {}
+      const res = await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+      if (res && res.ok) {
+        const tbody = document.getElementById('tabela-registros')
+        if (tbody) {
+          const tr = document.createElement('tr')
+          tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
+          tr.style.animation = 'pageIn 0.4s ease'
+          tbody.prepend(tr)
+        }
+        mostrarToast('Venda registrada! 💚', 'success')
+        agendarDashboard()
+      } else {
+        mostrarToast('Erro ao salvar venda. Tente novamente.', 'error')
+      }
+    } catch {
+      mostrarToast('Erro de conexão. Tente novamente.', 'error')
+    }
+  } else {
+    // Modo demo
+    const tbody = document.getElementById('tabela-registros')
+    if (tbody) {
+      const tr = document.createElement('tr')
+      tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
+      tr.style.animation = 'pageIn 0.4s ease'
+      tbody.prepend(tr)
+    }
+    mostrarToast('Venda registrada! 💚', 'success')
   }
 }
 
@@ -6544,22 +6558,37 @@ async function modalRegistrarDespesa() {
   const cat  = document.getElementById('modal-desp-cat')?.value  || 'Outros'
   const pag  = document.getElementById('modal-desp-pag')?.value  || 'Pix'
   const desc = document.getElementById('modal-desp-desc')?.value || ''
-  const data = new Date().toISOString().split('T')[0]
-  const tbody = document.getElementById('tabela-registros')
-  if (tbody) {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
-    tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
-  }
+  const data = _dataISO
   closeModal('nova-despesa')
   document.getElementById('modal-desp-val').value = ''
   if (document.getElementById('modal-desp-desc')) document.getElementById('modal-desp-desc').value = ''
-  mostrarToast('Despesa registrada! 🔴', 'success')
   if (App.token) {
     try {
-      await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
-      agendarDashboard()
-    } catch {}
+      const res = await api('/despesas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, descricao:desc, data }) })
+      if (res && res.ok) {
+        const tbody = document.getElementById('tabela-registros')
+        if (tbody) {
+          const tr = document.createElement('tr')
+          tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
+          tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
+        }
+        mostrarToast('Despesa registrada! 🔴', 'success')
+        agendarDashboard()
+      } else {
+        mostrarToast('Erro ao salvar despesa. Tente novamente.', 'error')
+      }
+    } catch {
+      mostrarToast('Erro de conexão. Tente novamente.', 'error')
+    }
+  } else {
+    // Modo demo
+    const tbody = document.getElementById('tabela-registros')
+    if (tbody) {
+      const tr = document.createElement('tr')
+      tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
+      tr.style.animation = 'pageIn 0.4s ease'; tbody.prepend(tr)
+    }
+    mostrarToast('Despesa registrada! 🔴', 'success')
   }
 }
 
@@ -6587,15 +6616,6 @@ async function registrarVenda() {
     }
   }
 
-  // Adiciona na tabela de histórico
-  const tbody = document.getElementById('tabela-registros')
-  if (tbody) {
-    const tr = document.createElement('tr')
-    tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
-    tr.style.animation = 'pageIn 0.4s ease'
-    tbody.prepend(tr)
-  }
-
   // Limpar campos
   document.getElementById('val-venda').value = ''
   const avulso = document.getElementById('prod-avulso-input')
@@ -6605,13 +6625,36 @@ async function registrarVenda() {
   const preview = document.getElementById('produto-preview')
   if (preview) preview.style.display = 'none'
 
-  mostrarToast('Venda registrada! 💚', 'success')
-
   if (App.token) {
     try {
-      await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
-      agendarDashboard()
-    } catch {}
+      const res = await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
+      if (res && res.ok) {
+        // Adiciona na tabela de histórico após confirmar salvamento
+        const tbody = document.getElementById('tabela-registros')
+        if (tbody) {
+          const tr = document.createElement('tr')
+          tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
+          tr.style.animation = 'pageIn 0.4s ease'
+          tbody.prepend(tr)
+        }
+        mostrarToast('Venda registrada! 💚', 'success')
+        agendarDashboard()
+      } else {
+        mostrarToast('Erro ao salvar venda. Tente novamente.', 'error')
+      }
+    } catch {
+      mostrarToast('Erro de conexão. Tente novamente.', 'error')
+    }
+  } else {
+    // Modo demo — feedback visual apenas
+    const tbody = document.getElementById('tabela-registros')
+    if (tbody) {
+      const tr = document.createElement('tr')
+      tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
+      tr.style.animation = 'pageIn 0.4s ease'
+      tbody.prepend(tr)
+    }
+    mostrarToast('Venda registrada! 💚', 'success')
   }
 }
 
@@ -6623,18 +6666,27 @@ async function registrarDespesa(){
   const pag=document.getElementById('pag-despesa')?.value||'Pix'
   const desc=document.getElementById('desc-despesa')?.value||''
   const data=document.getElementById('data-despesa')?.value||_dataISO
-  const tbody=document.getElementById('tabela-registros')
-  const tr=document.createElement('tr')
-  tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`
-  tr.style.animation='pageIn 0.4s ease'; tbody.prepend(tr)
   document.getElementById('val-despesa').value=''
   if(document.getElementById('desc-despesa')) document.getElementById('desc-despesa').value=''
-  mostrarToast('Despesa registrada! 🔴', 'success')
   if(App.token) {
     try {
-      await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
-      agendarDashboard()
-    } catch{}
+      const res=await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
+      if(res && res.ok) {
+        const tbody=document.getElementById('tabela-registros')
+        if(tbody){const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`;tr.style.animation='pageIn 0.4s ease';tbody.prepend(tr)}
+        mostrarToast('Despesa registrada! 🔴', 'success')
+        agendarDashboard()
+      } else {
+        mostrarToast('Erro ao salvar despesa. Tente novamente.', 'error')
+      }
+    } catch{
+      mostrarToast('Erro de conexão. Tente novamente.', 'error')
+    }
+  } else {
+    // Modo demo — feedback visual apenas
+    const tbody=document.getElementById('tabela-registros')
+    if(tbody){const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`;tr.style.animation='pageIn 0.4s ease';tbody.prepend(tr)}
+    mostrarToast('Despesa registrada! 🔴', 'success')
   }
 }
 
