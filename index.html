@@ -3404,7 +3404,7 @@ function salvarSessao(data) {
 
 function fazerLogout() {
   if (App.token&&App.refresh) fetch(API_URL+'/auth/logout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+App.token},body:JSON.stringify({refresh_token:App.refresh})}).catch(()=>{})
-  ['nexor_token','nexor_refresh','nexor_usuario'].forEach(k=>localStorage.removeItem(k))
+  ;['nexor_token','nexor_refresh','nexor_usuario'].forEach(k=>localStorage.removeItem(k))
   App.token=null; App.refresh=null; App.usuario=null
   location.reload()
 }
