@@ -3194,6 +3194,7 @@ const App = {
 // Lock global: garante que só um refresh roda por vez
 let _refreshPromise = null
 let _loggingOut = false
+let _logoutTimer = null
 
 async function api(path, opts = {}) {
   if (_loggingOut) return null
@@ -3238,7 +3239,7 @@ async function api(path, opts = {}) {
         if (!_loggingOut) {
           _loggingOut = true
           mostrarToast('Sessão expirada. Faça login novamente.', 'error')
-          setTimeout(fazerLogout, 1500)
+          _logoutTimer = setTimeout(fazerLogout, 1500)
         }
         return null
       }
@@ -3251,7 +3252,7 @@ async function api(path, opts = {}) {
         headers['Authorization'] = 'Bearer ' + App.token
         res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
         if (!res || res.status === 401) {
-          if (!_loggingOut) { _loggingOut = true; mostrarToast('Sessão expirada. Faça login novamente.', 'error'); setTimeout(fazerLogout, 1500) }
+          if (!_loggingOut) { _loggingOut = true; mostrarToast('Sessão expirada. Faça login novamente.', 'error'); _logoutTimer = setTimeout(fazerLogout, 1500) }
           return null
         }
       } else {
@@ -3259,7 +3260,7 @@ async function api(path, opts = {}) {
         if (!_loggingOut) {
           _loggingOut = true
           mostrarToast('Sessão expirada. Faça login novamente.', 'error')
-          setTimeout(fazerLogout, 1500)
+          _logoutTimer = setTimeout(fazerLogout, 1500)
         }
         return null
       }
@@ -3439,6 +3440,7 @@ function fazerLogout() {
 }
 
 async function entrarApp(usuario, isNewUser = false) {
+  if (_logoutTimer) { clearTimeout(_logoutTimer); _logoutTimer = null }
   _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
