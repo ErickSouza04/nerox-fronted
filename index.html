@@ -3208,6 +3208,12 @@ async function api(path, opts = {}) {
       localStorage.setItem('nexor_refresh', d.refresh_token)
       headers['Authorization'] = 'Bearer ' + App.token
       res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
+      // Se mesmo com novo token ainda retornar 401, sessão realmente expirou
+      if (res && res.status === 401) {
+        mostrarToast('Sessão expirada. Faça login novamente.', 'error')
+        setTimeout(fazerLogout, 1500)
+        return null
+      }
     } else { fazerLogout(); return null }
   }
   if (res && res.status === 402) {
