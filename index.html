@@ -726,6 +726,42 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 }
 .onboarding-overlay.hide { opacity: 0; pointer-events: none; }
 
+/* ── Card Motivacional ── */
+.motivacao-overlay {
+  position: fixed; inset: 0; z-index: 1050;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.motivacao-overlay.show { opacity: 1; pointer-events: all; }
+.motivacao-card {
+  position: relative; width: 100%; max-width: 380px;
+  background: linear-gradient(145deg, rgba(9,14,26,0.98), rgba(13,21,37,0.97));
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 22px; padding: 32px 32px 24px; text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,197,94,0.06);
+  animation: motivacaoIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes motivacaoIn {
+  from { opacity: 0; transform: scale(0.88) translateY(24px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+}
+.motivacao-emoji { font-size: 42px; margin-bottom: 14px; line-height: 1; }
+.motivacao-saudacao { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.motivacao-frase {
+  font-size: 17px; font-weight: 700; color: var(--text);
+  line-height: 1.5; margin-bottom: 22px; font-style: italic;
+}
+.motivacao-progress { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+.motivacao-progress-fill { height: 100%; background: var(--green); border-radius: 2px; width: 100%; }
+.motivacao-close {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; color: var(--text-muted);
+  font-size: 20px; cursor: pointer; padding: 4px 6px; line-height: 1;
+  border-radius: 6px; transition: color 0.2s;
+}
+.motivacao-close:hover { color: var(--text); }
+
 /* ── Tela de boas-vindas ── */
 .welcome-card {
   position: relative;
@@ -3451,12 +3487,13 @@ async function entrarApp(usuario, isNewUser = false) {
     iniciarDashboard()
     atualizarHeroHora()
     setTimeout(initPerf30Chart, 300)
-    // Mostra onboarding para novos cadastros ou primeira visita
+    // Boas-vindas apenas no cadastro. Retornando: frase motivacional 1x por sessão.
     if (isNewUser) {
       localStorage.removeItem('nexor_onboarding_done')
       setTimeout(() => mostrarBoasVindas(usuario), 1200)
-    } else if (!localStorage.getItem('nexor_onboarding_done')) {
-      setTimeout(() => mostrarBoasVindas(usuario), 1200)
+    } else if (!sessionStorage.getItem('nexor_motivacao_shown')) {
+      sessionStorage.setItem('nexor_motivacao_shown', '1')
+      setTimeout(() => mostrarFraseMotivacional(usuario), 1400)
     }
   },400)
 }
@@ -6971,6 +7008,62 @@ function fecharOnboarding() {
   // Volta para o dashboard ao fechar
   const dashBtn = document.querySelector('.nav-item[onclick*="dashboard"]')
   if (dashBtn) navigate('dashboard', dashBtn)
+}
+
+// ── Frases motivacionais por dia da semana ──
+const FRASES_MOTIVACIONAIS = [
+  { emoji: '🌅', frase: 'Um novo começo. Cada venda hoje é um passo para o seu sonho.' },
+  { emoji: '💪', frase: 'Quem controla as finanças, controla o próprio futuro.' },
+  { emoji: '🚀', frase: 'Você está construindo algo incrível. Continue firme!' },
+  { emoji: '📈', frase: 'Pequenos registros de hoje são os grandes resultados de amanhã.' },
+  { emoji: '🎯', frase: 'Foco e organização: os dois segredos do crescimento real.' },
+  { emoji: '🔥', frase: 'Consistência + controle = o negócio dos seus sonhos.' },
+  { emoji: '✨', frase: 'Mais um dia, mais uma chance de fazer seu negócio brilhar.' },
+]
+
+function mostrarFraseMotivacional(usuario) {
+  const primeiroNome = (usuario?.nome || '').split(' ')[0] || 'empreendedor'
+  const f = FRASES_MOTIVACIONAIS[new Date().getDay() % FRASES_MOTIVACIONAIS.length]
+
+  let el = document.getElementById('motivacao-overlay')
+  if (el) el.remove()
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="motivacao-overlay" id="motivacao-overlay">
+      <div class="motivacao-card">
+        <button class="motivacao-close" onclick="fecharMotivacao()">×</button>
+        <div class="motivacao-emoji">${f.emoji}</div>
+        <div class="motivacao-saudacao">Olá, ${primeiroNome}! Bom ter você aqui 👋</div>
+        <div class="motivacao-frase">"${f.frase}"</div>
+        <div class="motivacao-progress">
+          <div class="motivacao-progress-fill" id="motivacao-fill"></div>
+        </div>
+      </div>
+    </div>`)
+
+  requestAnimationFrame(() => {
+    const overlay = document.getElementById('motivacao-overlay')
+    if (overlay) overlay.classList.add('show')
+    const fill = document.getElementById('motivacao-fill')
+    if (fill) {
+      fill.style.transition = 'none'
+      fill.style.width = '100%'
+      requestAnimationFrame(() => {
+        fill.style.transition = 'width 4s linear'
+        fill.style.width = '0%'
+      })
+    }
+  })
+
+  setTimeout(fecharMotivacao, 4000)
+}
+
+function fecharMotivacao() {
+  const overlay = document.getElementById('motivacao-overlay')
+  if (!overlay) return
+  overlay.style.opacity = '0'
+  overlay.style.transition = 'opacity 0.35s ease'
+  setTimeout(() => overlay.remove(), 380)
 }
 
 
