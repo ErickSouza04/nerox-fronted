@@ -3215,7 +3215,14 @@ async function api(path, opts = {}) {
             localStorage.setItem('nexor_token', d.token)
             localStorage.setItem('nexor_refresh', d.refresh_token)
           } else {
-            App.token = null // sinaliza falha para outras chamadas
+            // Verifica se outra aba já renovou o token antes de deslogar
+            const _lt = localStorage.getItem('nexor_token')
+            const _lr = localStorage.getItem('nexor_refresh')
+            if (_lt && _lt !== App.token) {
+              App.token = _lt; App.refresh = _lr
+            } else {
+              App.token = null // sinaliza falha para outras chamadas
+            }
           }
           _refreshPromise = null
         })
@@ -3236,13 +3243,26 @@ async function api(path, opts = {}) {
         return null
       }
     } else {
-      // Sem refresh token — sessão inválida, força logout imediato
-      if (!_loggingOut) {
-        _loggingOut = true
-        mostrarToast('Sessão expirada. Faça login novamente.', 'error')
-        setTimeout(fazerLogout, 1500)
+      // Sem refresh token — tenta recuperar do localStorage (outra aba pode ter renovado)
+      const _lt = localStorage.getItem('nexor_token')
+      const _lr = localStorage.getItem('nexor_refresh')
+      if (_lt && _lr && _lt !== App.token) {
+        App.token = _lt; App.refresh = _lr
+        headers['Authorization'] = 'Bearer ' + App.token
+        res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
+        if (!res || res.status === 401) {
+          if (!_loggingOut) { _loggingOut = true; mostrarToast('Sessão expirada. Faça login novamente.', 'error'); setTimeout(fazerLogout, 1500) }
+          return null
+        }
+      } else {
+        // Sessão inválida — força logout
+        if (!_loggingOut) {
+          _loggingOut = true
+          mostrarToast('Sessão expirada. Faça login novamente.', 'error')
+          setTimeout(fazerLogout, 1500)
+        }
+        return null
       }
-      return null
     }
   }
   if (res && res.status === 402) {
