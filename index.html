@@ -3657,7 +3657,7 @@ async function iniciarDashboard() {
       if(cards[0]){cards[0].dataset.target=Math.round(_cd.faturamento||0);    countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(_cd.total_despesas||0); countUp(cards[1])}
       if(cards[2]){cards[2].dataset.target=Math.round(_cd.lucro||0);           countUp(cards[2])}
-      if(cards[3]){cards[3].dataset.target=Math.round(_cd.margem||0);          countUp(cards[3])}
+      if(cards[3]){cards[3].dataset.target=Math.round(_cd.ticket_medio||0);     countUp(cards[3])}
       const hlEl=document.getElementById('hero-lucro'), hrEl=document.getElementById('hero-receita'), hdEl=document.getElementById('hero-despesas')
       if(hlEl && _ch) hlEl.textContent=fmtBRL(_ch.lucro||0)
       if(hrEl && _ch) hrEl.textContent=fmtBRL(_ch.faturamento||0)
@@ -3680,7 +3680,7 @@ async function iniciarDashboard() {
       if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento);   countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas); countUp(cards[1])}
       if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
-      if(cards[3]){cards[3].dataset.target=Math.round(dados.margem);         countUp(cards[3])}
+      if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
       const _vFat=dados.variacao?.faturamento||0, _vDesp=dados.variacao?.despesas||0, _vLuc=dados.variacao?.lucro||0
