@@ -2555,6 +2555,17 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div class="progress-bar"><div class="progress-fill" id="metas-progress-fill" style="width:72%"></div></div>
           <div class="meta-info" id="metas-meta-info"><span>72% concluída · faltam <strong>R$ 1.405</strong></span><span>25 dias restantes</span></div>
         </div>
+        <div class="form-section" style="margin-bottom:14px">
+          <div class="form-section-title">🎯 Definir Meta de Lucro</div>
+          <div id="metas-meta-save-ok" style="display:none;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--green);margin-bottom:12px">✅ Meta salva com sucesso!</div>
+          <div id="metas-meta-save-err" style="display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--red);margin-bottom:12px">❌ Erro ao salvar. Tente novamente.</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Valor da meta mensal (R$)</label><input class="form-input" type="number" id="metas-meta-input" placeholder="Ex: 5000" min="0" step="100"></div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="salvarMeta()">Salvar meta</button>
+          </div>
+        </div>
         <div class="form-section">
           <div class="form-section-title">💸 Pró-labore</div>
           <div class="form-grid">
@@ -4272,6 +4283,29 @@ function calcularProLabore() {
   if (apos)  apos.textContent  = fmtBRL(Math.max(0, lucro - prolabore))
 }
 
+// ── Metas — salvar meta de lucro ──
+async function salvarMeta() {
+  const input = document.getElementById('metas-meta-input')
+  const ok    = document.getElementById('metas-meta-save-ok')
+  const err   = document.getElementById('metas-meta-save-err')
+  const valor = parseFloat(input?.value || 0)
+  if (!valor || valor <= 0) { mostrarToast('Informe um valor válido para a meta.', 'error'); return }
+  ok.style.display = 'none'; err.style.display = 'none'
+  if (!App.token) {
+    if (App.stats) App.stats.metaValor = Math.round(valor)
+    ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+    carregarPaginaMetas(); return
+  }
+  try {
+    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_mensal: Math.round(valor) }) })
+    if (res?.ok) {
+      if (App.stats) App.stats.metaValor = Math.round(valor)
+      ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+      carregarPaginaMetas()
+    } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+  } catch { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+}
+
 // ── Metas — carregar página com dados reais ──
 function carregarPaginaMetas() {
   const s    = App.stats ? Object.assign({}, App.stats) : {}
@@ -4301,6 +4335,10 @@ function carregarPaginaMetas() {
     else                  nexorDesc.textContent = 'Comece a registrar vendas e despesas para calcular seu índice.'
   }
 
+  // ─ Popular input da meta com valor atual ─
+  const metaInput = document.getElementById('metas-meta-input')
+  if (metaInput && s.metaValor > 0 && !metaInput.value) metaInput.value = s.metaValor
+
   // ─ Verificar se meta foi batida → atualizar liga ─
   const progresso = s.progresso || 0
   const metaValor = s.metaValor || 0
@@ -4328,7 +4366,7 @@ function carregarPaginaMetas() {
   const mi = document.getElementById('metas-meta-info')
   if (mi) {
     if (metaValor <= 0) {
-      mi.innerHTML = '<span style="color:var(--text-muted)">Defina sua meta em Configurações</span>'
+      mi.innerHTML = '<span style="color:var(--text-muted)">Defina sua meta abaixo</span>'
     } else if (progresso >= 100) {
       mi.innerHTML = '<span style="color:var(--green);font-weight:700">🏆 Meta batida! Parabéns!</span>'
     } else {
