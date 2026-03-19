@@ -4297,7 +4297,7 @@ async function salvarMeta() {
     carregarPaginaMetas(); return
   }
   try {
-    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_mensal: Math.round(valor) }) })
+    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats) App.stats.metaValor = Math.round(valor)
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
