@@ -1141,6 +1141,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   display: none;
 }
 .auth-error.show { display: block; animation: slideDown 0.3s ease; }
+.auth-error ul { margin: 6px 0 0 0; padding-left: 18px; }
+.auth-error ul li { margin-bottom: 2px; }
 
 .faturamento-opts {
   display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
@@ -3334,7 +3336,16 @@ async function avancarEtapa(etapa) {
     const erro=document.getElementById('cad-erro-1')
     if (!nome)                               { mostrarErroAuth(erro,'Digite seu nome.'); return }
     if (!email||!/\S+@\S+\.\S+/.test(email)) { mostrarErroAuth(erro,'Digite um e-mail válido.'); return }
-    if (senha.length < 8)                    { mostrarErroAuth(erro,'Senha: mínimo 8 caracteres.'); return }
+    const senhaErros = []
+    if (senha.length < 8)          senhaErros.push('mínimo 8 caracteres')
+    if (!/[A-Z]/.test(senha))      senhaErros.push('1 letra maiúscula')
+    if (!/[a-z]/.test(senha))      senhaErros.push('1 letra minúscula')
+    if (!/[0-9]/.test(senha))      senhaErros.push('1 número')
+    if (!/[$&@]/.test(senha))      senhaErros.push('1 caractere especial ($, &, @)')
+    if (senhaErros.length > 0) {
+      mostrarErroAuth(erro,'A senha precisa ter:<ul>' + senhaErros.map(e=>`<li>${e}</li>`).join('') + '</ul>')
+      return
+    }
     erro.classList.remove('show')
   }
   if (etapa === 3) {
@@ -3349,8 +3360,8 @@ async function avancarEtapa(etapa) {
 
 function mostrarErroAuth(el, msg) {
   clearTimeout(el._erroTimer)
-  el.textContent=msg; el.classList.add('show')
-  el._erroTimer=setTimeout(()=>el.classList.remove('show'),4000)
+  el.innerHTML=msg; el.classList.add('show')
+  el._erroTimer=setTimeout(()=>el.classList.remove('show'),6000)
 }
 
 // ======================================
@@ -3449,7 +3460,7 @@ async function finalizarCadastro() {
       const errMsg = res.status===409
         ? 'Este e-mail já está cadastrado. Clique em "Entrar" para fazer login.'
         : (data.erro==='Dados inválidos'
-          ? 'Dados inválidos. Verifique nome, e-mail e senha (mín. 8 caracteres) e tente novamente.'
+          ? 'Dados inválidos. A senha deve ter:<ul><li>mínimo 8 caracteres</li><li>1 letra maiúscula</li><li>1 letra minúscula</li><li>1 número</li><li>1 caractere especial ($, &, @)</li></ul>'
           : (data.erro||'Erro ao criar conta. Tente novamente.'))
       mostrarErroAuth(document.getElementById('cad-erro-1'),errMsg)
       avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
