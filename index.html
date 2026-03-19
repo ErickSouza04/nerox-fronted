@@ -7687,10 +7687,9 @@ window.addEventListener('load',()=>{
   const dv=document.getElementById('data-venda'); if(dv) dv.value=_dataISO
   const dd=document.getElementById('data-despesa'); if(dd) dd.value=_dataISO
 
-  // Tem sessão salva? Entra direto
+  // Tem sessão salva? Tenta renovar token antes de entrar
   if(App.token && App.usuario){
-    entrarApp(App.usuario)
-    setTimeout(verificarPlano, 1500) // verifica plano no backend
+    _tentarEntrarComRefresh()
     return
   }
   // Sem sessão - mostra auth screen (visível por padrão)
@@ -7702,6 +7701,48 @@ window.addEventListener('load',()=>{
   // Init perf30 chart (dashboard é a tela inicial)
   setTimeout(initPerf30Chart, 200)
 })
+
+async function _tentarEntrarComRefresh() {
+  // Verifica se o token JWT ainda é válido checando o campo exp
+  const _tokenValido = (() => {
+    try {
+      const payload = JSON.parse(atob(App.token.split('.')[1]))
+      return payload.exp && (payload.exp * 1000) > Date.now() + 60000 // 60s de margem
+    } catch { return false }
+  })()
+
+  if (!_tokenValido && App.refresh) {
+    // Token expirado — tenta renovar silenciosamente
+    try {
+      const r = await fetch(API_URL + '/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: App.refresh })
+      }).catch(() => null)
+      if (r && r.ok) {
+        const d = await r.json()
+        App.token = d.token
+        App.refresh = d.refresh_token
+        localStorage.setItem('nexor_token', d.token)
+        localStorage.setItem('nexor_refresh', d.refresh_token)
+      } else {
+        // Refresh expirado — limpa sessão e mostra login
+        ;['nexor_token','nexor_refresh','nexor_usuario'].forEach(k => localStorage.removeItem(k))
+        App.token = null; App.refresh = null; App.usuario = null
+        drawGauge('gaugeCanvas', 0)
+        document.getElementById('page-subtitle').textContent = _dataFormatada
+        atualizarHeroHora()
+        setTimeout(initPerf30Chart, 200)
+        return
+      }
+    } catch {
+      // Sem rede — entra com token expirado mesmo; o api() vai tentar de novo depois
+    }
+  }
+
+  entrarApp(App.usuario)
+  setTimeout(verificarPlano, 1500)
+}
 </script>
 
 
