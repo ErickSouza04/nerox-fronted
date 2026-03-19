@@ -4263,8 +4263,15 @@ function calcularProLabore() {
 
 // ── Metas — carregar página com dados reais ──
 function carregarPaginaMetas() {
-  if (!App.token) return
-  const s    = App.stats || {}
+  const s    = App.stats ? Object.assign({}, App.stats) : {}
+  // Modo demo: preenche dados de exemplo para não mostrar página em branco
+  if (!App.token && !s.faturamento) {
+    s.faturamento = 12840; s.despesas = 9245; s.lucro = 3595
+    s.margem = 28; s.varLucro = 18; s.varFat = 14
+    s.progresso = 72; s.totalVendas = 45; s.indice = 74
+    s.metaValor = 5000; s.ticketMedio = 285
+  }
+  if (!App.token && !s.faturamento) return
   const hoje = new Date()
   const mes  = hoje.getMonth() + 1
   const ano  = hoje.getFullYear()
@@ -6371,7 +6378,9 @@ function renderProximaLiga(score, ligaInfo) {
     if (msgEl)  msgEl.textContent = 'Mantenha a performance para continuar no topo.'
     return
   }
-  const currentBase = ligaInfo.nextScore - 10
+  // Bases por liga: Starter=0, Bronze=60, Silver=70, Gold=80, Diamond=90
+  const ligaBases = { Bronze: 60, Silver: 70, Gold: 80, Diamond: 90, Starter: 0 }
+  const currentBase = ligaBases[ligaInfo.nome] ?? 0
   const pct = Math.round(((score - currentBase) / (ligaInfo.nextScore - currentBase)) * 100)
   const faltam = ligaInfo.nextScore - score
   const proxInfo = getLigaInfo(ligaInfo.nextScore)
@@ -6749,29 +6758,33 @@ async function registrarVenda() {
   if (preview) preview.style.display = 'none'
 
   if (App.token) {
+    // Inserção otimista — linha aparece imediatamente, antes da API responder
+    const _tbody = document.getElementById('tabela-registros')
+    let _trOtimista = null
+    if (_tbody) {
+      _trOtimista = document.createElement('tr')
+      _trOtimista.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
+      _trOtimista.style.animation = 'pageIn 0.4s ease'
+      _tbody.prepend(_trOtimista)
+    }
     try {
       const res = await api('/vendas', { method:'POST', body: JSON.stringify({ valor:parseFloat(val), categoria:cat, pagamento:pag, produto:prod, data }) })
       if (res && res.ok) {
-        // Adiciona na tabela de histórico após confirmar salvamento
-        const tbody = document.getElementById('tabela-registros')
-        if (tbody) {
-          const tr = document.createElement('tr')
-          tr.innerHTML = `<td>${esc(fmtData(data))}</td><td>${esc(prod||cat)}</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+${esc(fmtBRL(parseFloat(val)))}</td>`
-          tr.style.animation = 'pageIn 0.4s ease'
-          tbody.prepend(tr)
-        }
         mostrarToast('Venda registrada! 💚', 'success')
         agendarDashboard()
       } else if (res) {
+        if (_trOtimista) _trOtimista.remove()
         let errMsg = 'Erro ao salvar venda.'
         try { const e = await res.json(); errMsg = e.erro || e.message || errMsg } catch {}
         console.error('[Nexor] POST /vendas status', res.status, errMsg)
         mostrarToast(errMsg, 'error')
       } else {
+        if (_trOtimista) _trOtimista.remove()
         console.error('[Nexor] POST /vendas sem resposta (rede ou plano expirado)')
         mostrarToast('Sem resposta da API. Verifique sua conexão.', 'error')
       }
     } catch(err) {
+      if (_trOtimista) _trOtimista.remove()
       console.error('[Nexor] POST /vendas exception:', err)
       mostrarToast('Erro de conexão. Tente novamente.', 'error')
     }
@@ -6799,23 +6812,28 @@ async function registrarDespesa(){
   document.getElementById('val-despesa').value=''
   if(document.getElementById('desc-despesa')) document.getElementById('desc-despesa').value=''
   if(App.token) {
+    // Inserção otimista — linha aparece antes da API responder
+    const _tbodyD = document.getElementById('tabela-registros')
+    let _trOtimistaD = null
+    if(_tbodyD){_trOtimistaD=document.createElement('tr');_trOtimistaD.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`;_trOtimistaD.style.animation='pageIn 0.4s ease';_tbodyD.prepend(_trOtimistaD)}
     try {
       const res=await api('/despesas',{method:'POST',body:JSON.stringify({valor:parseFloat(val),categoria:cat,pagamento:pag,descricao:desc,data})})
       if(res && res.ok) {
-        const tbody=document.getElementById('tabela-registros')
-        if(tbody){const tr=document.createElement('tr');tr.innerHTML=`<td>${esc(fmtData(data))}</td><td>${esc(desc||cat)}</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">-${esc(fmtBRL(parseFloat(val)))}</td>`;tr.style.animation='pageIn 0.4s ease';tbody.prepend(tr)}
         mostrarToast('Despesa registrada! 🔴', 'success')
         agendarDashboard()
       } else if(res) {
+        if(_trOtimistaD) _trOtimistaD.remove()
         let errMsg='Erro ao salvar despesa.'
         try{const e=await res.json();errMsg=e.erro||e.message||errMsg}catch{}
         console.error('[Nexor] POST /despesas status',res.status,errMsg)
         mostrarToast(errMsg,'error')
       } else {
+        if(_trOtimistaD) _trOtimistaD.remove()
         console.error('[Nexor] POST /despesas sem resposta (rede ou plano expirado)')
         mostrarToast('Sem resposta da API. Verifique sua conexão.','error')
       }
     } catch(err){
+      if(_trOtimistaD) _trOtimistaD.remove()
       console.error('[Nexor] POST /despesas exception:',err)
       mostrarToast('Erro de conexão. Tente novamente.', 'error')
     }
