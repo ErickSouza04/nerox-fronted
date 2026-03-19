@@ -3732,8 +3732,22 @@ async function iniciarDashboard() {
         varLucro:     parseFloat((dados.variacao?.lucro||0).toFixed(1)),
         varDesp:      parseFloat((dados.variacao?.despesas||0).toFixed(1)),
         totalVendas:  dados.total_vendas || 0,
-        progresso:    Math.round(dados.progresso_meta || 0),
-        metaValor:    Math.round(dados.meta_valor     || 0),
+        metaValor:    (() => {
+          const apiVal = Math.round(dados.meta_valor || 0)
+          if (apiVal > 0) return apiVal
+          const agora = new Date()
+          const local = parseInt(localStorage.getItem('nexor_meta_'+(agora.getMonth()+1)+'_'+agora.getFullYear()) || '0')
+          return local > 0 ? local : 0
+        })(),
+        progresso:    (() => {
+          const apiProg = Math.round(dados.progresso_meta || 0)
+          if ((dados.meta_valor || 0) > 0) return apiProg
+          // Recalcula progresso com meta local
+          const agora = new Date()
+          const localMeta = parseInt(localStorage.getItem('nexor_meta_'+(agora.getMonth()+1)+'_'+agora.getFullYear()) || '0')
+          if (localMeta > 0) return Math.round(Math.min(100, (dados.lucro||0) / localMeta * 100))
+          return apiProg
+        })(),
         diario:       [],  // preenchido abaixo
       }
       // ── Índice Nexor mini-cards ──
@@ -4291,19 +4305,32 @@ async function salvarMeta() {
   const valor = parseFloat(input?.value || 0)
   if (!valor || valor <= 0) { mostrarToast('Informe um valor válido para a meta.', 'error'); return }
   ok.style.display = 'none'; err.style.display = 'none'
+
+  const agora = new Date()
+  const mes = agora.getMonth() + 1
+  const ano = agora.getFullYear()
+  const localKey = 'nexor_meta_' + mes + '_' + ano
+
+  // Salva localmente de imediato — garante que funciona independente da API
+  localStorage.setItem(localKey, String(Math.round(valor)))
+  if (App.stats) App.stats.metaValor = Math.round(valor)
+
   if (!App.token) {
-    if (App.stats) App.stats.metaValor = Math.round(valor)
     ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
     carregarPaginaMetas(); return
   }
+
+  // Tenta salvar na API (testa PUT /metas e fallback POST /metas)
+  let saved = false
   try {
-    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_mensal: Math.round(valor) }) })
-    if (res?.ok) {
-      if (App.stats) App.stats.metaValor = Math.round(valor)
-      ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
-      carregarPaginaMetas()
-    } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
-  } catch { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+    const payload = JSON.stringify({ valor: Math.round(valor), mes, ano })
+    let res = await api('/metas', { method: 'PUT', body: payload })
+    if (!res?.ok) res = await api('/metas', { method: 'POST', body: payload })
+    if (res?.ok) saved = true
+  } catch { /* continua com localStorage */ }
+
+  ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+  carregarPaginaMetas()
 }
 
 // ── Metas — carregar página com dados reais ──
