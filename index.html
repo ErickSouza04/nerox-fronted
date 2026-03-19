@@ -1141,6 +1141,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   display: none;
 }
 .auth-error.show { display: block; animation: slideDown 0.3s ease; }
+.auth-error ul { margin: 6px 0 0 0; padding-left: 18px; }
+.auth-error ul li { margin-bottom: 2px; }
 
 .faturamento-opts {
   display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;
@@ -2228,7 +2230,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       <p id="page-subtitle" id="page-subtitle"></p>
     </div>
     <div class="topbar-right">
-      <div class="notif-btn" onclick="openModal('alertas')">🔔<span class="notif-badge"></span></div>
+      <div class="notif-btn" onclick="abrirModalAlertas()">🔔<span class="notif-badge"></span></div>
       <button class="btn btn-primary" onclick="openModal('nova-venda')">+ Registrar</button>
     </div>
   </header>
@@ -2552,6 +2554,17 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div class="meta-values"><span class="meta-current" id="metas-meta-current">R$ 3.595</span><span class="meta-total" id="metas-meta-total">/ R$ 5.000</span></div>
           <div class="progress-bar"><div class="progress-fill" id="metas-progress-fill" style="width:72%"></div></div>
           <div class="meta-info" id="metas-meta-info"><span>72% concluída · faltam <strong>R$ 1.405</strong></span><span>25 dias restantes</span></div>
+        </div>
+        <div class="form-section" style="margin-bottom:14px">
+          <div class="form-section-title">🎯 Definir Meta de Lucro</div>
+          <div id="metas-meta-save-ok" style="display:none;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--green);margin-bottom:12px">✅ Meta salva com sucesso!</div>
+          <div id="metas-meta-save-err" style="display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--red);margin-bottom:12px">❌ Erro ao salvar. Tente novamente.</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Valor da meta mensal (R$)</label><input class="form-input" type="number" id="metas-meta-input" placeholder="Ex: 5000" min="0" step="100"></div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="salvarMeta()">Salvar meta</button>
+          </div>
         </div>
         <div class="form-section">
           <div class="form-section-title">💸 Pró-labore</div>
@@ -3196,7 +3209,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 <div class="modal-overlay" id="modal-alertas">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">🔔 Alertas Inteligentes</div><button class="modal-close" onclick="closeModal('alertas')">×</button></div>
-    <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;flex-direction:column;gap:10px" id="modal-alertas-body">
       <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:14px;display:flex;gap:10px"><span>⚠️</span><div><strong style="font-size:13px;color:var(--amber)">Margem abaixo do ideal</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">Sua margem está em 28%. Revise a precificação para chegar a 35%.</p></div></div>
       <div style="background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2);border-radius:12px;padding:14px;display:flex;gap:10px"><span>📊</span><div><strong style="font-size:13px;color:var(--blue)">Despesas subiram 12%</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">Atenção ao aumento de despesas em relação ao mês anterior.</p></div></div>
       <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:14px;display:flex;gap:10px"><span>🎯</span><div><strong style="font-size:13px;color:var(--green)">Meta 72% concluída!</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">Faltam R$ 1.405 para atingir sua meta mensal.</p></div></div>
@@ -3334,7 +3347,16 @@ async function avancarEtapa(etapa) {
     const erro=document.getElementById('cad-erro-1')
     if (!nome)                               { mostrarErroAuth(erro,'Digite seu nome.'); return }
     if (!email||!/\S+@\S+\.\S+/.test(email)) { mostrarErroAuth(erro,'Digite um e-mail válido.'); return }
-    if (senha.length < 8)                    { mostrarErroAuth(erro,'Senha: mínimo 8 caracteres.'); return }
+    const senhaErros = []
+    if (senha.length < 8)          senhaErros.push('mínimo 8 caracteres')
+    if (!/[A-Z]/.test(senha))      senhaErros.push('1 letra maiúscula')
+    if (!/[a-z]/.test(senha))      senhaErros.push('1 letra minúscula')
+    if (!/[0-9]/.test(senha))      senhaErros.push('1 número')
+    if (!/[$&@!]/.test(senha))     senhaErros.push('1 caractere especial ($, &, @, !)')
+    if (senhaErros.length > 0) {
+      mostrarErroAuth(erro,'A senha precisa ter:<ul>' + senhaErros.map(e=>`<li>${e}</li>`).join('') + '</ul>')
+      return
+    }
     erro.classList.remove('show')
   }
   if (etapa === 3) {
@@ -3349,7 +3371,7 @@ async function avancarEtapa(etapa) {
 
 function mostrarErroAuth(el, msg) {
   clearTimeout(el._erroTimer)
-  el.textContent=msg; el.classList.add('show')
+  el.innerHTML=msg; el.classList.add('show')
   el._erroTimer=setTimeout(()=>el.classList.remove('show'),4000)
 }
 
@@ -3449,7 +3471,7 @@ async function finalizarCadastro() {
       const errMsg = res.status===409
         ? 'Este e-mail já está cadastrado. Clique em "Entrar" para fazer login.'
         : (data.erro==='Dados inválidos'
-          ? 'Dados inválidos. Verifique nome, e-mail e senha (mín. 8 caracteres) e tente novamente.'
+          ? 'Verifique nome, e-mail e senha. A senha deve ter:<ul><li>mínimo 8 caracteres</li><li>1 letra maiúscula</li><li>1 letra minúscula</li><li>1 número</li><li>1 caractere especial ($, &, @, !)</li></ul>'
           : (data.erro||'Erro ao criar conta. Tente novamente.'))
       mostrarErroAuth(document.getElementById('cad-erro-1'),errMsg)
       avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
@@ -3646,7 +3668,7 @@ async function iniciarDashboard() {
       if(cards[0]){cards[0].dataset.target=Math.round(_cd.faturamento||0);    countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(_cd.total_despesas||0); countUp(cards[1])}
       if(cards[2]){cards[2].dataset.target=Math.round(_cd.lucro||0);           countUp(cards[2])}
-      if(cards[3]){cards[3].dataset.target=Math.round(_cd.margem||0);          countUp(cards[3])}
+      if(cards[3]){cards[3].dataset.target=Math.round(_cd.ticket_medio||0);     countUp(cards[3])}
       const hlEl=document.getElementById('hero-lucro'), hrEl=document.getElementById('hero-receita'), hdEl=document.getElementById('hero-despesas')
       if(hlEl && _ch) hlEl.textContent=fmtBRL(_ch.lucro||0)
       if(hrEl && _ch) hrEl.textContent=fmtBRL(_ch.faturamento||0)
@@ -3669,7 +3691,7 @@ async function iniciarDashboard() {
       if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento);   countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas); countUp(cards[1])}
       if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
-      if(cards[3]){cards[3].dataset.target=Math.round(dados.margem);         countUp(cards[3])}
+      if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
       const _vFat=dados.variacao?.faturamento||0, _vDesp=dados.variacao?.despesas||0, _vLuc=dados.variacao?.lucro||0
@@ -4261,6 +4283,29 @@ function calcularProLabore() {
   if (apos)  apos.textContent  = fmtBRL(Math.max(0, lucro - prolabore))
 }
 
+// ── Metas — salvar meta de lucro ──
+async function salvarMeta() {
+  const input = document.getElementById('metas-meta-input')
+  const ok    = document.getElementById('metas-meta-save-ok')
+  const err   = document.getElementById('metas-meta-save-err')
+  const valor = parseFloat(input?.value || 0)
+  if (!valor || valor <= 0) { mostrarToast('Informe um valor válido para a meta.', 'error'); return }
+  ok.style.display = 'none'; err.style.display = 'none'
+  if (!App.token) {
+    if (App.stats) App.stats.metaValor = Math.round(valor)
+    ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+    carregarPaginaMetas(); return
+  }
+  try {
+    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_mensal: Math.round(valor) }) })
+    if (res?.ok) {
+      if (App.stats) App.stats.metaValor = Math.round(valor)
+      ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+      carregarPaginaMetas()
+    } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+  } catch { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+}
+
 // ── Metas — carregar página com dados reais ──
 function carregarPaginaMetas() {
   const s    = App.stats ? Object.assign({}, App.stats) : {}
@@ -4290,6 +4335,10 @@ function carregarPaginaMetas() {
     else                  nexorDesc.textContent = 'Comece a registrar vendas e despesas para calcular seu índice.'
   }
 
+  // ─ Popular input da meta com valor atual ─
+  const metaInput = document.getElementById('metas-meta-input')
+  if (metaInput && s.metaValor > 0 && !metaInput.value) metaInput.value = s.metaValor
+
   // ─ Verificar se meta foi batida → atualizar liga ─
   const progresso = s.progresso || 0
   const metaValor = s.metaValor || 0
@@ -4317,7 +4366,7 @@ function carregarPaginaMetas() {
   const mi = document.getElementById('metas-meta-info')
   if (mi) {
     if (metaValor <= 0) {
-      mi.innerHTML = '<span style="color:var(--text-muted)">Defina sua meta em Configurações</span>'
+      mi.innerHTML = '<span style="color:var(--text-muted)">Defina sua meta abaixo</span>'
     } else if (progresso >= 100) {
       mi.innerHTML = '<span style="color:var(--green);font-weight:700">🏆 Meta batida! Parabéns!</span>'
     } else {
@@ -6575,6 +6624,56 @@ function irParaPrecificacao() {
 function openModal(n) {
   document.getElementById('modal-'+n).classList.add('open')
   if (n === 'nova-venda') _syncModalSelectProdutos()
+}
+
+function abrirModalAlertas() {
+  const s = App.stats || {}
+  const body = document.getElementById('modal-alertas-body')
+  if (body && s.faturamento) {
+    const items = []
+    const margem  = s.margem  || 0
+    const varDesp = s.varDesp || 0
+    const varLucro= s.varLucro|| 0
+    const varFat  = s.varFat  || 0
+    const progresso = s.progresso || 0
+    const metaValor = s.metaValor || 0
+    const lucro     = s.lucro     || 0
+    const falta     = Math.max(0, metaValor - lucro)
+
+    // Críticos
+    if ((s.lucro || 0) < 0)
+      items.push({bg:'rgba(248,113,113,',icon:'🚨',cor:'var(--red)',titulo:'Você está operando no prejuízo',sub:'Revise despesas imediatamente para reverter esse cenário.'})
+    else if (margem < 10 && s.faturamento > 0)
+      items.push({bg:'rgba(248,113,113,',icon:'🚨',cor:'var(--red)',titulo:'Margem criticamente baixa',sub:`Sua margem está em ${margem}%. Risco alto de prejuízo.`})
+
+    // Atenção
+    if (margem >= 10 && margem < 25)
+      items.push({bg:'rgba(251,191,36,',icon:'⚠️',cor:'var(--amber)',titulo:'Margem abaixo do ideal',sub:`Sua margem está em ${margem}%. Revise a precificação para chegar a 35%.`})
+    if (varDesp > 10)
+      items.push({bg:'rgba(251,191,36,',icon:'📊',cor:'var(--amber)',titulo:`Despesas subiram ${Math.round(varDesp)}%`,sub:'Atenção ao aumento de despesas em relação ao mês anterior.'})
+    if (varLucro < -10)
+      items.push({bg:'rgba(251,191,36,',icon:'📉',cor:'var(--amber)',titulo:`Lucro caiu ${Math.abs(Math.round(varLucro))}%`,sub:'Analise os custos e revise a estratégia de vendas.'})
+
+    // Meta
+    if (metaValor > 0 && progresso >= 100)
+      items.push({bg:'rgba(34,197,94,',icon:'🏆',cor:'var(--green)',titulo:'Meta batida!',sub:'Parabéns! Você atingiu sua meta mensal de lucro.'})
+    else if (metaValor > 0)
+      items.push({bg:'rgba(34,197,94,',icon:'🎯',cor:'var(--green)',titulo:`Meta ${progresso}% concluída!`,sub:`Faltam ${fmtBRL(falta)} para atingir sua meta mensal.`})
+
+    // Positivos
+    if (margem >= 35 && lucro > 0)
+      items.push({bg:'rgba(34,197,94,',icon:'✅',cor:'var(--green)',titulo:'Margem excelente!',sub:`Sua margem de ${margem}% está acima da média — ótima saúde financeira.`})
+    if (varFat > 15)
+      items.push({bg:'rgba(96,165,250,',icon:'📈',cor:'var(--blue)',titulo:`Faturamento cresceu ${Math.round(varFat)}%`,sub:'Ótimo crescimento! Você tem espaço para investir mais.'})
+
+    if (!items.length)
+      items.push({bg:'rgba(96,165,250,',icon:'💡',cor:'var(--blue)',titulo:'Negócio estável',sub:'Seus indicadores estão dentro do esperado. Continue registrando!'})
+
+    body.innerHTML = items.slice(0, 4).map(a =>
+      `<div style="background:${a.bg}0.07);border:1px solid ${a.bg}0.2);border-radius:12px;padding:14px;display:flex;gap:10px"><span>${a.icon}</span><div><strong style="font-size:13px;color:${a.cor}">${a.titulo}</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">${a.sub}</p></div></div>`
+    ).join('')
+  }
+  openModal('alertas')
 }
 
 function _syncModalSelectProdutos() {
