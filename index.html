@@ -2230,7 +2230,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       <p id="page-subtitle" id="page-subtitle"></p>
     </div>
     <div class="topbar-right">
-      <div class="notif-btn" onclick="openModal('alertas')">🔔<span class="notif-badge"></span></div>
+      <div class="notif-btn" onclick="abrirModalAlertas()">🔔<span class="notif-badge"></span></div>
       <button class="btn btn-primary" onclick="openModal('nova-venda')">+ Registrar</button>
     </div>
   </header>
@@ -3209,7 +3209,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 <div class="modal-overlay" id="modal-alertas">
   <div class="modal">
     <div class="modal-header"><div class="modal-title">🔔 Alertas Inteligentes</div><button class="modal-close" onclick="closeModal('alertas')">×</button></div>
-    <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;flex-direction:column;gap:10px" id="modal-alertas-body">
       <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:14px;display:flex;gap:10px"><span>⚠️</span><div><strong style="font-size:13px;color:var(--amber)">Margem abaixo do ideal</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">Sua margem está em 28%. Revise a precificação para chegar a 35%.</p></div></div>
       <div style="background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2);border-radius:12px;padding:14px;display:flex;gap:10px"><span>📊</span><div><strong style="font-size:13px;color:var(--blue)">Despesas subiram 12%</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">Atenção ao aumento de despesas em relação ao mês anterior.</p></div></div>
       <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:14px;display:flex;gap:10px"><span>🎯</span><div><strong style="font-size:13px;color:var(--green)">Meta 72% concluída!</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">Faltam R$ 1.405 para atingir sua meta mensal.</p></div></div>
@@ -6624,6 +6624,56 @@ function irParaPrecificacao() {
 function openModal(n) {
   document.getElementById('modal-'+n).classList.add('open')
   if (n === 'nova-venda') _syncModalSelectProdutos()
+}
+
+function abrirModalAlertas() {
+  const s = App.stats || {}
+  const body = document.getElementById('modal-alertas-body')
+  if (body && s.faturamento) {
+    const items = []
+    const margem  = s.margem  || 0
+    const varDesp = s.varDesp || 0
+    const varLucro= s.varLucro|| 0
+    const varFat  = s.varFat  || 0
+    const progresso = s.progresso || 0
+    const metaValor = s.metaValor || 0
+    const lucro     = s.lucro     || 0
+    const falta     = Math.max(0, metaValor - lucro)
+
+    // Críticos
+    if ((s.lucro || 0) < 0)
+      items.push({bg:'rgba(248,113,113,',icon:'🚨',cor:'var(--red)',titulo:'Você está operando no prejuízo',sub:'Revise despesas imediatamente para reverter esse cenário.'})
+    else if (margem < 10 && s.faturamento > 0)
+      items.push({bg:'rgba(248,113,113,',icon:'🚨',cor:'var(--red)',titulo:'Margem criticamente baixa',sub:`Sua margem está em ${margem}%. Risco alto de prejuízo.`})
+
+    // Atenção
+    if (margem >= 10 && margem < 25)
+      items.push({bg:'rgba(251,191,36,',icon:'⚠️',cor:'var(--amber)',titulo:'Margem abaixo do ideal',sub:`Sua margem está em ${margem}%. Revise a precificação para chegar a 35%.`})
+    if (varDesp > 10)
+      items.push({bg:'rgba(251,191,36,',icon:'📊',cor:'var(--amber)',titulo:`Despesas subiram ${Math.round(varDesp)}%`,sub:'Atenção ao aumento de despesas em relação ao mês anterior.'})
+    if (varLucro < -10)
+      items.push({bg:'rgba(251,191,36,',icon:'📉',cor:'var(--amber)',titulo:`Lucro caiu ${Math.abs(Math.round(varLucro))}%`,sub:'Analise os custos e revise a estratégia de vendas.'})
+
+    // Meta
+    if (metaValor > 0 && progresso >= 100)
+      items.push({bg:'rgba(34,197,94,',icon:'🏆',cor:'var(--green)',titulo:'Meta batida!',sub:'Parabéns! Você atingiu sua meta mensal de lucro.'})
+    else if (metaValor > 0)
+      items.push({bg:'rgba(34,197,94,',icon:'🎯',cor:'var(--green)',titulo:`Meta ${progresso}% concluída!`,sub:`Faltam ${fmtBRL(falta)} para atingir sua meta mensal.`})
+
+    // Positivos
+    if (margem >= 35 && lucro > 0)
+      items.push({bg:'rgba(34,197,94,',icon:'✅',cor:'var(--green)',titulo:'Margem excelente!',sub:`Sua margem de ${margem}% está acima da média — ótima saúde financeira.`})
+    if (varFat > 15)
+      items.push({bg:'rgba(96,165,250,',icon:'📈',cor:'var(--blue)',titulo:`Faturamento cresceu ${Math.round(varFat)}%`,sub:'Ótimo crescimento! Você tem espaço para investir mais.'})
+
+    if (!items.length)
+      items.push({bg:'rgba(96,165,250,',icon:'💡',cor:'var(--blue)',titulo:'Negócio estável',sub:'Seus indicadores estão dentro do esperado. Continue registrando!'})
+
+    body.innerHTML = items.slice(0, 4).map(a =>
+      `<div style="background:${a.bg}0.07);border:1px solid ${a.bg}0.2);border-radius:12px;padding:14px;display:flex;gap:10px"><span>${a.icon}</span><div><strong style="font-size:13px;color:${a.cor}">${a.titulo}</strong><p style="font-size:12px;color:var(--text-muted);margin-top:3px">${a.sub}</p></div></div>`
+    ).join('')
+  }
+  openModal('alertas')
 }
 
 function _syncModalSelectProdutos() {
