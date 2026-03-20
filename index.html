@@ -7629,6 +7629,12 @@ function perguntarSobreAcao(idx) {
 // ======================================================
 function mostrarPaywall() {
   document.getElementById('paywall-screen').style.display = 'flex'
+  const backBtn = document.getElementById('paywall-back-btn')
+  if (backBtn) {
+    const plano = App.usuario?.plano
+    const dias  = App.usuario?.diasRestantes
+    backBtn.style.display = (plano === 'trial' && dias > 0) ? 'block' : 'none'
+  }
 }
 
 function fecharPaywall() {
@@ -7736,6 +7742,7 @@ window.addEventListener('load',()=>{
         <div style="margin-top:8px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;text-align:center">⭐ Melhor valor — economia de R$ 179,90 →</div>
       </div>
     </div>
+    <div id="paywall-back-btn" style="display:none;margin-bottom:10px"><button onclick="fecharPaywall()" style="background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit">← Voltar ao período de teste</button></div>
     <div class="paywall-demo-link" onclick="entrarDemo()">Continuar no modo demo</div>
   </div>
 </div>
