@@ -7586,6 +7586,16 @@ async function ativarCopiloto() {
   }
 }
 
+function cleanNumberSpaces(text) {
+  if (!text) return text
+  let prev
+  do {
+    prev = text
+    text = text.replace(/(\d) (?=\d)/g, '$1')
+  } while (text !== prev)
+  return text
+}
+
 function renderCopilotActions(acoes) {
   const container = document.getElementById('copilot-actions')
   if (!acoes.length) {
@@ -7596,10 +7606,10 @@ function renderCopilotActions(acoes) {
     <div class="copilot-action-item" onclick="perguntarSobreAcao(${i})">
       <div class="copilot-action-num">${i+1}</div>
       <div class="copilot-action-body">
-        <div class="copilot-action-title">${a.titulo}</div>
-        <div class="copilot-action-desc">${a.descricao}</div>
+        <div class="copilot-action-title">${cleanNumberSpaces(a.titulo)}</div>
+        <div class="copilot-action-desc">${cleanNumberSpaces(a.descricao)}</div>
         <span class="copilot-action-impact ${a.impacto==='alto'?'impact-high':'impact-med'}">
-          ${a.impacto==='alto'?'🔥 Alto impacto':'⚡ Médio impacto'} · ${a.ganho}
+          ${a.impacto==='alto'?'🔥 Alto impacto':'⚡ Médio impacto'} · ${cleanNumberSpaces(a.ganho)}
         </span>
       </div>
     </div>
