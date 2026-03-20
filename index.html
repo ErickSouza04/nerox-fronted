@@ -4297,22 +4297,31 @@ async function salvarMeta() {
     carregarPaginaMetas(); return
   }
   try {
-    const payload = {
-      nome:              App.usuario?.nome             || '',
-      tipo_negocio:      App.usuario?.tipo_negocio     || '',
-      faturamento_medio: App.usuario?.faturamento_medio|| 0,
-      meta_valor:        Math.round(valor)
-    }
-    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify(payload) })
+    // Tenta PATCH (atualização parcial) — menos propenso a 500 que PUT completo
+    const res = await api('/usuarios/perfil', { method: 'PATCH', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats) App.stats.metaValor = Math.round(valor)
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else {
-      const body = await res?.json().catch(()=>null)
-      console.error('salvarMeta erro:', res?.status, body)
-      err.textContent = `❌ Erro ${res?.status||''}: ${body?.message || 'Tente novamente.'}`
-      err.style.display = 'block'; setTimeout(() => { err.style.display = 'none'; err.textContent = '❌ Erro ao salvar. Tente novamente.' }, 6000)
+      // Fallback: PUT com todos os campos do perfil
+      const payload = {
+        nome:              App.usuario?.nome              || '',
+        tipo_negocio:      App.usuario?.tipo_negocio      || '',
+        faturamento_medio: App.usuario?.faturamento_medio || 0,
+        meta_valor:        Math.round(valor)
+      }
+      const res2 = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify(payload) })
+      const body2 = await res2?.json().catch(()=>null)
+      console.error('salvarMeta PATCH status:', res?.status, '| PUT status:', res2?.status, body2)
+      if (res2?.ok) {
+        if (App.stats) App.stats.metaValor = Math.round(valor)
+        ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+        carregarPaginaMetas()
+      } else {
+        err.textContent = `❌ Erro ${res2?.status||''}: ${body2?.message || 'Tente novamente.'}`
+        err.style.display = 'block'; setTimeout(() => { err.style.display = 'none'; err.textContent = '❌ Erro ao salvar. Tente novamente.' }, 6000)
+      }
     }
   } catch(e) { console.error('salvarMeta exception:', e); err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
 }
