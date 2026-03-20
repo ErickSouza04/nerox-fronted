@@ -4302,8 +4302,13 @@ async function salvarMeta() {
       if (App.stats) App.stats.metaValor = Math.round(valor)
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
-    } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
-  } catch { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+    } else {
+      const body = await res?.json().catch(()=>null)
+      console.error('salvarMeta erro:', res?.status, body)
+      err.textContent = `❌ Erro ${res?.status||''}: ${body?.message || 'Tente novamente.'}`
+      err.style.display = 'block'; setTimeout(() => { err.style.display = 'none'; err.textContent = '❌ Erro ao salvar. Tente novamente.' }, 6000)
+    }
+  } catch(e) { console.error('salvarMeta exception:', e); err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
 }
 
 // ── Metas — carregar página com dados reais ──
