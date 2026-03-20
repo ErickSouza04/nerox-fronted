@@ -1221,7 +1221,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .paywall-benefit-icon { color: var(--green); font-size: 16px; flex-shrink: 0; }
 .paywall-price {
   background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 14px; padding: 16px 20px; margin-bottom: 20px;
+  border-radius: 14px; padding: 16px 20px; margin-bottom: 20px; text-align: center;
 }
 .paywall-price-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
 .paywall-price-value { font-family: 'Syne', sans-serif; font-size: 34px; font-weight: 800; color: var(--green); line-height: 1; margin: 6px 0 4px; }
@@ -4297,7 +4297,7 @@ async function salvarMeta() {
     carregarPaginaMetas(); return
   }
   try {
-    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_mensal: Math.round(valor) }) })
+    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats) App.stats.metaValor = Math.round(valor)
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
@@ -7629,6 +7629,30 @@ function perguntarSobreAcao(idx) {
 // ======================================================
 function mostrarPaywall() {
   document.getElementById('paywall-screen').style.display = 'flex'
+  const plano = App.usuario?.plano
+  const dias  = App.usuario?.diasRestantes
+  const isTrialAtivo = plano === 'trial' && dias > 0
+
+  const backBtn = document.getElementById('paywall-back-btn')
+  if (backBtn) backBtn.style.display = isTrialAtivo ? 'block' : 'none'
+
+  const title = document.getElementById('paywall-title')
+  const sub   = document.getElementById('paywall-sub')
+  if (title) {
+    if (isTrialAtivo) {
+      const label = dias === 1 ? '1 dia restante' : `${dias} dias restantes`
+      title.innerHTML = `Seu teste — <span>${label}</span>`
+    } else {
+      title.innerHTML = 'Seu teste <span>encerrou</span>'
+    }
+  }
+  if (sub) {
+    if (isTrialAtivo) {
+      sub.textContent = 'Aproveite os dias restantes ou assine agora para continuar controlando seu negócio.'
+    } else {
+      sub.textContent = 'Você aproveitou 7 dias grátis do Nexor. Assine agora para continuar controlando seu negócio.'
+    }
+  }
 }
 
 function fecharPaywall() {
@@ -7710,8 +7734,8 @@ window.addEventListener('load',()=>{
 <div class="paywall-screen" id="paywall-screen" style="display:none">
   <div class="paywall-card">
     <div class="paywall-icon">🔒</div>
-    <div class="paywall-title">Seu teste <span>encerrou</span></div>
-    <div class="paywall-sub">Você aproveitou 7 dias grátis do Nexor.<br>Assine agora para continuar controlando seu negócio.</div>
+    <div class="paywall-title" id="paywall-title">Seu teste <span>encerrou</span></div>
+    <div class="paywall-sub" id="paywall-sub">Você aproveitou 7 dias grátis do Nexor.<br>Assine agora para continuar controlando seu negócio.</div>
     <div class="paywall-benefits">
       <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Dashboard financeiro completo</div>
       <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Registro ilimitado de vendas e despesas</div>
@@ -7736,6 +7760,7 @@ window.addEventListener('load',()=>{
         <div style="margin-top:8px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;text-align:center">⭐ Melhor valor — economia de R$ 179,90 →</div>
       </div>
     </div>
+    <div id="paywall-back-btn" style="display:none;margin-bottom:10px"><button onclick="fecharPaywall()" style="background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit">← Voltar ao período de teste</button></div>
     <div class="paywall-demo-link" onclick="entrarDemo()">Continuar no modo demo</div>
   </div>
 </div>
