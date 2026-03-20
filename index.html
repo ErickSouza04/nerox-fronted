@@ -4297,7 +4297,13 @@ async function salvarMeta() {
     carregarPaginaMetas(); return
   }
   try {
-    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
+    const payload = {
+      nome:              App.usuario?.nome             || '',
+      tipo_negocio:      App.usuario?.tipo_negocio     || '',
+      faturamento_medio: App.usuario?.faturamento_medio|| 0,
+      meta_valor:        Math.round(valor)
+    }
+    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify(payload) })
     if (res?.ok) {
       if (App.stats) App.stats.metaValor = Math.round(valor)
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
