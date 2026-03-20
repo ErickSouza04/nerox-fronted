@@ -7744,23 +7744,23 @@ window.addEventListener('load',()=>{
       <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Suporte prioritário</div>
     </div>
     <!-- Planos -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
-      <!-- Mensal -->
-      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s" onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')">
-        <div class="paywall-price-label">Mensal</div>
-        <div class="paywall-price-value" style="font-size:24px">R$ 37<span style="font-size:14px">,90</span></div>
-        <div class="paywall-price-period">por mês</div>
-        <div style="margin-top:8px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;text-align:center">Assinar →</div>
-      </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
       <!-- Anual -->
-      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.06)" onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')">
+      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);margin-bottom:0" onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')">
         <div class="paywall-price-label">Anual <span style="background:#f59e0b;color:#000;padding:1px 6px;border-radius:4px;font-size:10px;margin-left:4px">-40%</span></div>
-        <div class="paywall-price-value" style="font-size:24px">R$ 274<span style="font-size:14px">,90/ano</span></div>
+        <div class="paywall-price-value">R$ 274<span style="font-size:16px">,90/ano</span></div>
         <div class="paywall-price-period">= R$ 22,90/mês</div>
-        <div style="margin-top:8px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;text-align:center">⭐ Melhor valor — economia de R$ 179,90 →</div>
+        <div style="margin-top:8px;background:rgba(34,197,94,0.2);color:var(--green);font-size:12px;font-weight:700;padding:8px 12px;border-radius:8px;text-align:center">⭐ Melhor valor — economia de R$ 179,90 →</div>
+      </div>
+      <!-- Mensal -->
+      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;margin-bottom:0" onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')">
+        <div class="paywall-price-label">Mensal</div>
+        <div class="paywall-price-value">R$ 37<span style="font-size:16px">,90</span></div>
+        <div class="paywall-price-period">por mês</div>
+        <div style="margin-top:8px;background:rgba(34,197,94,0.15);color:var(--green);font-size:12px;font-weight:700;padding:8px 12px;border-radius:8px;text-align:center">Assinar →</div>
       </div>
     </div>
-    <div id="paywall-back-btn" style="display:none;margin-bottom:10px"><button onclick="fecharPaywall()" style="background:none;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit">← Voltar ao período de teste</button></div>
+    <div id="paywall-back-btn" style="display:none;margin-bottom:10px"><button onclick="fecharPaywall()" style="background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.3);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;padding:11px 16px;border-radius:10px;transition:all 0.2s">← Voltar ao período de teste</button></div>
     <div class="paywall-demo-link" onclick="entrarDemo()">Continuar no modo demo</div>
   </div>
 </div>
