@@ -2764,13 +2764,13 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <div class="chart-card" id="perfil-plano-card">
           <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-            <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
+            <div onclick="abrirStripe('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
               <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Mensal</div>
               <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
               <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
               <div style="margin-top:10px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">Assinar →</div>
             </div>
-            <div onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
+            <div onclick="abrirStripe('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
               <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Anual <span style="background:#f59e0b;color:#000;padding:1px 5px;border-radius:4px;font-size:9px">-40%</span></div>
               <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 274<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
               <div style="font-size:10px;color:var(--text-muted);margin-top:2px">= R$ 22,90/mês</div>
@@ -3986,13 +3986,13 @@ async function carregarPerfil() {
     card.innerHTML = `
       <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Plano Pro</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
+        <div onclick="abrirStripe('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
           <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Mensal</div>
           <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
           <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
           <div style="margin-top:10px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">Assinar →</div>
         </div>
-        <div onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
+        <div onclick="abrirStripe('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
           <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Anual <span style="background:#f59e0b;color:#000;padding:1px 5px;border-radius:4px;font-size:9px">-40%</span></div>
           <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 274<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
           <div style="font-size:10px;color:var(--text-muted);margin-top:2px">= R$ 22,90/mês</div>
@@ -7685,8 +7685,8 @@ function aplicarStatusPlano(usuario) {
     const label = document.getElementById('trial-dias-label')
     if (label) label.textContent = dias === 1 ? '1 dia restante' : `${dias} dias restantes`
     paywall.style.display = 'none'
-  } else if (plano === 'expirado' || plano === 'cancelado') {
-    // Bloqueia com paywall
+  } else if (plano === 'expirado' || plano === 'cancelado' || (plano === 'trial' && dias <= 0)) {
+    // Bloqueia com paywall (trial zerado também bloqueia)
     banner.style.display = 'none'
     mostrarPaywall()
   } else {
@@ -7715,6 +7715,18 @@ async function verificarPlano() {
     }
   } catch(e) { /* silencioso */ }
 }
+
+// Abre link do Stripe pré-preenchendo o e-mail do usuário logado (evita compra com e-mail diferente)
+function abrirStripe(url) {
+  const email = App.token ? App.usuario?.email : null
+  const dest = email ? url + '?prefilled_email=' + encodeURIComponent(email) : url
+  window.open(dest, '_blank')
+}
+
+// Re-verifica assinatura ao voltar para a aba (ex: após concluir pagamento no Stripe)
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && App.token) verificarPlano()
+})
 
 window.addEventListener('load',()=>{
   // Preenche datas dos formulários com hoje
@@ -7756,14 +7768,14 @@ window.addEventListener('load',()=>{
     <!-- Planos -->
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
       <!-- Anual -->
-      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);margin-bottom:0" onclick="window.open('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01','_blank')">
+      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);margin-bottom:0" onclick="abrirStripe('https://buy.stripe.com/cNi9AT1JxcOH8ENcD36Na01')">
         <div class="paywall-price-label">Anual <span style="background:#f59e0b;color:#000;padding:1px 6px;border-radius:4px;font-size:10px;margin-left:4px">-40%</span></div>
         <div class="paywall-price-value">R$ 274<span style="font-size:16px">,90/ano</span></div>
         <div class="paywall-price-period">= R$ 22,90/mês</div>
         <div style="margin-top:8px;background:rgba(34,197,94,0.2);color:var(--green);font-size:12px;font-weight:700;padding:8px 12px;border-radius:8px;text-align:center">⭐ Melhor valor — economia de R$ 179,90 →</div>
       </div>
       <!-- Mensal -->
-      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;margin-bottom:0" onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')">
+      <div class="paywall-price" style="cursor:pointer;transition:all 0.2s;margin-bottom:0" onclick="abrirStripe('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00')">
         <div class="paywall-price-label">Mensal</div>
         <div class="paywall-price-value">R$ 37<span style="font-size:16px">,90</span></div>
         <div class="paywall-price-period">por mês</div>
