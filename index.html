@@ -1283,6 +1283,9 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     border-radius: 16px;
   }
   
+  /* Grid de cards IA — 1 coluna no mobile */
+  .ia-mini-cards { grid-template-columns: 1fr !important; }
+
   /* Copiloto compacto no mobile — só o header, sem corpo */
   .copilot-card { flex-shrink: 0; }
   .copilot-actions { display: none !important; }
@@ -2837,7 +2840,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     </div>
 
     <!-- 4 cards IA -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div class="ia-mini-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
 
       <!-- Copiloto de Lucro -->
       <div class="chart-card" style="background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(109,40,217,0.04));border-color:rgba(167,139,250,0.2)">
