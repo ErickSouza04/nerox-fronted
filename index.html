@@ -7685,8 +7685,8 @@ function aplicarStatusPlano(usuario) {
     const label = document.getElementById('trial-dias-label')
     if (label) label.textContent = dias === 1 ? '1 dia restante' : `${dias} dias restantes`
     paywall.style.display = 'none'
-  } else if (plano === 'expirado' || plano === 'cancelado') {
-    // Bloqueia com paywall
+  } else if (plano === 'expirado' || plano === 'cancelado' || (plano === 'trial' && dias <= 0)) {
+    // Bloqueia com paywall (trial zerado também bloqueia)
     banner.style.display = 'none'
     mostrarPaywall()
   } else {
@@ -7718,7 +7718,7 @@ async function verificarPlano() {
 
 // Abre link do Stripe pré-preenchendo o e-mail do usuário logado (evita compra com e-mail diferente)
 function abrirStripe(url) {
-  const email = App.usuario?.email
+  const email = App.token ? App.usuario?.email : null
   const dest = email ? url + '?prefilled_email=' + encodeURIComponent(email) : url
   window.open(dest, '_blank')
 }
