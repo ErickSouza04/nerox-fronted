@@ -70,6 +70,7 @@ function loadScript(fetchMock) {
     fetch:       fetchMock,
     setTimeout:  (...a) => setTimeout(...a),
     clearTimeout:(...a) => clearTimeout(...a),
+    AbortController: typeof AbortController !== 'undefined' ? AbortController : class { abort(){} get signal(){ return undefined } },
     Promise,
     JSON,
     parseFloat,

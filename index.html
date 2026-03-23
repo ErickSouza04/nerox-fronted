@@ -3436,9 +3436,12 @@ async function fazerLogin() {
   const btn=document.querySelector('#auth-login .auth-btn') || document.querySelector('.auth-btn')
   if (btn) { btn.textContent='Entrando...'; btn.disabled=true }
   try {
-    const res=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,senha})}).catch(()=>null)
+    const ctrl=new AbortController()
+    const _t=setTimeout(()=>ctrl.abort(),15000)
+    const res=await fetch(API_URL+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,body:JSON.stringify({email,senha})}).catch(()=>null)
+    clearTimeout(_t)
     if (!res) throw new Error('offline')
-    const data=await res.json()
+    const data=await res.json().catch(()=>({}))
     if (!res.ok) { mostrarErroAuth(erro,data.erro||'E-mail ou senha incorretos.'); if(btn){btn.textContent='Entrar no Nexor';btn.disabled=false} return }
     salvarSessao(data); entrarApp(data.usuario, false)
   } catch {
@@ -3467,12 +3470,15 @@ async function finalizarCadastro() {
   const btn=document.getElementById('btn-finalizar')
   btn.textContent='⏳ Criando conta...'; btn.disabled=true
   try {
-    const res=await fetch(API_URL+'/auth/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},
+    const ctrl=new AbortController()
+    const _t=setTimeout(()=>ctrl.abort(),15000)
+    const res=await fetch(API_URL+'/auth/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
       body:JSON.stringify({nome:document.getElementById('cad-nome').value.trim(),email:document.getElementById('cad-email').value.trim(),
         senha:document.getElementById('cad-senha').value,tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento})
     }).catch(()=>null)
+    clearTimeout(_t)
     if (!res) throw new Error('offline')
-    const data=await res.json()
+    const data=await res.json().catch(()=>({}))
     if (!res.ok) {
       const errMsg = res.status===409
         ? 'Este e-mail já está cadastrado. Clique em "Entrar" para fazer login.'
