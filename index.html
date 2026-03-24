@@ -3490,8 +3490,17 @@ async function finalizarCadastro() {
     }
     salvarSessao(data); entrarApp(data.usuario, true)
   } catch {
-    mostrarErroAuth(erro,'Erro de conexão. Tente novamente.')
     btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false
+    const nomeVal=document.getElementById('cad-nome').value.trim()||'Usuário Teste'
+    const emailVal=document.getElementById('cad-email').value.trim()||'teste@nexor.com.br'
+    mostrarToast('Servidor indisponível. Abrindo modo de demonstração…','info')
+    setTimeout(()=>{
+      localStorage.removeItem('nexor_token'); localStorage.removeItem('nexor_refresh')
+      App.token=null; App.refresh=null
+      App.usuario={nome:nomeVal,email:emailVal,plano:'trial',tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento}
+      localStorage.setItem('nexor_usuario',JSON.stringify(App.usuario))
+      entrarApp(App.usuario,true)
+    },1800)
   }
 }
 

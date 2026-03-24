@@ -288,10 +288,27 @@ describe('Cadastro — finalizarCadastro (API)', () => {
     expect(erroVisivel('cad-erro-1', 'Servidor indisponível')).toBe(true)
   })
 
-  test('erro de rede → exibe "Erro de conexão"', async () => {
+  test('erro de rede → entra em modo demo com dados do formulário', async () => {
+    jest.useFakeTimers()
     fetchMock.mockReturnValue(Promise.resolve(null)) // simula falha de rede
     await sb.finalizarCadastro()
-    expect(erroVisivel('cad-erro-3', 'Erro de conexão')).toBe(true)
+
+    // sem erro no formulário — entra em demo após toast
+    expect(erroVisivel('cad-erro-3', 'Erro de conexão')).toBe(false)
+
+    // avança o setTimeout de 1800ms → modo demo ativado
+    jest.advanceTimersByTime(2000)
+
+    // token não deve ser salvo (modo demo)
+    expect(localStorage.getItem('nexor_token')).toBeNull()
+
+    // usuário demo salvo com dados do formulário
+    const usuario = JSON.parse(localStorage.getItem('nexor_usuario'))
+    expect(usuario).not.toBeNull()
+    expect(usuario.nome).toBe('Guilherme Phellipe')
+    expect(usuario.email).toBe('guilherme@teste.com')
+
+    jest.useRealTimers()
   })
 
   test('envia os campos corretos para a API', async () => {
