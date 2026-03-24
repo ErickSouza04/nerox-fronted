@@ -1170,6 +1170,24 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 
 
 /* ══════════════════════════════════════
+   BANNER MODO DEMO
+══════════════════════════════════════ */
+.demo-banner {
+  background: linear-gradient(90deg, rgba(96,165,250,0.12), rgba(96,165,250,0.06));
+  border-bottom: 1px solid rgba(96,165,250,0.25);
+  padding: 9px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; font-size: 13px; flex-wrap: wrap;
+}
+.demo-banner-text { color: var(--blue); font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.demo-banner-btn {
+  background: var(--blue); color: #000; border: none;
+  padding: 6px 16px; border-radius: 8px; font-size: 12px;
+  font-weight: 800; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.demo-banner-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(96,165,250,0.4); }
+
+/* ══════════════════════════════════════
    TRIAL EXPIRADO + BANNER TRIAL
 ══════════════════════════════════════ */
 .trial-banner {
@@ -2222,7 +2240,12 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 
 <main class="main">
   <!-- TOPBAR -->
-  <!-- TRIAL BANNER -->
+  <!-- DEMO BANNER -->
+<div class="demo-banner" id="demo-banner" style="display:none">
+  <div class="demo-banner-text">🧪 Modo de demonstração — dados não serão salvos</div>
+  <button class="demo-banner-btn" onclick="fazerLogout()">Criar conta real</button>
+</div>
+<!-- TRIAL BANNER -->
 <div class="trial-banner" id="trial-banner" style="display:none">
   <div class="trial-banner-text">⏳ Período de teste ativo — <span class="trial-banner-dias" id="trial-dias-label">7 dias restantes</span></div>
   <button class="trial-banner-btn" onclick="mostrarPaywall()">🚀 Ver planos</button>
@@ -3523,6 +3546,8 @@ async function entrarApp(usuario, isNewUser = false) {
   _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
+  const demoBanner = document.getElementById('demo-banner')
+  if (demoBanner) demoBanner.style.display = App.token ? 'none' : 'flex'
   const screen=document.getElementById('auth-screen')
   screen.style.transition='opacity 0.4s ease'; screen.style.opacity='0'
   setTimeout(()=>{
