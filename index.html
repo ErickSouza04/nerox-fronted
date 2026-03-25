@@ -287,6 +287,35 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .modal-close:hover { background:var(--surface-hov); color:var(--text); }
 .modal-actions { display:flex; gap:10px; margin-top:20px; justify-content:flex-end; }
 
+/* ═══ NAV ITEMS PLUS BLOQUEADOS ═══ */
+.nav-item.locked { opacity: 0.5; }
+.nav-item.locked:hover { transform: none; background: none; color: var(--text-muted); }
+.nav-lock { margin-left: auto; font-size: 11px; }
+
+/* ═══ MODAL UPGRADE ═══ */
+.upgrade-plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.upgrade-plan-card { border-radius: 14px; padding: 16px; border: 1px solid var(--border); background: var(--glass); }
+.upgrade-plan-card.plus { border-color: rgba(34,197,94,0.35); background: rgba(34,197,94,0.04); }
+.upgrade-plan-name { font-size: 10px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.upgrade-plan-card.plus .upgrade-plan-name { color: var(--green); }
+.upgrade-plan-price { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
+.upgrade-plan-card.plus .upgrade-plan-price { color: var(--green); }
+.upgrade-plan-features { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.upgrade-plan-feature { font-size: 12px; color: rgba(255,255,255,0.35); display: flex; align-items: center; gap: 6px; }
+.upgrade-plan-feature.ok { color: var(--text-muted); }
+
+/* ═══ ESTOQUE ═══ */
+.stock-badge-low { background: var(--red-dim); color: var(--red); border-radius: 6px; padding: 2px 7px; font-size: 10px; font-weight: 700; margin-left: 4px; }
+.stock-btn { padding: 5px 11px; border-radius: 7px; font-size: 11.5px; font-weight: 600; cursor: pointer; border: 1px solid; font-family: inherit; transition: all 0.15s; }
+.stock-btn.entrada { background: var(--green-dim); color: var(--green); border-color: rgba(34,197,94,0.25); }
+.stock-btn.entrada:hover { background: rgba(34,197,94,0.22); }
+.stock-btn.saida { background: var(--red-dim); color: var(--red); border-color: rgba(248,113,113,0.25); }
+.stock-btn.saida:hover { background: rgba(248,113,113,0.22); }
+
+/* ═══ WHATSAPP AGENT ═══ */
+.wa-status-ok { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 12px; background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); font-size: 13px; font-weight: 600; color: var(--green); margin-top: 12px; }
+.wa-command { background: var(--glass); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 12.5px; color: var(--text-muted); }
+
 @keyframes countUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 .count-anim { animation: countUp 0.5s ease both; }
 
@@ -2224,6 +2253,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <button class="nav-item nav-item-score" onclick="navigate('score',this)"><span class="nav-icon" style="background:rgba(251,191,36,0.1)">🏆</span> Nexor Score</button>
     <button class="nav-item nav-item-ai" onclick="navigate('ia',this)"><span class="nav-icon" style="background:rgba(167,139,250,0.1)">🤖</span> Nexor AI</button>
     <div class="divider"></div>
+    <div class="nav-section-label">Plus</div>
+    <button class="nav-item nav-item-plus locked" id="nav-estoque" onclick="navegarPlus('estoque',this)"><span class="nav-icon" style="background:rgba(96,165,250,0.1)">📦</span> Estoque<span class="nav-lock" id="lock-estoque">🔒</span></button>
+    <button class="nav-item nav-item-plus locked" id="nav-whatsapp" onclick="navegarPlus('whatsapp',this)"><span class="nav-icon" style="background:rgba(34,197,94,0.1)">💬</span> WhatsApp Agent<span class="nav-lock" id="lock-whatsapp">🔒</span></button>
+    <div class="divider"></div>
     <div class="nav-section-label">Conta</div>
     <button class="nav-item" onclick="navigate('perfil',this)"><span class="nav-icon">👤</span> Perfil</button>
   </nav>
@@ -3171,6 +3204,118 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     </div>
   </div><!-- end page-cards -->
 
+  <!-- ══ ESTOQUE ══ -->
+  <div class="page" id="page-estoque">
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">📦 Controle de Estoque</div>
+          <div class="chart-sub">Produtos, movimentações e alertas de estoque baixo</div>
+        </div>
+        <button class="btn btn-primary" onclick="document.getElementById('estoque-form-add').style.display=document.getElementById('estoque-form-add').style.display==='none'?'block':'none'">+ Adicionar produto</button>
+      </div>
+      <!-- Formulário inline de adição -->
+      <div id="estoque-form-add" style="display:none;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div class="form-grid" style="margin-bottom:12px">
+          <div class="form-group">
+            <label class="form-label">Nome do produto</label>
+            <input class="form-input" type="text" id="est-nome" placeholder="Ex: Farinha Especial">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marca</label>
+            <input class="form-input" type="text" id="est-marca" placeholder="Ex: Dona Benta">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço de custo (R$)</label>
+            <input class="form-input" type="number" id="est-custo" placeholder="0,00" step="0.01" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preço de venda (R$)</label>
+            <input class="form-input" type="number" id="est-preco" placeholder="0,00" step="0.01" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Qtd. inicial</label>
+            <input class="form-input" type="number" id="est-qtd" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estoque mínimo</label>
+            <input class="form-input" type="number" id="est-min" placeholder="5" min="0">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-secondary" onclick="document.getElementById('estoque-form-add').style.display='none'">Cancelar</button>
+          <button class="btn btn-primary" onclick="adicionarProdutoEstoque()">Salvar produto</button>
+        </div>
+      </div>
+      <!-- Tabela -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Marca</th>
+              <th>Estoque</th>
+              <th>Custo</th>
+              <th>Venda</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="estoque-tbody">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">Carregando estoque...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- end page-estoque -->
+
+  <!-- ══ WHATSAPP AGENT ══ -->
+  <div class="page" id="page-whatsapp">
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start">
+      <div>
+        <div class="chart-card" style="margin-bottom:16px">
+          <div class="chart-title" style="margin-bottom:6px">💬 Vincular Número WhatsApp</div>
+          <div class="chart-sub" style="margin-bottom:16px">Seu agente responderá automaticamente comandos enviados pelo WhatsApp</div>
+          <div class="form-group" style="margin-bottom:12px">
+            <label class="form-label">Número do WhatsApp (com DDD)</label>
+            <input class="form-input" type="tel" id="wa-numero" placeholder="Ex: 11999887766" style="width:100%">
+          </div>
+          <button class="btn btn-primary" id="wa-vincular-btn" onclick="vincularWhatsapp()" style="width:100%">Vincular número</button>
+          <div id="wa-status-div" class="wa-status-ok" style="display:none">
+            ✅ Número vinculado — seu agente está ativo
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:14px">📋 Exemplos de Comandos</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="wa-command"><strong style="color:var(--green)">/venda 150</strong> — Registra uma venda de R$ 150,00</div>
+            <div class="wa-command"><strong style="color:var(--green)">/venda 89.90 bolos</strong> — Registra venda com descrição</div>
+            <div class="wa-command"><strong style="color:var(--green)">/despesa 45 aluguel</strong> — Registra despesa</div>
+            <div class="wa-command"><strong style="color:var(--green)">/lucro</strong> — Retorna o lucro do mês atual</div>
+            <div class="wa-command"><strong style="color:var(--green)">/resumo</strong> — Resumo financeiro do dia</div>
+            <div class="wa-command"><strong style="color:var(--green)">/estoque</strong> — Lista produtos com estoque baixo</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title" style="margin-bottom:12px">ℹ️ Como funciona</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">1</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--text)">Vincule seu número</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px">Digite o número do WhatsApp que você usa para negócios.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">2</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--text)">Adicione o agente</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px">Salve o contato do Nexor Agent e mande um "Oi" para ativar.</div></div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">3</div>
+            <div><div style="font-size:13px;font-weight:600;color:var(--text)">Registre pelo celular</div><div style="font-size:12px;color:var(--text-muted);margin-top:3px">Envie comandos e receba confirmações em tempo real, sem abrir o app.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end page-whatsapp -->
+
 </main>
 
 <!-- MODALS -->
@@ -3266,6 +3411,7 @@ const App = {
   token:   localStorage.getItem('nexor_token')   || null,
   usuario: JSON.parse(localStorage.getItem('nexor_usuario') || 'null'),
   refresh: localStorage.getItem('nexor_refresh') || null,
+  plan:    JSON.parse(localStorage.getItem('nexor_usuario') || 'null')?.plan || null,
 }
 
 // -- Fetch autenticado com refresh automático --
@@ -3356,6 +3502,77 @@ const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFrac
 const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
 // Escapa HTML entities — usar sempre que texto do usuário/API for colocado em innerHTML
 const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
+
+// ======================================
+// PLANOS — Base / Plus
+// ======================================
+function isPlus() { return App.plan === 'plus' || App.usuario?.plan === 'plus' }
+
+async function carregarPlanoUsuario() {
+  if (!App.token) return
+  const res = await api('/users/me')
+  if (!res?.ok) return
+  const data = await res.json().catch(() => null)
+  if (!data) return
+  App.plan = data.plan
+  if (App.usuario) {
+    App.usuario.plan = data.plan
+    localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+  }
+  atualizarUIPlano()
+}
+
+function atualizarUIPlano() {
+  const plus = isPlus()
+  document.querySelectorAll('.nav-item-plus').forEach(el => el.classList.toggle('locked', !plus))
+  document.querySelectorAll('.nav-lock').forEach(el => { el.style.display = plus ? 'none' : 'inline' })
+}
+
+function navegarPlus(page, el) {
+  if (!isPlus()) { abrirModalUpgrade(); return }
+  navigate(page, el)
+}
+
+function abrirModalUpgrade() {
+  document.getElementById('modal-upgrade').classList.add('open')
+}
+
+function fecharModalUpgrade() {
+  document.getElementById('modal-upgrade').classList.remove('open')
+}
+
+async function fazerUpgrade() {
+  const btn = document.getElementById('upgrade-btn')
+  const errEl = document.getElementById('upgrade-err')
+  btn.textContent = 'Aguarde...'; btn.disabled = true
+  errEl.style.display = 'none'
+  const res = await api('/stripe/checkout', { method: 'POST', body: JSON.stringify({ plan: 'plus' }) })
+  if (!res?.ok) {
+    errEl.textContent = 'Erro ao iniciar o checkout. Tente novamente.'
+    errEl.style.display = 'block'
+    btn.textContent = '🚀 Fazer upgrade — R$67,90/mês'; btn.disabled = false
+    return
+  }
+  const data = await res.json().catch(() => null)
+  if (data?.url) {
+    window.location.href = data.url
+  } else {
+    errEl.textContent = 'URL de pagamento não encontrada. Tente novamente.'
+    errEl.style.display = 'block'
+    btn.textContent = '🚀 Fazer upgrade — R$67,90/mês'; btn.disabled = false
+  }
+}
+
+function verificarUpgradeRetorno() {
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('upgraded') !== 'true') return
+  history.replaceState({}, '', window.location.pathname)
+  if (App.token) {
+    carregarPlanoUsuario().then(() => {
+      setTimeout(() => mostrarToast('🎉 Bem-vindo ao Nexor Plus!', 'success'), 600)
+    })
+  }
+}
 
 // ======================================
 // AUTH
@@ -3546,6 +3763,8 @@ async function entrarApp(usuario, isNewUser = false) {
   _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
+  atualizarUIPlano()
+  if (App.token) setTimeout(carregarPlanoUsuario, 900)
   const demoBanner = document.getElementById('demo-banner')
   if (demoBanner) demoBanner.style.display = App.token ? 'none' : 'flex'
   const screen=document.getElementById('auth-screen')
@@ -4067,13 +4286,13 @@ async function carregarPerfil() {
 // ======================================
 // NAVIGATION
 // ======================================
-const pageTitles={dashboard:'Dashboard',registrar:'Registrar',precificacao:'Precificação',metas:'Metas',relatorios:'Relatórios',ia:'Nexor AI',score:'Nexor Score',cards:'Shareable Cards',perfil:'Perfil'}
+const pageTitles={dashboard:'Dashboard',registrar:'Registrar',precificacao:'Precificação',metas:'Metas',relatorios:'Relatórios',ia:'Nexor AI',score:'Nexor Score',cards:'Shareable Cards',perfil:'Perfil',estoque:'Estoque',whatsapp:'WhatsApp Agent'}
 const _hoje=new Date()
 const _diaSem=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado']
 const _mesesNome=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
 const _dataFormatada=`${_diaSem[_hoje.getDay()]}, ${_hoje.getDate()} de ${_mesesNome[_hoje.getMonth()]} de ${_hoje.getFullYear()}`
 const _dataISO=`${_hoje.getFullYear()}-${String(_hoje.getMonth()+1).padStart(2,'0')}-${String(_hoje.getDate()).padStart(2,'0')}`
-const pageSubs={dashboard:_dataFormatada,registrar:'Registre vendas e despesas rapidamente',precificacao:'Calcule o preço ideal dos seus produtos',metas:'Acompanhe e gerencie suas metas',relatorios:'Análises completas do seu negócio',ia:'Inteligência financeira e consultoria com IA',score:'Reputação financeira e ranking do seu negócio',cards:'Gere e compartilhe seus cards de performance financeira',perfil:'Configurações da sua conta'}
+const pageSubs={dashboard:_dataFormatada,registrar:'Registre vendas e despesas rapidamente',precificacao:'Calcule o preço ideal dos seus produtos',metas:'Acompanhe e gerencie suas metas',relatorios:'Análises completas do seu negócio',ia:'Inteligência financeira e consultoria com IA',score:'Reputação financeira e ranking do seu negócio',cards:'Gere e compartilhe seus cards de performance financeira',perfil:'Configurações da sua conta',estoque:'Controle de produtos e movimentação de estoque',whatsapp:'Agente automatizado via WhatsApp'}
 
 function navigate(page,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
@@ -4088,6 +4307,8 @@ function navigate(page,el){
   if(page==='relatorios') { relInit=false; setTimeout(initRelatorioChart,80); setTimeout(carregarRelatorios,120) }
   if(page==='metas')      setTimeout(carregarPaginaMetas, 80)
   if(page==='perfil')     carregarPerfil()
+  if(page==='estoque')    setTimeout(carregarEstoque, 80)
+  if(page==='whatsapp')   setTimeout(carregarStatusWhatsapp, 80)
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
   if(page==='ia')     {} // já tem hook abaixo
@@ -7742,6 +7963,116 @@ function aplicarStatusPlano(usuario) {
   }
 }
 
+// ======================================
+// ESTOQUE
+// ======================================
+let _estoqueData = []
+
+async function carregarEstoque() {
+  const res = await api('/produtos')
+  if (!res?.ok) return
+  const data = await res.json().catch(() => [])
+  _estoqueData = Array.isArray(data) ? data : (data.produtos || [])
+  renderizarEstoque()
+}
+
+function renderizarEstoque() {
+  const tbody = document.getElementById('estoque-tbody')
+  if (!tbody) return
+  if (!_estoqueData.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">Nenhum produto cadastrado</td></tr>'
+    return
+  }
+  tbody.innerHTML = _estoqueData.map((p, i) => {
+    const qtd = p.estoque_atual ?? p.quantidade ?? 0
+    const min  = p.estoque_minimo ?? p.minimo ?? 5
+    const baixo = qtd < min
+    return `<tr>
+      <td>${esc(p.nome)}</td>
+      <td>${esc(p.marca || '-')}</td>
+      <td>${qtd}${baixo ? '<span class="stock-badge-low">baixo</span>' : ''}</td>
+      <td>${fmtBRL(p.preco_custo || 0)}</td>
+      <td>${fmtBRL(p.preco_venda || p.preco || 0)}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="stock-btn entrada" onclick="movimentarEstoque(${i},'entrada')">+ Entrada</button>
+        <button class="stock-btn saida" onclick="movimentarEstoque(${i},'saida')">− Saída</button>
+      </div></td>
+    </tr>`
+  }).join('')
+}
+
+async function adicionarProdutoEstoque() {
+  const nome        = document.getElementById('est-nome').value.trim()
+  const marca       = document.getElementById('est-marca').value.trim()
+  const preco_venda = parseFloat(document.getElementById('est-preco').value) || 0
+  const preco_custo = parseFloat(document.getElementById('est-custo').value) || 0
+  const estoque_atual = parseInt(document.getElementById('est-qtd').value) || 0
+  const estoque_minimo = parseInt(document.getElementById('est-min').value) || 5
+  if (!nome || !preco_venda) { mostrarToast('Preencha nome e preço de venda', 'error'); return }
+  const res = await api('/produtos', {
+    method: 'POST',
+    body: JSON.stringify({ nome, marca, preco_venda, preco_custo, estoque_atual, estoque_minimo })
+  })
+  if (res?.ok) {
+    mostrarToast('Produto adicionado!', 'success')
+    document.getElementById('estoque-form-add').style.display = 'none'
+    ;['est-nome','est-marca','est-preco','est-custo','est-qtd','est-min'].forEach(id => { const el = document.getElementById(id); if (el) el.value = '' })
+    await carregarEstoque()
+  } else {
+    mostrarToast('Erro ao adicionar produto', 'error')
+  }
+}
+
+async function movimentarEstoque(idx, tipo) {
+  const prod = _estoqueData[idx]
+  if (!prod) return
+  const qtdStr = prompt(`Quantidade para ${tipo === 'entrada' ? 'entrada (+)' : 'saída (−)'}:`)
+  if (!qtdStr || isNaN(parseInt(qtdStr)) || parseInt(qtdStr) <= 0) return
+  const res = await api(`/produtos/${prod.id || prod._id}/movimentar`, {
+    method: 'POST',
+    body: JSON.stringify({ tipo, quantidade: parseInt(qtdStr) })
+  })
+  if (res?.ok) {
+    mostrarToast(`${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada!`, 'success')
+    await carregarEstoque()
+  } else {
+    mostrarToast('Erro na movimentação', 'error')
+  }
+}
+
+// ======================================
+// WHATSAPP AGENT
+// ======================================
+async function carregarStatusWhatsapp() {
+  if (!App.token) return
+  const res = await api('/whatsapp/status')
+  if (!res?.ok) return
+  const data = await res.json().catch(() => null)
+  if (data?.phone || data?.numero) {
+    const num = data.phone || data.numero
+    const input = document.getElementById('wa-numero')
+    if (input) input.value = num
+    const statusDiv = document.getElementById('wa-status-div')
+    if (statusDiv) statusDiv.style.display = 'flex'
+  }
+}
+
+async function vincularWhatsapp() {
+  const num = (document.getElementById('wa-numero')?.value || '').replace(/\D/g, '')
+  if (!num || num.length < 10) { mostrarToast('Digite um número válido (com DDD)', 'error'); return }
+  const btn = document.getElementById('wa-vincular-btn')
+  btn.textContent = 'Vinculando...'; btn.disabled = true
+  const res = await api('/whatsapp/register-phone', { method: 'POST', body: JSON.stringify({ phone: num }) })
+  btn.textContent = 'Vincular número'; btn.disabled = false
+  if (res?.ok) {
+    const statusDiv = document.getElementById('wa-status-div')
+    if (statusDiv) statusDiv.style.display = 'flex'
+    mostrarToast('✅ Número vinculado com sucesso!', 'success')
+  } else {
+    mostrarToast('Erro ao vincular. Verifique o número e tente novamente.', 'error')
+  }
+}
+
 // Checa plano no backend (garante que não houve expiração desde o último login)
 // Usa fetch direto para não disparar logout global em caso de erro neste endpoint
 async function verificarPlano() {
@@ -7779,6 +8110,9 @@ window.addEventListener('load',()=>{
   const dv=document.getElementById('data-venda'); if(dv) dv.value=_dataISO
   const dd=document.getElementById('data-despesa'); if(dd) dd.value=_dataISO
 
+  // Detecta retorno do Stripe (?upgraded=true)
+  verificarUpgradeRetorno()
+
   // Tem sessão salva? Entra direto
   if(App.token && App.usuario){
     entrarApp(App.usuario)
@@ -7797,6 +8131,48 @@ window.addEventListener('load',()=>{
 </script>
 
 
+
+<!-- MODAL UPGRADE PLUS -->
+<div class="modal-overlay" id="modal-upgrade">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">🚀 Conheça o Nexor Plus</div>
+      <button class="modal-close" onclick="fecharModalUpgrade()">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:4px;line-height:1.5">Desbloqueie controle de <strong style="color:var(--text)">Estoque</strong> e o <strong style="color:var(--text)">WhatsApp Agent</strong> para gerenciar seu negócio sem abrir o app.</p>
+    <div class="upgrade-plan-grid">
+      <div class="upgrade-plan-card">
+        <div class="upgrade-plan-name">Base</div>
+        <div class="upgrade-plan-price">Grátis</div>
+        <div class="upgrade-plan-features">
+          <div class="upgrade-plan-feature ok">✅ Dashboard financeiro</div>
+          <div class="upgrade-plan-feature ok">✅ Vendas e Despesas</div>
+          <div class="upgrade-plan-feature ok">✅ Relatórios</div>
+          <div class="upgrade-plan-feature ok">✅ Nexor AI</div>
+          <div class="upgrade-plan-feature">🔒 Estoque</div>
+          <div class="upgrade-plan-feature">🔒 WhatsApp Agent</div>
+        </div>
+      </div>
+      <div class="upgrade-plan-card plus">
+        <div class="upgrade-plan-name">Plus</div>
+        <div class="upgrade-plan-price">R$ 67<span style="font-size:13px;color:var(--text-muted);font-weight:400">,90/mês</span></div>
+        <div class="upgrade-plan-features">
+          <div class="upgrade-plan-feature ok">✅ Dashboard financeiro</div>
+          <div class="upgrade-plan-feature ok">✅ Vendas e Despesas</div>
+          <div class="upgrade-plan-feature ok">✅ Relatórios</div>
+          <div class="upgrade-plan-feature ok">✅ Nexor AI</div>
+          <div class="upgrade-plan-feature ok">✅ Estoque completo</div>
+          <div class="upgrade-plan-feature ok">✅ WhatsApp Agent</div>
+        </div>
+      </div>
+    </div>
+    <div id="upgrade-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;padding:9px 12px;background:var(--red-dim);border-radius:8px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="fecharModalUpgrade()">Agora não</button>
+      <button class="btn btn-primary" id="upgrade-btn" onclick="fazerUpgrade()">🚀 Fazer upgrade — R$67,90/mês</button>
+    </div>
+  </div>
+</div>
 
 <!-- PAYWALL — Trial Expirado -->
 <div class="paywall-screen" id="paywall-screen" style="display:none">
