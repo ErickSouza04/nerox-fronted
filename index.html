@@ -3509,7 +3509,8 @@ const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'
 // ======================================
 // PLANOS — Base / Plus
 // ======================================
-function isPlus() { return App.plan === 'plus' || App.usuario?.plan === 'plus' }
+function isPlus() { return App.plan === 'plus' || App.usuario?.plan === 'plus' || App.usuario?.plano === 'plus' }
+function isBase() { return App.plan === 'base' || App.usuario?.plan === 'base' || App.usuario?.plano === 'base' }
 
 async function carregarPlanoUsuario() {
   if (!App.token) return
@@ -3539,8 +3540,7 @@ function navegarPlus(page, el) {
 
 function abrirModalUpgrade() {
   document.getElementById('modal-upgrade').classList.add('open')
-  const isBase = App.plan === 'base' || App.usuario?.plan === 'base'
-  document.getElementById('assinar-base-btn').style.display = isBase ? 'none' : ''
+  document.getElementById('assinar-base-btn').style.display = isBase() ? 'none' : ''
 }
 
 function fecharModalUpgrade() {
@@ -3577,6 +3577,7 @@ function verificarUpgradeRetorno() {
     carregarPlanoUsuario().then(() => {
       setTimeout(() => mostrarToast('🎉 Bem-vindo ao Nexor Plus!', 'success'), 600)
     })
+    verificarPlano() // atualiza plano/diasRestantes e esconde paywall imediatamente
   }
 }
 
