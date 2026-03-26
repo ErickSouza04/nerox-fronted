@@ -8126,12 +8126,17 @@ async function verificarPlano() {
     }).catch(() => null)
     if (res?.ok) {
       const data = await res.json()
+      console.log('[nexor:/auth/plano]', data)
       if (App.usuario) {
         App.usuario.plano = data.plano
         App.usuario.diasRestantes = data.diasRestantes
+        // captura plan e tipo_plano se o endpoint já os retornar
+        if (data.plan)      { App.plan = data.plan; App.usuario.plan = data.plan }
+        if (data.tipo_plano) App.usuario.tipo_plano = data.tipo_plano
         localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
       }
       aplicarStatusPlano(App.usuario)
+      atualizarUIPlano()
     }
   } catch(e) { /* silencioso */ }
 }
