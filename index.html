@@ -3704,10 +3704,11 @@ async function fazerLogin() {
 async function entrarDemo() {
   const btn=document.querySelector('#auth-login .auth-btn-secondary') || document.querySelector('.auth-btn-secondary')
   if (btn) { btn.textContent='Carregando...'; btn.disabled=true }
-  App.token = null; App.usuario = null; App.refresh = null
+  App.token = null; App.usuario = null; App.refresh = null; App.plan = null
   localStorage.removeItem('nexor_token')
   localStorage.removeItem('nexor_usuario')
   localStorage.removeItem('nexor_refresh')
+  localStorage.removeItem('nexor_plan')
   setTimeout(()=>{
     App.usuario={nome:'Maria Clara',email:'demo@nexor.com.br',plano:'ativo',tipo_negocio:'Alimentação e Confeitaria',faturamento_medio:'R$ 5.001 a R$ 15.000/mês'}
     entrarApp(App.usuario, false)
