@@ -3521,6 +3521,7 @@ async function carregarPlanoUsuario() {
   if (App.usuario) {
     App.usuario.plan = data.plan
     localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+    aplicarUsuarioUI(App.usuario)
   }
   atualizarUIPlano()
 }
@@ -3797,7 +3798,7 @@ function aplicarUsuarioUI(u) {
   document.querySelectorAll('.user-name').forEach(el=>el.textContent=(u.nome||'').split(' ')[0])
   const pa=document.getElementById('perfil-avatar'); if(pa) pa.textContent=abrev
   const pn=document.getElementById('perfil-nome-header'); if(pn) pn.textContent=u.nome||'-'
-  const pp=document.getElementById('perfil-plano-header'); if(pp) pp.textContent='Plano '+(u.plano||'Essencial')
+  const pp=document.getElementById('perfil-plano-header'); if(pp) { const _p=u.plan||u.plano||'essencial'; pp.textContent='Plano '+_p.charAt(0).toUpperCase()+_p.slice(1) }
   const setVal=(id,v)=>{ const el=document.getElementById(id); if(el&&v) el.value=v }
   setVal('perfil-nome',u.nome); setVal('perfil-email',u.email)
   setVal('perfil-tipo',u.tipo_negocio); setVal('perfil-fat',u.faturamento_medio)
