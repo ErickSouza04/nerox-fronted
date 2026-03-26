@@ -3770,13 +3770,41 @@ function fazerLogout() {
   location.reload()
 }
 
+// ── DEBUG TEMPORÁRIO — remover após diagnóstico ──────────────────
+function _mostrarDebugPlano() {
+  const plus = App.plan === 'plus' || App.usuario?.plan === 'plus' || App.usuario?.plano === 'plus'
+  const linhas = [
+    '🔍 DEBUG PLANO',
+    'App.plan: ' + App.plan,
+    'usuario.plan: ' + App.usuario?.plan,
+    'usuario.plano: ' + App.usuario?.plano,
+    'isPlus(): ' + plus,
+  ]
+  let el = document.getElementById('_debug_plano')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = '_debug_plano'
+    el.onclick = () => el.remove()
+    Object.assign(el.style, {
+      position:'fixed', top:'0', left:'0', right:'0', zIndex:'99999',
+      background:'#1e293b', color:'#f8fafc', fontFamily:'monospace',
+      fontSize:'13px', lineHeight:'1.6', padding:'10px 14px',
+      borderBottom:'2px solid #6366f1', whiteSpace:'pre'
+    })
+    document.body.appendChild(el)
+  }
+  el.textContent = linhas.join('\n') + '\n(toque para fechar)'
+}
+// ─────────────────────────────────────────────────────────────────
+
 async function entrarApp(usuario, isNewUser = false) {
   if (_logoutTimer) { clearTimeout(_logoutTimer); _logoutTimer = null }
   _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
   atualizarUIPlano()
-  if (App.token) setTimeout(carregarPlanoUsuario, 900)
+  if (App.token) setTimeout(() => carregarPlanoUsuario().then(_mostrarDebugPlano), 900)
+  _mostrarDebugPlano()
   const demoBanner = document.getElementById('demo-banner')
   if (demoBanner) demoBanner.style.display = App.token ? 'none' : 'flex'
   const screen=document.getElementById('auth-screen')
