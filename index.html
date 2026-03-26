@@ -3509,7 +3509,11 @@ const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'
 // ======================================
 // PLANOS — Base / Plus
 // ======================================
-function isPlus() { return App.plan === 'plus' || App.usuario?.plan === 'plus' || App.usuario?.plano === 'plus' }
+function isPlus() {
+  const result = App.plan === 'plus' || App.usuario?.plan === 'plus' || App.usuario?.plano === 'plus'
+  console.log('[nexor:isPlus]', { 'App.plan': App.plan, 'usuario.plan': App.usuario?.plan, 'usuario.plano': App.usuario?.plano, result })
+  return result
+}
 function isBase() { return App.plan === 'base' || App.usuario?.plan === 'base' || App.usuario?.plano === 'base' }
 
 async function carregarPlanoUsuario() {
@@ -3518,6 +3522,7 @@ async function carregarPlanoUsuario() {
   if (!res?.ok) return
   const data = await res.json().catch(() => null)
   if (!data) return
+  console.log('[nexor:/users/me]', data)
   App.plan = data.plan
   if (App.usuario) {
     App.usuario.plan = data.plan
@@ -3766,13 +3771,41 @@ function fazerLogout() {
   location.reload()
 }
 
+// ── DEBUG TEMPORÁRIO — remover após diagnóstico ──────────────────
+function _mostrarDebugPlano() {
+  const plus = App.plan === 'plus' || App.usuario?.plan === 'plus' || App.usuario?.plano === 'plus'
+  const linhas = [
+    '🔍 DEBUG PLANO',
+    'App.plan: ' + App.plan,
+    'usuario.plan: ' + App.usuario?.plan,
+    'usuario.plano: ' + App.usuario?.plano,
+    'isPlus(): ' + plus,
+  ]
+  let el = document.getElementById('_debug_plano')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = '_debug_plano'
+    el.onclick = () => el.remove()
+    Object.assign(el.style, {
+      position:'fixed', top:'0', left:'0', right:'0', zIndex:'99999',
+      background:'#1e293b', color:'#f8fafc', fontFamily:'monospace',
+      fontSize:'13px', lineHeight:'1.6', padding:'10px 14px',
+      borderBottom:'2px solid #6366f1', whiteSpace:'pre'
+    })
+    document.body.appendChild(el)
+  }
+  el.textContent = linhas.join('\n') + '\n(toque para fechar)'
+}
+// ─────────────────────────────────────────────────────────────────
+
 async function entrarApp(usuario, isNewUser = false) {
   if (_logoutTimer) { clearTimeout(_logoutTimer); _logoutTimer = null }
   _loggingOut = false  // reseta flag ao entrar com nova sessão
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
   atualizarUIPlano()
-  if (App.token) setTimeout(carregarPlanoUsuario, 900)
+  if (App.token) setTimeout(() => carregarPlanoUsuario().then(_mostrarDebugPlano), 900)
+  _mostrarDebugPlano()
   const demoBanner = document.getElementById('demo-banner')
   if (demoBanner) demoBanner.style.display = App.token ? 'none' : 'flex'
   const screen=document.getElementById('auth-screen')
@@ -3798,6 +3831,7 @@ function aplicarUsuarioUI(u) {
   const abrev=(u.nome||'?').split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()
   document.querySelectorAll('.user-avatar').forEach(el=>el.textContent=abrev)
   document.querySelectorAll('.user-name').forEach(el=>el.textContent=(u.nome||'').split(' ')[0])
+  document.querySelectorAll('.user-plan').forEach(el=>{ const dot=el.querySelector('.plan-dot')?.cloneNode(true); const _p=u.plan||u.plano||'essencial'; el.textContent='Plano '+_p.charAt(0).toUpperCase()+_p.slice(1); if(dot) el.prepend(dot) })
   const pa=document.getElementById('perfil-avatar'); if(pa) pa.textContent=abrev
   const pn=document.getElementById('perfil-nome-header'); if(pn) pn.textContent=u.nome||'-'
   const pp=document.getElementById('perfil-plano-header'); if(pp) { const _p=u.plan||u.plano||'essencial'; pp.textContent='Plano '+_p.charAt(0).toUpperCase()+_p.slice(1) }
@@ -4275,9 +4309,11 @@ async function carregarPerfil() {
       <div style="text-align:center;font-size:11px;color:var(--text-muted)">Cancele quando quiser · Pagamento seguro via Stripe</div>`
   } else {
     const u = App.usuario || {}
-    const planoNome = u.plano_nome || 'Pro'
+    const _planKey = u.plan || u.plano_nome || ''
+    const planoNome = _planKey === 'plus' ? 'Plus' : _planKey === 'base' ? 'Base' : (_planKey ? _planKey.charAt(0).toUpperCase()+_planKey.slice(1) : 'Essencial')
     const planoDesc = u.plano_desc || 'Dashboard · Registros · Precificação · Relatórios · IA · Score · Metas · Cards'
-    const planoPeriodicidade = u.plano_periodo === 'anual' ? 'R$ 247,90/ano' : 'R$ 37,90/mês'
+    const isAnual = u.tipo_plano === 'anual' || u.plano_periodo === 'anual'
+    const planoPeriodicidade = isAnual ? 'R$ 247,90/ano' : (_planKey === 'plus' ? 'R$ 67,90/mês' : 'R$ 37,90/mês')
     card.innerHTML = `
       <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
       <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:15px">
