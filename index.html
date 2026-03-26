@@ -3422,6 +3422,7 @@ const App = {
 let _refreshPromise = null
 let _loggingOut = false
 let _logoutTimer = null
+let _planCarregado = false
 
 async function api(path, opts = {}) {
   if (_loggingOut) return null
@@ -3806,7 +3807,7 @@ async function entrarApp(usuario, isNewUser = false) {
   aplicarUsuarioUI(usuario)
   aplicarStatusPlano(usuario)
   atualizarUIPlano()
-  if (App.token) setTimeout(() => carregarPlanoUsuario().then(_mostrarDebugPlano), 900)
+  if (App.token && !_planCarregado) { _planCarregado = true; carregarPlanoUsuario().then(_mostrarDebugPlano) }
   _mostrarDebugPlano()
   const demoBanner = document.getElementById('demo-banner')
   if (demoBanner) demoBanner.style.display = App.token ? 'none' : 'flex'
