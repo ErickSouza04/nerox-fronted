@@ -3414,7 +3414,7 @@ const App = {
   token:   localStorage.getItem('nexor_token')   || null,
   usuario: JSON.parse(localStorage.getItem('nexor_usuario') || 'null'),
   refresh: localStorage.getItem('nexor_refresh') || null,
-  plan:    JSON.parse(localStorage.getItem('nexor_usuario') || 'null')?.plan || null,
+  plan:    localStorage.getItem('nexor_plan') || JSON.parse(localStorage.getItem('nexor_usuario') || 'null')?.plan || null,
 }
 
 // -- Fetch autenticado com refresh automático --
@@ -3524,6 +3524,7 @@ async function carregarPlanoUsuario() {
   if (!data) return
   console.log('[nexor:/users/me]', data)
   App.plan = data.plan
+  if (data.plan) localStorage.setItem('nexor_plan', data.plan)
   if (App.usuario) {
     App.usuario.plan = data.plan
     localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
@@ -3762,12 +3763,13 @@ function salvarSessao(data) {
   localStorage.setItem('nexor_token',data.token)
   localStorage.setItem('nexor_refresh',data.refresh_token)
   localStorage.setItem('nexor_usuario',JSON.stringify(data.usuario))
+  if (App.plan) localStorage.setItem('nexor_plan', App.plan)
 }
 
 function fazerLogout() {
   if (App.token&&App.refresh) fetch(API_URL+'/auth/logout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+App.token},body:JSON.stringify({refresh_token:App.refresh})}).catch(()=>{})
-  ;['nexor_token','nexor_refresh','nexor_usuario'].forEach(k=>localStorage.removeItem(k))
-  App.token=null; App.refresh=null; App.usuario=null
+  ;['nexor_token','nexor_refresh','nexor_usuario','nexor_plan'].forEach(k=>localStorage.removeItem(k))
+  App.token=null; App.refresh=null; App.usuario=null; App.plan=null
   location.reload()
 }
 
