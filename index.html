@@ -3523,10 +3523,12 @@ async function carregarPlanoUsuario() {
   const data = await res.json().catch(() => null)
   if (!data) return
   console.log('[nexor:/users/me]', data)
-  App.plan = data.plan
-  if (data.plan) localStorage.setItem('nexor_plan', data.plan)
+  if (data.plan) {
+    App.plan = data.plan
+    localStorage.setItem('nexor_plan', data.plan)
+  }
   if (App.usuario) {
-    App.usuario.plan = data.plan
+    if (data.plan) App.usuario.plan = data.plan
     localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
     aplicarUsuarioUI(App.usuario)
   }
