@@ -3414,7 +3414,7 @@ const App = {
   token:   localStorage.getItem('nexor_token')   || null,
   usuario: JSON.parse(localStorage.getItem('nexor_usuario') || 'null'),
   refresh: localStorage.getItem('nexor_refresh') || null,
-  plan:    localStorage.getItem('nexor_plan') || JSON.parse(localStorage.getItem('nexor_usuario') || 'null')?.plan || null,
+  plan:    localStorage.getItem('nexor_plan') || null,
 }
 
 // -- Fetch autenticado com refresh automático --
@@ -3511,9 +3511,7 @@ const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'
 // PLANOS — Base / Plus
 // ======================================
 function isPlus() {
-  const result = App.plan === 'plus' || App.usuario?.plan === 'plus' || App.usuario?.plano === 'plus'
-  console.log('[nexor:isPlus]', { 'App.plan': App.plan, 'usuario.plan': App.usuario?.plan, 'usuario.plano': App.usuario?.plano, result })
-  return result
+  return App.plan === 'plus' || localStorage.getItem('nexor_plan') === 'plus'
 }
 function isBase() { return App.plan === 'base' || App.usuario?.plan === 'base' || App.usuario?.plano === 'base' }
 
@@ -3524,7 +3522,6 @@ async function carregarPlanoUsuario() {
   const data = await res.json().catch(() => null)
   if (!data) return
   console.log('[nexor:/users/me]', data)
-  App.plan = data.plan
   if (data.plan) localStorage.setItem('nexor_plan', data.plan)
   if (App.usuario) {
     App.usuario.plan = data.plan
@@ -3765,6 +3762,7 @@ function salvarSessao(data) {
   localStorage.setItem('nexor_refresh',data.refresh_token)
   localStorage.setItem('nexor_usuario',JSON.stringify(data.usuario))
   if (App.plan) localStorage.setItem('nexor_plan', App.plan)
+  else localStorage.removeItem('nexor_plan')
 }
 
 function fazerLogout() {
