@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+  <meta name="version" content="2.1">
   <!-- ═══ SEGURANÇA ═══ -->
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -3517,6 +3518,7 @@ function isPlus() {
 function isBase() { return App.plan === 'base' || App.usuario?.plan === 'base' || App.usuario?.plano === 'base' }
 
 async function carregarPlanoUsuario() {
+  if (!App.plan) App.plan = localStorage.getItem('nexor_plan') || null
   if (!App.token) return
   const res = await api('/users/me')
   if (!res?.ok) return
