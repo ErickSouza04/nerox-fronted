@@ -3277,7 +3277,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   <div class="page" id="page-whatsapp">
     <div class="wa-page-grid">
       <div>
-        <div class="chart-card" style="margin-bottom:16px">
+        <!-- Formulário: exibido quando não há número vinculado -->
+        <div class="chart-card" id="wa-form-card" style="margin-bottom:16px">
           <div class="chart-title" style="margin-bottom:6px">💬 Vincular Número WhatsApp</div>
           <div class="chart-sub" style="margin-bottom:16px">Seu agente responderá automaticamente comandos enviados pelo WhatsApp</div>
           <div class="form-group" style="margin-bottom:12px">
@@ -3285,9 +3286,21 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <input class="form-input" type="tel" id="wa-numero" placeholder="Ex: 11999887766" style="width:100%">
           </div>
           <button class="btn btn-primary" id="wa-vincular-btn" onclick="vincularWhatsapp()" style="width:100%">Vincular número</button>
-          <div id="wa-status-div" class="wa-status-ok" style="display:none">
-            ✅ Número vinculado — seu agente está ativo
+        </div>
+        <!-- Card ativo: exibido quando já há número vinculado -->
+        <div class="chart-card" id="wa-ativo-card" style="margin-bottom:16px;display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="chart-title" style="margin-bottom:0">💬 WhatsApp Agent</div>
+            <span style="background:rgba(34,197,94,0.2);color:var(--green);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:0.5px">ATIVO</span>
           </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);margin-bottom:14px">
+            <span style="font-size:22px">✅</span>
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Número Ativo</div>
+              <div id="wa-numero-ativo" style="font-size:15px;font-weight:700;color:var(--text)"></div>
+            </div>
+          </div>
+          <button onclick="desvinculatWhatsapp()" style="width:100%;padding:9px;border-radius:10px;border:1px solid rgba(248,113,113,0.3);background:rgba(248,113,113,0.06);color:rgba(248,113,113,0.85);font-size:13px;font-weight:600;cursor:pointer">Desvincular</button>
         </div>
         <div class="chart-card">
           <div class="chart-title" style="margin-bottom:14px">📋 Exemplos de Comandos</div>
@@ -8099,17 +8112,40 @@ async function movimentarEstoque(idx, tipo) {
 // ======================================
 // WHATSAPP AGENT
 // ======================================
+function formatarNumeroWA(num) {
+  const n = String(num).replace(/\D/g, '')
+  if (n.length === 11) return `(${n.slice(0,2)}) ${n.slice(2,7)}-${n.slice(7)}`
+  if (n.length === 10) return `(${n.slice(0,2)}) ${n.slice(2,6)}-${n.slice(6)}`
+  return n
+}
+
+function _mostrarNumeroAtivoWA(num) {
+  const formCard = document.getElementById('wa-form-card')
+  const ativoCard = document.getElementById('wa-ativo-card')
+  const numEl = document.getElementById('wa-numero-ativo')
+  if (formCard) formCard.style.display = 'none'
+  if (ativoCard) ativoCard.style.display = 'block'
+  if (numEl) numEl.textContent = formatarNumeroWA(num)
+}
+
+function _mostrarFormVincularWA() {
+  const formCard = document.getElementById('wa-form-card')
+  const ativoCard = document.getElementById('wa-ativo-card')
+  const input = document.getElementById('wa-numero')
+  if (formCard) formCard.style.display = 'block'
+  if (ativoCard) ativoCard.style.display = 'none'
+  if (input) input.value = ''
+}
+
 async function carregarStatusWhatsapp() {
   if (!App.token) return
   const res = await api('/whatsapp/status')
   if (!res?.ok) return
   const data = await res.json().catch(() => null)
   if (data?.phone || data?.numero) {
-    const num = data.phone || data.numero
-    const input = document.getElementById('wa-numero')
-    if (input) input.value = num
-    const statusDiv = document.getElementById('wa-status-div')
-    if (statusDiv) statusDiv.style.display = 'flex'
+    _mostrarNumeroAtivoWA(data.phone || data.numero)
+  } else {
+    _mostrarFormVincularWA()
   }
 }
 
@@ -8121,11 +8157,21 @@ async function vincularWhatsapp() {
   const res = await api('/whatsapp/register-phone', { method: 'POST', body: JSON.stringify({ phone: num }) })
   btn.textContent = 'Vincular número'; btn.disabled = false
   if (res?.ok) {
-    const statusDiv = document.getElementById('wa-status-div')
-    if (statusDiv) statusDiv.style.display = 'flex'
+    _mostrarNumeroAtivoWA(num)
     mostrarToast('✅ Número vinculado com sucesso!', 'success')
   } else {
     mostrarToast('Erro ao vincular. Verifique o número e tente novamente.', 'error')
+  }
+}
+
+async function desvinculatWhatsapp() {
+  if (!confirm('Tem certeza? O agente será desativado para esse número.')) return
+  const res = await api('/whatsapp/register-phone', { method: 'DELETE' })
+  if (res?.ok) {
+    _mostrarFormVincularWA()
+    mostrarToast('Número desvinculado.', 'success')
+  } else {
+    mostrarToast('Erro ao desvincular. Tente novamente.', 'error')
   }
 }
 
