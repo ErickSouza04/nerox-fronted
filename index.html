@@ -8030,7 +8030,9 @@ function aplicarStatusPlano(usuario) {
 let _estoqueData = []
 
 async function carregarEstoque() {
-  const res = await api('/stock/products')
+  const userId = App.usuario?.id
+  const query = userId ? `?user_id=${userId}` : ''
+  const res = await api('/stock/products' + query)
   if (!res?.ok) return
   const data = await res.json().catch(() => [])
   _estoqueData = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
@@ -8076,14 +8078,15 @@ async function adicionarProdutoEstoque() {
       nome, marca,
       preco_venda, preco_custo,
       estoque_atual, quantidade: estoque_atual,
-      estoque_minimo, minimo: estoque_minimo
+      estoque_minimo, minimo: estoque_minimo,
+      user_id: App.usuario?.id
     })
   })
   if (res?.ok) {
-    mostrarToast('Produto adicionado!', 'success')
     document.getElementById('estoque-form-add').style.display = 'none'
     ;['est-nome','est-marca','est-preco','est-custo','est-qtd','est-min'].forEach(id => { const el = document.getElementById(id); if (el) el.value = '' })
     await carregarEstoque()
+    mostrarToast('Produto cadastrado!', 'success')
   } else {
     const errBody = await res?.json().catch(() => null)
     const errMsg = errBody?.message || errBody?.erro || errBody?.error || 'Verifique os campos e tente novamente'
