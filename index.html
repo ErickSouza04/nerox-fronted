@@ -315,6 +315,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 /* ═══ WHATSAPP AGENT ═══ */
 .wa-status-ok { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 12px; background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); font-size: 13px; font-weight: 600; color: var(--green); margin-top: 12px; }
 .wa-command { background: var(--glass); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; font-size: 12.5px; color: var(--text-muted); }
+.wa-page-grid { display: grid; grid-template-columns: 1fr 380px; gap: 16px; align-items: start; }
+@media (max-width: 700px) { .wa-page-grid { grid-template-columns: 1fr; } }
 
 @keyframes countUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 .count-anim { animation: countUp 0.5s ease both; }
@@ -3273,7 +3275,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 
   <!-- ══ WHATSAPP AGENT ══ -->
   <div class="page" id="page-whatsapp">
-    <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start">
+    <div class="wa-page-grid">
       <div>
         <div class="chart-card" style="margin-bottom:16px">
           <div class="chart-title" style="margin-bottom:6px">💬 Vincular Número WhatsApp</div>
@@ -4311,7 +4313,7 @@ async function carregarPerfil() {
   } else {
     const u = App.usuario || {}
     const _planKey = u.plan || u.plano_nome || ''
-    const planoNome = _planKey === 'plus' ? 'Plus' : _planKey === 'base' ? 'Base' : (_planKey ? _planKey.charAt(0).toUpperCase()+_planKey.slice(1) : 'Essencial')
+    const planoNome = _planKey === 'plus' ? 'Plano Plus' : _planKey === 'base' ? 'Plano Base' : (_planKey ? 'Plano '+_planKey.charAt(0).toUpperCase()+_planKey.slice(1) : 'Plano Essencial')
     const planoDesc = u.plano_desc || 'Dashboard · Registros · Precificação · Relatórios · IA · Score · Metas · Cards'
     const isAnual = u.tipo_plano === 'anual' || u.plano_periodo === 'anual'
     const planoPeriodicidade = isAnual ? 'R$ 247,90/ano' : (_planKey === 'plus' ? 'R$ 67,90/mês' : 'R$ 37,90/mês')
@@ -8014,10 +8016,10 @@ function aplicarStatusPlano(usuario) {
 let _estoqueData = []
 
 async function carregarEstoque() {
-  const res = await api('/produtos')
+  const res = await api('/stock/products')
   if (!res?.ok) return
   const data = await res.json().catch(() => [])
-  _estoqueData = Array.isArray(data) ? data : (data.produtos || [])
+  _estoqueData = Array.isArray(data) ? data : (data.produtos || data.products || [])
   renderizarEstoque()
 }
 
@@ -8054,9 +8056,14 @@ async function adicionarProdutoEstoque() {
   const estoque_atual = parseInt(document.getElementById('est-qtd').value) || 0
   const estoque_minimo = parseInt(document.getElementById('est-min').value) || 5
   if (!nome || !preco_venda) { mostrarToast('Preencha nome e preço de venda', 'error'); return }
-  const res = await api('/produtos', {
+  const res = await api('/stock/products', {
     method: 'POST',
-    body: JSON.stringify({ nome, marca, preco_venda, preco_custo, estoque_atual, estoque_minimo })
+    body: JSON.stringify({
+      nome, marca,
+      preco_venda, preco_custo,
+      estoque_atual, quantidade: estoque_atual,
+      estoque_minimo, minimo: estoque_minimo
+    })
   })
   if (res?.ok) {
     mostrarToast('Produto adicionado!', 'success')
@@ -8064,7 +8071,10 @@ async function adicionarProdutoEstoque() {
     ;['est-nome','est-marca','est-preco','est-custo','est-qtd','est-min'].forEach(id => { const el = document.getElementById(id); if (el) el.value = '' })
     await carregarEstoque()
   } else {
-    mostrarToast('Erro ao adicionar produto', 'error')
+    const errBody = await res?.json().catch(() => null)
+    const errMsg = errBody?.message || errBody?.erro || errBody?.error || 'Verifique os campos e tente novamente'
+    mostrarToast('Erro ao adicionar produto: ' + errMsg, 'error')
+    console.error('[estoque POST]', res?.status, errBody)
   }
 }
 
@@ -8073,7 +8083,7 @@ async function movimentarEstoque(idx, tipo) {
   if (!prod) return
   const qtdStr = prompt(`Quantidade para ${tipo === 'entrada' ? 'entrada (+)' : 'saída (−)'}:`)
   if (!qtdStr || isNaN(parseInt(qtdStr)) || parseInt(qtdStr) <= 0) return
-  const res = await api(`/produtos/${prod.id || prod._id}/movimentar`, {
+  const res = await api(`/stock/products/${prod.id || prod._id}/movimentar`, {
     method: 'POST',
     body: JSON.stringify({ tipo, quantidade: parseInt(qtdStr) })
   })
