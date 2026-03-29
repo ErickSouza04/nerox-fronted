@@ -2635,9 +2635,14 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         </div>
         <div class="form-section">
           <div class="form-section-title">💸 Pró-labore</div>
+          <div id="metas-prolabore-save-ok" style="display:none;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--green);margin-bottom:12px">✅ Pró-labore salvo com sucesso!</div>
+          <div id="metas-prolabore-save-err" style="display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--red);margin-bottom:12px">❌ Erro ao salvar. Tente novamente.</div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" id="metas-prolabore-input" value="1500" oninput="calcularProLabore()"></div>
             <div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="metas-prolabore-freq"><option>Mensal</option><option>Quinzenal</option><option>Semanal</option></select></div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" onclick="salvarProLabore()">Salvar pró-labore</button>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px">
             <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:5px" id="metas-lucro-antes">R$ 3.595</div></div>
@@ -4628,6 +4633,29 @@ async function salvarMeta() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats) App.stats.metaValor = Math.round(valor)
+      ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+      carregarPaginaMetas()
+    } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+  } catch { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
+}
+
+// ── Metas — salvar pró-labore ──
+async function salvarProLabore() {
+  const ok    = document.getElementById('metas-prolabore-save-ok')
+  const err   = document.getElementById('metas-prolabore-save-err')
+  const valor = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  const freq  = document.getElementById('metas-prolabore-freq')?.value || 'Mensal'
+  if (!valor || valor <= 0) { mostrarToast('Informe um valor válido para o pró-labore.', 'error'); return }
+  ok.style.display = 'none'; err.style.display = 'none'
+  if (!App.token) {
+    if (App.stats) { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
+    ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
+    carregarPaginaMetas(); return
+  }
+  try {
+    const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
+    if (res?.ok) {
+      if (App.stats) { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
