@@ -8188,15 +8188,23 @@ async function movimentarEstoque(idx, tipo) {
   if (!prod) return
   const qtdStr = prompt(`Quantidade para ${tipo === 'entrada' ? 'entrada (+)' : 'saída (−)'}:`)
   if (!qtdStr || isNaN(parseInt(qtdStr)) || parseInt(qtdStr) <= 0) return
-  const res = await api(`/stock/products/${prod.id || prod._id}/movimentar`, {
+  const productId = prod.id || prod._id
+  const res = await api('/stock/movements', {
     method: 'POST',
-    body: JSON.stringify({ tipo, quantidade: parseInt(qtdStr) })
+    body: JSON.stringify({
+      product_id: productId,
+      type: tipo,
+      quantity: parseInt(qtdStr)
+    })
   })
   if (res?.ok) {
     mostrarToast(`${tipo === 'entrada' ? 'Entrada' : 'Saída'} registrada!`, 'success')
     await carregarEstoque()
   } else {
-    mostrarToast('Erro na movimentação', 'error')
+    const errBody = await res?.json().catch(() => null)
+    const errMsg = errBody?.message || errBody?.erro || errBody?.error || 'Verifique os campos e tente novamente'
+    console.error('[movimentarEstoque] status:', res?.status, '| body:', errBody)
+    mostrarToast('Erro na movimentação: ' + errMsg, 'error')
   }
 }
 
