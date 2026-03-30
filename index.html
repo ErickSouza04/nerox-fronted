@@ -2597,7 +2597,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <div class="chart-title">📦 Produtos Cadastrados</div>
             <span id="produtos-count" style="font-size:12px;color:var(--text-muted)">0 produtos</span>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Produto</th><th>Custo</th><th>Preço</th><th>Margem</th><th></th></tr></thead>
+          <div class="table-wrap"><table><thead><tr><th>Produto</th><th>Custo</th><th>Preço Sugerido</th><th>Margem</th><th></th></tr></thead>
           <tbody id="tabela-produtos">
             <tr id="produtos-empty"><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;font-size:13px">Nenhum produto cadastrado.<br>Use a calculadora ao lado para adicionar. 👈</td></tr>
           </tbody></table></div>
@@ -4374,6 +4374,7 @@ function navigate(page,el){
   if(page==='metas')      setTimeout(carregarPaginaMetas, 80)
   if(page==='perfil')     carregarPerfil()
   if(page==='estoque')    setTimeout(carregarEstoque, 80)
+  if(page==='precificacao') setTimeout(carregarProdutosPrecificacao, 80)
   if(page==='whatsapp')   setTimeout(carregarStatusWhatsapp, 80)
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
@@ -4808,6 +4809,8 @@ function calcPreco(){
     document.getElementById('margem-final-val').style.color = mr >= 40 ? 'var(--green)' : mr >= 25 ? '#f59e0b' : 'var(--red)'
   }
   document.getElementById('preco-final-aviso').style.display = 'none'
+  // Atualiza preços sugeridos na tabela de produtos do estoque
+  renderizarTabelaPrecificacao()
 }
 
 
@@ -4858,6 +4861,74 @@ function recalcMargemFinal() {
 //  PRODUTOS CADASTRADOS — array global
 // ══════════════════════════════════════════════
 const produtosCadastrados = []
+let _produtosEstoquePrec = []
+
+// ── Precificação: carrega produtos do estoque via API ──
+async function carregarProdutosPrecificacao() {
+  const userId = App.usuario?.id
+  const query = userId ? `?user_id=${userId}` : ''
+  const res = await api('/stock/products' + query)
+  if (res?.ok) {
+    const data = await res.json().catch(() => [])
+    _produtosEstoquePrec = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
+  }
+  renderizarTabelaPrecificacao()
+}
+
+// ── Precificação: renderiza tabela com produtos do estoque + locais ──
+function renderizarTabelaPrecificacao() {
+  const taxa   = parseFloat(document.getElementById('taxa').value)   || 3
+  const margem = parseFloat(document.getElementById('margem').value) || 35
+  const t = taxa / 100
+  const m = margem / 100
+  const denom = 1 - m - t
+
+  const tbody = document.getElementById('tabela-produtos')
+  if (!tbody) return
+  tbody.innerHTML = ''
+
+  let total = 0
+
+  // Produtos do estoque (API)
+  _produtosEstoquePrec.forEach(p => {
+    const nome  = p.nome || p.name || '—'
+    const custo = parseFloat(p.preco_custo || p.cost_price || 0)
+    const precoSug = denom > 0 ? custo / denom : 0
+    const margemCls = margem >= 45 ? 'green' : margem >= 30 ? 'amber' : 'red'
+    const tr = document.createElement('tr')
+    tr.innerHTML = `
+      <td style="font-weight:600">${nome}</td>
+      <td>R$ ${custo.toFixed(2).replace('.',',')}</td>
+      <td style="color:var(--green);font-weight:700">R$ ${precoSug.toFixed(2).replace('.',',')}</td>
+      <td><span class="tag ${margemCls}">${margem.toFixed(0)}%</span></td>
+      <td></td>`
+    tbody.appendChild(tr)
+    total++
+  })
+
+  // Produtos salvos localmente pela calculadora
+  produtosCadastrados.forEach(p => {
+    const margemCls = p.margemReal >= 45 ? 'green' : p.margemReal >= 30 ? 'amber' : 'red'
+    const tr = document.createElement('tr')
+    tr.id = p.id
+    tr.innerHTML = `
+      <td style="font-weight:600">${p.nome}</td>
+      <td>R$ ${p.custoTotal.toFixed(2).replace('.',',')}</td>
+      <td style="color:var(--green);font-weight:700">R$ ${p.precoFinal.toFixed(2).replace('.',',')}</td>
+      <td><span class="tag ${margemCls}">${p.margemReal.toFixed(0)}%</span></td>
+      <td><button onclick="removerProduto('${p.id}')"
+          style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:0">🗑</button></td>`
+    tbody.appendChild(tr)
+    total++
+  })
+
+  if (total === 0) {
+    tbody.innerHTML = '<tr id="produtos-empty"><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;font-size:13px">Nenhum produto do estoque encontrado.<br>Cadastre produtos na página de Estoque ou use a calculadora. 👈</td></tr>'
+  }
+
+  const countEl = document.getElementById('produtos-count')
+  if (countEl) countEl.textContent = total + (total === 1 ? ' produto' : ' produtos')
+}
 
 // ── Precificação: salvar produto ──
 function salvarProduto() {
@@ -4882,23 +4953,7 @@ function salvarProduto() {
   const id = 'prod-' + Date.now()
   produtosCadastrados.push({ id, nome, custoTotal, precoFinal, margemReal })
   _syncSelectProdutos()
-
-  // Adiciona na tabela de precificação
-  const tbody  = document.getElementById('tabela-produtos')
-  const empty  = document.getElementById('produtos-empty')
-  if (empty) empty.remove()
-  const tagCls = margemReal >= 45 ? 'green' : margemReal >= 30 ? 'amber' : 'red'
-  const tr     = document.createElement('tr')
-  tr.id        = id
-  tr.innerHTML = `
-    <td style="font-weight:600">${nome}</td>
-    <td>R$ ${custoTotal.toFixed(0)}</td>
-    <td style="color:var(--green);font-weight:700">R$ ${precoFinal.toFixed(2).replace('.',',')}</td>
-    <td><span class="tag ${tagCls}">${margemReal.toFixed(0)}%</span></td>
-    <td><button onclick="removerProduto('${id}')"
-        style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;padding:0">🗑</button></td>`
-  tbody.appendChild(tr)
-  atualizarContProdutos()
+  renderizarTabelaPrecificacao()
 
   // Limpar form
   nomeInput.value = ''
@@ -4918,9 +4973,7 @@ function removerProduto(id) {
   const idx = produtosCadastrados.findIndex(p => p.id === id)
   if (idx >= 0) produtosCadastrados.splice(idx, 1)
   _syncSelectProdutos()
-  const tr = document.getElementById(id)
-  if (tr) tr.remove()
-  atualizarContProdutos()
+  renderizarTabelaPrecificacao()
 }
 
 function atualizarContProdutos() {
