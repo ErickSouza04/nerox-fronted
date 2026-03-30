@@ -2638,7 +2638,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div id="metas-prolabore-save-ok" style="display:none;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--green);margin-bottom:12px">✅ Pró-labore salvo com sucesso!</div>
           <div id="metas-prolabore-save-err" style="display:none;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);border-radius:9px;padding:10px 13px;font-size:12.5px;color:var(--red);margin-bottom:12px">❌ Erro ao salvar. Tente novamente.</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" id="metas-prolabore-input" value="1500" oninput="calcularProLabore()"></div>
+            <div class="form-group"><label class="form-label">Retirada mensal desejada</label><input class="form-input" type="number" id="metas-prolabore-input" placeholder="Ex: 1500" oninput="calcularProLabore()"></div>
             <div class="form-group"><label class="form-label">Frequência</label><select class="form-select" id="metas-prolabore-freq"><option>Mensal</option><option>Quinzenal</option><option>Semanal</option></select></div>
           </div>
           <div style="margin-top:12px">
@@ -4670,7 +4670,8 @@ async function salvarProLabore() {
 }
 
 // ── Metas — carregar página com dados reais ──
-function carregarPaginaMetas() {
+// BACKEND: GET /usuarios/perfil deve retornar { dados: { meta_valor, prolabore_valor, prolabore_freq, ... } }
+async function carregarPaginaMetas() {
   const s    = App.stats ? Object.assign({}, App.stats) : {}
   // Modo demo: preenche dados de exemplo para não mostrar página em branco
   if (!App.token && !s.faturamento) {
@@ -4680,6 +4681,25 @@ function carregarPaginaMetas() {
     s.metaValor = 5000; s.ticketMedio = 285
   }
   if (!App.token && !s.faturamento) return
+
+  // ── Buscar perfil para garantir meta_valor e pró-labore atualizados ──
+  if (App.token) {
+    try {
+      const pRes = await api('/usuarios/perfil')
+      if (pRes?.ok) {
+        const { dados: perfil } = await pRes.json()
+        if (perfil.meta_valor > 0)      { s.metaValor      = Math.round(perfil.meta_valor);      if (App.stats) App.stats.metaValor      = s.metaValor }
+        if (perfil.prolabore_valor > 0) { s.prolaboreValor = Math.round(perfil.prolabore_valor); if (App.stats) App.stats.prolaboreValor = s.prolaboreValor }
+        if (perfil.prolabore_freq)      { s.prolaboreFreq  = perfil.prolabore_freq;               if (App.stats) App.stats.prolaboreFreq  = s.prolaboreFreq }
+        if (App.usuario) {
+          if (perfil.meta_valor > 0)      App.usuario.meta_valor      = Math.round(perfil.meta_valor)
+          if (perfil.prolabore_valor > 0) App.usuario.prolabore_valor = Math.round(perfil.prolabore_valor)
+          if (perfil.prolabore_freq)      App.usuario.prolabore_freq  = perfil.prolabore_freq
+          localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+        }
+      }
+    } catch { /* usa dados em cache de App.stats / App.usuario */ }
+  }
   const hoje = new Date()
   const mes  = hoje.getMonth() + 1
   const ano  = hoje.getFullYear()
