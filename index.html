@@ -8111,9 +8111,16 @@ async function adicionarProdutoEstoque() {
     })
   })
   if (res?.ok) {
+    const body = await res.json().catch(() => null)
+    const novoProduto = body?.produto || body?.product || body?.data
     document.getElementById('estoque-form-add').style.display = 'none'
     ;['est-nome','est-marca','est-preco','est-custo','est-qtd','est-min'].forEach(id => { const el = document.getElementById(id); if (el) el.value = '' })
-    await carregarEstoque()
+    if (novoProduto) {
+      _estoqueData = [..._estoqueData, novoProduto]
+      renderizarEstoque()
+    } else {
+      await carregarEstoque()
+    }
     mostrarToast('Produto cadastrado!', 'success')
   } else {
     const errBody = await res?.json().catch(() => null)
