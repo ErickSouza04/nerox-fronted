@@ -8063,7 +8063,7 @@ async function carregarEstoque() {
   const res = await api('/stock/products' + query)
   if (!res?.ok) return
   const data = await res.json().catch(() => [])
-  _estoqueData = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
+  _estoqueData = Array.isArray(data) ? data : (data.dados ?? data.produtos ?? data.products ?? data.data ?? data.items ?? [])
   renderizarEstoque()
 }
 
