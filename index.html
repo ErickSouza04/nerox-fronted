@@ -4052,18 +4052,20 @@ async function iniciarDashboard() {
       // ── Salvar stats globais para Profit Card e PDF ──
       const varLucro = dados.variacao?.lucro ?? 0
       App.stats = {
-        faturamento:  Math.round(dados.faturamento   || 0),
-        despesas:     Math.round(dados.total_despesas|| 0),
-        lucro:        Math.round(dados.lucro         || 0),
-        margem:       Math.round(dados.margem        || 0),
-        ticketMedio:  Math.round(dados.ticket_medio  || dados.faturamento/(dados.total_vendas||1) || 0),
-        varFat:       parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
-        varLucro:     parseFloat((dados.variacao?.lucro||0).toFixed(1)),
-        varDesp:      parseFloat((dados.variacao?.despesas||0).toFixed(1)),
-        totalVendas:  dados.total_vendas || 0,
-        progresso:    Math.round(dados.progresso_meta || 0),
-        metaValor:    Math.round(dados.meta_valor     || 0),
-        diario:       [],  // preenchido abaixo
+        faturamento:    Math.round(dados.faturamento   || 0),
+        despesas:       Math.round(dados.total_despesas|| 0),
+        lucro:          Math.round(dados.lucro         || 0),
+        margem:         Math.round(dados.margem        || 0),
+        ticketMedio:    Math.round(dados.ticket_medio  || dados.faturamento/(dados.total_vendas||1) || 0),
+        varFat:         parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
+        varLucro:       parseFloat((dados.variacao?.lucro||0).toFixed(1)),
+        varDesp:        parseFloat((dados.variacao?.despesas||0).toFixed(1)),
+        totalVendas:    dados.total_vendas || 0,
+        progresso:      Math.round(dados.progresso_meta || 0),
+        metaValor:      Math.round(dados.meta_valor     || App.usuario?.meta_valor     || 0),
+        prolaboreValor: Math.round(dados.prolabore_valor|| App.usuario?.prolabore_valor || 0),
+        prolaboreFreq:  dados.prolabore_freq || App.usuario?.prolabore_freq || 'Mensal',
+        diario:         [],  // preenchido abaixo
       }
       // ── Índice Nexor mini-cards ──
       const _vf = dados.variacao?.faturamento || 0, _vd = dados.variacao?.despesas || 0
@@ -4627,6 +4629,7 @@ async function salvarMeta() {
   ok.style.display = 'none'; err.style.display = 'none'
   if (!App.token) {
     if (App.stats) App.stats.metaValor = Math.round(valor)
+    if (App.usuario) { App.usuario.meta_valor = Math.round(valor); localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
     ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
     carregarPaginaMetas(); return
   }
@@ -4634,6 +4637,7 @@ async function salvarMeta() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats) App.stats.metaValor = Math.round(valor)
+      if (App.usuario) { App.usuario.meta_valor = Math.round(valor); localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4650,6 +4654,7 @@ async function salvarProLabore() {
   ok.style.display = 'none'; err.style.display = 'none'
   if (!App.token) {
     if (App.stats) { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
+    if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq; localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
     ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
     carregarPaginaMetas(); return
   }
@@ -4657,6 +4662,7 @@ async function salvarProLabore() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
     if (res?.ok) {
       if (App.stats) { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
+      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq; localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4694,7 +4700,7 @@ function carregarPaginaMetas() {
 
   // ─ Popular input da meta com valor atual ─
   const metaInput = document.getElementById('metas-meta-input')
-  if (metaInput && s.metaValor > 0 && !metaInput.value) metaInput.value = s.metaValor
+  if (metaInput && s.metaValor > 0) metaInput.value = s.metaValor
 
   // ─ Verificar se meta foi batida → atualizar liga ─
   const progresso = s.progresso || 0
@@ -4732,7 +4738,11 @@ function carregarPaginaMetas() {
   }
 
   // ─ Pró-labore ─
-  const prolabore = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  const prolaboreInput  = document.getElementById('metas-prolabore-input')
+  const prolaboreFreqEl = document.getElementById('metas-prolabore-freq')
+  if (prolaboreInput  && s.prolaboreValor > 0) prolaboreInput.value  = s.prolaboreValor
+  if (prolaboreFreqEl && s.prolaboreFreq)       prolaboreFreqEl.value = s.prolaboreFreq
+  const prolabore = parseFloat(prolaboreInput?.value || 0)
   _s('metas-lucro-antes', fmtBRL(lucro))
   _s('metas-lucro-apos',  fmtBRL(Math.max(0, lucro - prolabore)))
 
@@ -5059,18 +5069,20 @@ async function gerarRelatorioPDF() {
       if (rRes?.ok) {
         const {dados} = await rRes.json()
         App.stats = {
-          faturamento: Math.round(dados.faturamento    || 0),
-          despesas:    Math.round(dados.total_despesas || 0),
-          lucro:       Math.round(dados.lucro          || 0),
-          margem:      Math.round(dados.margem         || 0),
-          ticketMedio: Math.round(dados.ticket_medio   || 0),
-          varFat:      parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
-          varLucro:    parseFloat((dados.variacao?.lucro||0).toFixed(1)),
-          varDesp:     parseFloat((dados.variacao?.despesas||0).toFixed(1)),
-          totalVendas: dados.total_vendas  || 0,
-          progresso:   Math.round(dados.progresso_meta || 0),
-          metaValor:   Math.round(dados.meta_valor     || 0),
-          diario:      [],
+          faturamento:    Math.round(dados.faturamento    || 0),
+          despesas:       Math.round(dados.total_despesas || 0),
+          lucro:          Math.round(dados.lucro          || 0),
+          margem:         Math.round(dados.margem         || 0),
+          ticketMedio:    Math.round(dados.ticket_medio   || 0),
+          varFat:         parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
+          varLucro:       parseFloat((dados.variacao?.lucro||0).toFixed(1)),
+          varDesp:        parseFloat((dados.variacao?.despesas||0).toFixed(1)),
+          totalVendas:    dados.total_vendas  || 0,
+          progresso:      Math.round(dados.progresso_meta || 0),
+          metaValor:      Math.round(dados.meta_valor     || App.usuario?.meta_valor     || 0),
+          prolaboreValor: Math.round(dados.prolabore_valor|| App.usuario?.prolabore_valor || 0),
+          prolaboreFreq:  dados.prolabore_freq || App.usuario?.prolabore_freq || 'Mensal',
+          diario:         [],
         }
       }
       if (iRes?.ok) { const {dados} = await iRes.json(); if(App.stats) App.stats.indice = dados.indice||74 }
@@ -5343,17 +5355,19 @@ async function abrirProfitCard() {
       if (rRes?.ok) {
         const {dados} = await rRes.json()
         App.stats = {
-          faturamento:  Math.round(dados.faturamento    || 0),
-          despesas:     Math.round(dados.total_despesas || 0),
-          lucro:        Math.round(dados.lucro          || 0),
-          margem:       Math.round(dados.margem         || 0),
-          ticketMedio:  Math.round(dados.ticket_medio   || dados.faturamento/(dados.total_vendas||1) || 0),
-          varFat:       parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
-          varLucro:     parseFloat((dados.variacao?.lucro||0).toFixed(1)),
-          totalVendas:  dados.total_vendas || 0,
-          progresso:    Math.round(dados.progresso_meta || 0),
-          metaValor:    Math.round(dados.meta_valor     || 0),
-          diario:       [],
+          faturamento:    Math.round(dados.faturamento    || 0),
+          despesas:       Math.round(dados.total_despesas || 0),
+          lucro:          Math.round(dados.lucro          || 0),
+          margem:         Math.round(dados.margem         || 0),
+          ticketMedio:    Math.round(dados.ticket_medio   || dados.faturamento/(dados.total_vendas||1) || 0),
+          varFat:         parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
+          varLucro:       parseFloat((dados.variacao?.lucro||0).toFixed(1)),
+          totalVendas:    dados.total_vendas || 0,
+          progresso:      Math.round(dados.progresso_meta || 0),
+          metaValor:      Math.round(dados.meta_valor     || App.usuario?.meta_valor     || 0),
+          prolaboreValor: Math.round(dados.prolabore_valor|| App.usuario?.prolabore_valor || 0),
+          prolaboreFreq:  dados.prolabore_freq || App.usuario?.prolabore_freq || 'Mensal',
+          diario:         [],
         }
       }
       if (dRes?.ok) {
@@ -5556,17 +5570,19 @@ async function carregarPaginaIA() {
       if (rRes?.ok) {
         const {dados} = await rRes.json()
         App.stats = {
-          faturamento:  Math.round(dados.faturamento    || 0),
-          despesas:     Math.round(dados.total_despesas || 0),
-          lucro:        Math.round(dados.lucro          || 0),
-          margem:       Math.round(dados.margem         || 0),
-          ticketMedio:  Math.round(dados.ticket_medio   || 0),
-          varFat:       parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
-          varLucro:     parseFloat((dados.variacao?.lucro||0).toFixed(1)),
-          totalVendas:  dados.total_vendas  || 0,
-          progresso:    Math.round(dados.progresso_meta || 0),
-          metaValor:    Math.round(dados.meta_valor     || 0),
-          diario:       [],
+          faturamento:    Math.round(dados.faturamento    || 0),
+          despesas:       Math.round(dados.total_despesas || 0),
+          lucro:          Math.round(dados.lucro          || 0),
+          margem:         Math.round(dados.margem         || 0),
+          ticketMedio:    Math.round(dados.ticket_medio   || 0),
+          varFat:         parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
+          varLucro:       parseFloat((dados.variacao?.lucro||0).toFixed(1)),
+          totalVendas:    dados.total_vendas  || 0,
+          progresso:      Math.round(dados.progresso_meta || 0),
+          metaValor:      Math.round(dados.meta_valor     || App.usuario?.meta_valor     || 0),
+          prolaboreValor: Math.round(dados.prolabore_valor|| App.usuario?.prolabore_valor || 0),
+          prolaboreFreq:  dados.prolabore_freq || App.usuario?.prolabore_freq || 'Mensal',
+          diario:         [],
         }
       }
       if (iRes?.ok) {
@@ -5853,16 +5869,18 @@ async function iniciarPaginaCards() {
       if (rRes?.ok) {
         const { dados } = await rRes.json()
         App.stats = {
-          faturamento: Math.round(dados.faturamento    || 0),
-          despesas:    Math.round(dados.total_despesas || 0),
-          lucro:       Math.round(dados.lucro          || 0),
-          margem:      Math.round(dados.margem         || 0),
-          ticketMedio: Math.round(dados.ticket_medio   || 0),
-          varFat:      parseFloat((dados.variacao?.faturamento || 0).toFixed(1)),
-          varLucro:    parseFloat((dados.variacao?.lucro       || 0).toFixed(1)),
-          progresso:   Math.round(dados.progresso_meta || 0),
-          metaValor:   Math.round(dados.meta_valor     || 0),
-          diario:      [],
+          faturamento:    Math.round(dados.faturamento    || 0),
+          despesas:       Math.round(dados.total_despesas || 0),
+          lucro:          Math.round(dados.lucro          || 0),
+          margem:         Math.round(dados.margem         || 0),
+          ticketMedio:    Math.round(dados.ticket_medio   || 0),
+          varFat:         parseFloat((dados.variacao?.faturamento || 0).toFixed(1)),
+          varLucro:       parseFloat((dados.variacao?.lucro       || 0).toFixed(1)),
+          progresso:      Math.round(dados.progresso_meta || 0),
+          metaValor:      Math.round(dados.meta_valor     || App.usuario?.meta_valor     || 0),
+          prolaboreValor: Math.round(dados.prolabore_valor|| App.usuario?.prolabore_valor || 0),
+          prolaboreFreq:  dados.prolabore_freq || App.usuario?.prolabore_freq || 'Mensal',
+          diario:         [],
         }
       }
       if (iRes?.ok) {
