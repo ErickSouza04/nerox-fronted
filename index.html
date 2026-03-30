@@ -8075,15 +8075,15 @@ function renderizarEstoque() {
     return
   }
   tbody.innerHTML = _estoqueData.map((p, i) => {
-    const qtd = p.estoque_atual ?? p.quantidade ?? 0
-    const min  = p.estoque_minimo ?? p.minimo ?? 5
+    const qtd = p.current_stock ?? p.estoque_atual ?? p.quantidade ?? 0
+    const min  = p.min_stock_alert ?? p.estoque_minimo ?? p.minimo ?? 5
     const baixo = qtd < min
     return `<tr>
-      <td>${esc(p.nome)}</td>
-      <td>${esc(p.marca || '-')}</td>
+      <td>${esc(p.name ?? p.nome)}</td>
+      <td>${esc(p.brand ?? p.marca ?? '-')}</td>
       <td>${qtd}${baixo ? '<span class="stock-badge-low">baixo</span>' : ''}</td>
-      <td>${fmtBRL(p.preco_custo || 0)}</td>
-      <td>${fmtBRL(p.preco_venda || p.preco || 0)}</td>
+      <td>${fmtBRL(p.cost_price ?? p.preco_custo ?? 0)}</td>
+      <td>${fmtBRL(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)}</td>
       <td><div style="display:flex;gap:6px">
         <button class="stock-btn entrada" onclick="movimentarEstoque(${i},'entrada')">+ Entrada</button>
         <button class="stock-btn saida" onclick="movimentarEstoque(${i},'saida')">− Saída</button>
