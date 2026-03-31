@@ -4664,7 +4664,28 @@ async function salvarProLabore() {
 }
 
 // ── Metas — carregar página com dados reais ──
-function carregarPaginaMetas() {
+async function carregarPaginaMetas() {
+  // Buscar dados frescos do backend ao carregar a página de Metas
+  if (App.token) {
+    try {
+      const mes = new Date().getMonth() + 1, ano = new Date().getFullYear()
+      const rRes = await api('/dashboard/resumo?mes=' + mes + '&ano=' + ano)
+      if (rRes?.ok) {
+        const { dados } = await rRes.json()
+        if (!App.stats) App.stats = {}
+        App.stats.faturamento = Math.round(dados.faturamento    || 0)
+        App.stats.despesas    = Math.round(dados.total_despesas || 0)
+        App.stats.lucro       = Math.round(dados.lucro          || 0)
+        App.stats.margem      = Math.round(dados.margem         || 0)
+        App.stats.ticketMedio = Math.round(dados.ticket_medio   || 0)
+        App.stats.varFat      = parseFloat((dados.variacao?.faturamento || 0).toFixed(1))
+        App.stats.varLucro    = parseFloat((dados.variacao?.lucro       || 0).toFixed(1))
+        App.stats.totalVendas = dados.total_vendas  || 0
+        App.stats.progresso   = Math.round(dados.progresso_meta || 0)
+        App.stats.metaValor   = Math.round(dados.meta_valor     || 0)
+      }
+    } catch(e) { console.warn('Metas data fetch:', e) }
+  }
   const s    = App.stats ? Object.assign({}, App.stats) : {}
   // Modo demo: preenche dados de exemplo para não mostrar página em branco
   if (!App.token && !s.faturamento) {
@@ -4692,9 +4713,9 @@ function carregarPaginaMetas() {
     else                  nexorDesc.textContent = 'Comece a registrar vendas e despesas para calcular seu índice.'
   }
 
-  // ─ Popular input da meta com valor atual ─
+  // ─ Popular input da meta com valor atual do backend ─
   const metaInput = document.getElementById('metas-meta-input')
-  if (metaInput && s.metaValor > 0 && !metaInput.value) metaInput.value = s.metaValor
+  if (metaInput && s.metaValor > 0) metaInput.value = s.metaValor
 
   // ─ Verificar se meta foi batida → atualizar liga ─
   const progresso = s.progresso || 0
@@ -4731,8 +4752,12 @@ function carregarPaginaMetas() {
     }
   }
 
-  // ─ Pró-labore ─
-  const prolabore = parseFloat(document.getElementById('metas-prolabore-input')?.value || 0)
+  // ─ Pró-labore — popular inputs com valores persistidos ─
+  const prolaboreInput = document.getElementById('metas-prolabore-input')
+  const prolaboreFreqEl = document.getElementById('metas-prolabore-freq')
+  if (prolaboreInput && s.prolaboreValor > 0) prolaboreInput.value = s.prolaboreValor
+  if (prolaboreFreqEl && s.prolaboreFreq) prolaboreFreqEl.value = s.prolaboreFreq
+  const prolabore = parseFloat(prolaboreInput?.value || 0)
   _s('metas-lucro-antes', fmtBRL(lucro))
   _s('metas-lucro-apos',  fmtBRL(Math.max(0, lucro - prolabore)))
 
