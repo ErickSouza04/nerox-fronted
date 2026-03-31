@@ -4668,21 +4668,19 @@ async function carregarPaginaMetas() {
   // Buscar dados frescos do backend ao carregar a página de Metas
   if (App.token) {
     try {
-      const mes = new Date().getMonth() + 1, ano = new Date().getFullYear()
-      const rRes = await api('/dashboard/resumo?mes=' + mes + '&ano=' + ano)
+      const rRes = await api('/metas')
       if (rRes?.ok) {
         const { dados } = await rRes.json()
         if (!App.stats) App.stats = {}
-        App.stats.faturamento = Math.round(dados.faturamento    || 0)
-        App.stats.despesas    = Math.round(dados.total_despesas || 0)
-        App.stats.lucro       = Math.round(dados.lucro          || 0)
-        App.stats.margem      = Math.round(dados.margem         || 0)
-        App.stats.ticketMedio = Math.round(dados.ticket_medio   || 0)
-        App.stats.varFat      = parseFloat((dados.variacao?.faturamento || 0).toFixed(1))
-        App.stats.varLucro    = parseFloat((dados.variacao?.lucro       || 0).toFixed(1))
-        App.stats.totalVendas = dados.total_vendas  || 0
-        App.stats.progresso   = Math.round(dados.progresso_meta || 0)
-        App.stats.metaValor   = Math.round(dados.meta_valor     || 0)
+        const metaInput     = document.getElementById('metas-meta-input')
+        const prolaboreInput = document.getElementById('metas-prolabore-input')
+        if (dados && dados.length > 0) {
+          if (metaInput)      metaInput.value      = dados[0].valor_meta  ?? ''
+          if (prolaboreInput) prolaboreInput.value = dados[0].pro_labore  ?? ''
+        } else {
+          if (metaInput)      metaInput.value      = ''
+          if (prolaboreInput) prolaboreInput.value = ''
+        }
       }
     } catch(e) { console.warn('Metas data fetch:', e) }
   }
