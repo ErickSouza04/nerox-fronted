@@ -4675,15 +4675,19 @@ async function carregarPaginaMetas() {
         const metaInput     = document.getElementById('metas-meta-input')
         const prolaboreInput = document.getElementById('metas-prolabore-input')
         if (dados && dados.length > 0) {
-          App.stats.metaValor     = parseFloat(dados[0].valor_meta) || 0
+          App.stats.metaValor      = parseFloat(dados[0].valor_meta) || 0
           App.stats.prolaboreValor = parseFloat(dados[0].pro_labore) || 0
-          if (metaInput)      metaInput.value      = dados[0].valor_meta  ?? ''
-          if (prolaboreInput) prolaboreInput.value = dados[0].pro_labore  ?? ''
+          App.stats.progresso      = App.stats.metaValor > 0 && App.stats.lucro > 0
+            ? Math.min(100, Math.round((App.stats.lucro / App.stats.metaValor) * 100))
+            : 0
+          if (metaInput)       metaInput.value      = dados[0].valor_meta ?? ''
+          if (prolaboreInput)  prolaboreInput.value = dados[0].pro_labore ?? ''
         } else {
-          App.stats.metaValor     = 0
+          App.stats.metaValor      = 0
           App.stats.prolaboreValor = 0
-          if (metaInput)      metaInput.value      = ''
-          if (prolaboreInput) prolaboreInput.value = ''
+          App.stats.progresso      = 0
+          if (metaInput)       metaInput.value      = ''
+          if (prolaboreInput)  prolaboreInput.value = ''
         }
       }
     } catch(e) { console.warn('Metas data fetch:', e) }
