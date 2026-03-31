@@ -4686,8 +4686,13 @@ async function carregarPaginaMetas() {
   if (App.token) {
     try {
       const pRes = await api('/usuarios/perfil')
+      console.log('[Metas] GET /usuarios/perfil — status:', pRes?.status, 'ok:', pRes?.ok)
       if (pRes?.ok) {
-        const { dados: perfil } = await pRes.json()
+        const body = await pRes.json()
+        console.log('[Metas] GET /usuarios/perfil — body completo:', JSON.stringify(body))
+        const perfil = body?.dados ?? body
+        console.log('[Metas] perfil extraído:', JSON.stringify(perfil))
+        console.log('[Metas] perfil.meta_valor:', perfil?.meta_valor, '| perfil.prolabore_valor:', perfil?.prolabore_valor, '| perfil.prolabore_freq:', perfil?.prolabore_freq)
         if (perfil.meta_valor > 0)      { s.metaValor      = Math.round(perfil.meta_valor);      if (App.stats) App.stats.metaValor      = s.metaValor }
         if (perfil.prolabore_valor > 0) { s.prolaboreValor = Math.round(perfil.prolabore_valor); if (App.stats) App.stats.prolaboreValor = s.prolaboreValor }
         if (perfil.prolabore_freq)      { s.prolaboreFreq  = perfil.prolabore_freq;               if (App.stats) App.stats.prolaboreFreq  = s.prolaboreFreq }
@@ -4697,9 +4702,21 @@ async function carregarPaginaMetas() {
           if (perfil.prolabore_freq)      App.usuario.prolabore_freq  = perfil.prolabore_freq
           localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
         }
+      } else {
+        console.warn('[Metas] GET /usuarios/perfil falhou — usando cache')
       }
-    } catch { /* usa dados em cache de App.stats / App.usuario */ }
+    } catch (e) {
+      console.error('[Metas] GET /usuarios/perfil — exceção:', e)
+    }
   }
+
+  console.log('[Metas] s antes de renderizar:', JSON.stringify({
+    metaValor:      s.metaValor,
+    prolaboreValor: s.prolaboreValor,
+    prolaboreFreq:  s.prolaboreFreq,
+    lucro:          s.lucro,
+    progresso:      s.progresso,
+  }))
   const hoje = new Date()
   const mes  = hoje.getMonth() + 1
   const ano  = hoje.getFullYear()
