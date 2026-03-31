@@ -4690,16 +4690,17 @@ async function carregarPaginaMetas() {
       if (pRes?.ok) {
         const body = await pRes.json()
         console.log('[Metas] GET /usuarios/perfil — body completo:', JSON.stringify(body))
-        const perfil = body?.dados ?? body
+        // Suporta { dados:{...} }, { usuario:{...} }, { sucesso:true, usuario:{...} } e objeto direto
+        const perfil = body?.dados ?? body?.usuario ?? body
         console.log('[Metas] perfil extraído:', JSON.stringify(perfil))
         console.log('[Metas] perfil.meta_valor:', perfil?.meta_valor, '| perfil.prolabore_valor:', perfil?.prolabore_valor, '| perfil.prolabore_freq:', perfil?.prolabore_freq)
-        if (perfil.meta_valor > 0)      { s.metaValor      = Math.round(perfil.meta_valor);      if (App.stats) App.stats.metaValor      = s.metaValor }
-        if (perfil.prolabore_valor > 0) { s.prolaboreValor = Math.round(perfil.prolabore_valor); if (App.stats) App.stats.prolaboreValor = s.prolaboreValor }
-        if (perfil.prolabore_freq)      { s.prolaboreFreq  = perfil.prolabore_freq;               if (App.stats) App.stats.prolaboreFreq  = s.prolaboreFreq }
+        if (perfil?.meta_valor > 0)      { s.metaValor      = Math.round(perfil.meta_valor);      if (App.stats) App.stats.metaValor      = s.metaValor }
+        if (perfil?.prolabore_valor > 0) { s.prolaboreValor = Math.round(perfil.prolabore_valor); if (App.stats) App.stats.prolaboreValor = s.prolaboreValor }
+        if (perfil?.prolabore_freq)      { s.prolaboreFreq  = perfil.prolabore_freq;               if (App.stats) App.stats.prolaboreFreq  = s.prolaboreFreq }
         if (App.usuario) {
-          if (perfil.meta_valor > 0)      App.usuario.meta_valor      = Math.round(perfil.meta_valor)
-          if (perfil.prolabore_valor > 0) App.usuario.prolabore_valor = Math.round(perfil.prolabore_valor)
-          if (perfil.prolabore_freq)      App.usuario.prolabore_freq  = perfil.prolabore_freq
+          if (perfil?.meta_valor > 0)      App.usuario.meta_valor      = Math.round(perfil.meta_valor)
+          if (perfil?.prolabore_valor > 0) App.usuario.prolabore_valor = Math.round(perfil.prolabore_valor)
+          if (perfil?.prolabore_freq)      App.usuario.prolabore_freq  = perfil.prolabore_freq
           localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
         }
       } else {
