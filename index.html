@@ -2361,7 +2361,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       <div class="stat-card c-blue"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon blue">💰</div><div class="stat-label">Faturamento</div><div class="stat-value count-anim" data-target="12840" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 18%</span> vs mês anterior</div></div></div>
       <div class="stat-card c-red"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon red">📤</div><div class="stat-label">Despesas</div><div class="stat-value red count-anim" data-target="9245" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-down">↑ 12%</span> vs mês anterior</div></div></div>
       <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">📈</div><div class="stat-label">Lucro Real</div><div class="stat-value green count-anim" data-target="3595" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 31%</span> vs mês anterior</div></div></div>
-      <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">🎫</div><div class="stat-label">Ticket Médio</div><div class="stat-value count-anim" data-target="285" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ R$ 23</span> vs ant.</div></div></div>
+      <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">🎫</div><div class="stat-label">Ticket Médio</div><div class="stat-value count-anim" data-target="285" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 8%</span> vs mês anterior</div></div></div>
     </div>
     <div class="smart-alerts" id="smart-alerts"></div>
 
@@ -4047,11 +4047,11 @@ async function iniciarDashboard() {
       if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
-      const _vFat=dados.variacao?.faturamento||0, _vDesp=dados.variacao?.despesas||0, _vLuc=dados.variacao?.lucro||0
+      const _vFat=parseFloat(dados.variacao?.faturamento)||0, _vDesp=parseFloat(dados.variacao?.despesas)||0, _vLuc=parseFloat(dados.variacao?.lucro)||0
       if(vars[0]){vars[0].textContent=(_vFat>=0?'↑':'↓')+Math.abs(_vFat).toFixed(0)+'%'; vars[0].className=_vFat>=0?'badge-up':'badge-down'}
       if(vars[1]){vars[1].textContent=(_vDesp>=0?'↑':'↓')+Math.abs(_vDesp).toFixed(0)+'%'; vars[1].className=_vDesp>0?'badge-down':'badge-up'}
       if(vars[2]){vars[2].textContent=(_vLuc>=0?'↑':'↓')+Math.abs(_vLuc).toFixed(0)+'%'; vars[2].className=_vLuc>=0?'badge-up':'badge-down'}
-      if(vars[3]){vars[3].textContent=dados.ticket_medio_anterior>0?(dados.ticket_medio>=dados.ticket_medio_anterior?'↑':'↓')+'R$ '+Math.abs((dados.ticket_medio||0)-(dados.ticket_medio_anterior||0)).toFixed(0):'—'; vars[3].className=dados.ticket_medio>=(dados.ticket_medio_anterior||0)?'badge-up':'badge-down'}
+      if(vars[3]){const _tA=dados.ticket_medio||0,_tAnt=dados.ticket_medio_anterior||0,_vT=_tAnt>0?(_tA-_tAnt)/_tAnt*100:null,_pct=_vT!==null&&isFinite(_vT)?_vT:null;vars[3].textContent=_pct!==null?(_pct>=0?'↑':'↓')+Math.abs(_pct).toFixed(0)+'%':'—';vars[3].className=(_pct===null||_pct>=0)?'badge-up':'badge-down'}
       // Meta do mês — usa meta_valor da API ou fallback para App.usuario/App.stats
       const _metaValorFinal = dados.meta_valor > 0 ? dados.meta_valor : (parseFloat(App.usuario?.meta_valor) || App.stats?.metaValor || 0)
       const pct = dados.progresso_meta > 0 ? dados.progresso_meta : (_metaValorFinal > 0 && dados.lucro > 0 ? Math.min(100, Math.round((dados.lucro / _metaValorFinal) * 100)) : 0)
