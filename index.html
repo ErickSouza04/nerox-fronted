@@ -141,7 +141,7 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 @keyframes heroScan { 0%{top:-2px;opacity:0} 3%{opacity:1} 92%{opacity:0.6} 100%{top:102%;opacity:0} }
 @keyframes cornerPing { 0%,100%{transform:scale(1);opacity:0.4} 50%{transform:scale(1.6);opacity:0} }
 /* Scan line animada no hero */
-.hero-metric { position:relative; overflow:hidden; }
+.hero-metric { position:relative; overflow:visible; }
 .hero-metric::after { content:''; position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent 0%,rgba(34,197,94,0.45) 35%,rgba(34,197,94,0.85) 50%,rgba(34,197,94,0.45) 65%,transparent 100%); animation:heroScan 9s ease-in-out infinite 1.5s; pointer-events:none; z-index:3; }
 /* Brilho suave no valor principal */
 .hero-main-value { text-shadow:0 0 35px rgba(34,197,94,0.18); }
@@ -332,7 +332,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .hero-metric-glow { position: absolute; top: -60px; right: -40px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, transparent 65%); pointer-events: none; }
 .hero-label { font-size: 11px; font-weight: 700; color: rgba(34,197,94,0.8); text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .hero-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
-.hero-main-value { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 8vw, 3rem); font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; display: block; overflow: visible; width: 100%; white-space: nowrap; word-break: keep-all; padding-right: 0; box-sizing: border-box; }
+.hero-main-value { font-family: 'Syne', sans-serif; font-size: clamp(1.6rem, 7.5vw, 2.8rem) !important; font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; display: block !important; overflow: visible !important; width: auto !important; max-width: 100% !important; white-space: nowrap !important; word-break: keep-all; padding-right: 0; box-sizing: border-box !important; }
 .hero-main-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
 .hero-stats-row { display: flex; flex-direction: column; gap: 0; margin-top: 4px; }
 .hero-stat { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
@@ -4023,7 +4023,7 @@ async function iniciarDashboard() {
       if(cards[2]){cards[2].dataset.target=Math.round(_cd.lucro||0);           countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(_cd.ticket_medio||0);     countUp(cards[3])}
       const hlEl=document.getElementById('hero-lucro'), hrEl=document.getElementById('hero-receita'), hdEl=document.getElementById('hero-despesas')
-      if(hlEl && _ch) hlEl.textContent=fmtBRL(_ch.lucro||0)
+      if(hlEl && _ch) { hlEl.textContent=fmtBRL(_ch.lucro||0); hlEl.style.cssText+='font-size:clamp(1.6rem,7.5vw,2.8rem)!important;white-space:nowrap!important;overflow:visible!important;' }
       if(hrEl && _ch) hrEl.textContent=fmtBRL(_ch.faturamento||0)
       if(hdEl && _ch) hdEl.textContent=fmtBRL(_ch.despesas||0)
     }
@@ -4153,7 +4153,7 @@ async function iniciarDashboard() {
         const hmvEl = document.getElementById('hero-margem-val')
         const hmfEl = document.getElementById('hero-margin-fill')
         const hmpEl = document.querySelector('.hero-margin-pct')
-        if (hlEl) hlEl.textContent = fmtBRL(hoje.lucro || 0)
+        if (hlEl) { hlEl.textContent = fmtBRL(hoje.lucro || 0); hlEl.style.cssText+='font-size:clamp(1.6rem,7.5vw,2.8rem)!important;white-space:nowrap!important;overflow:visible!important;' }
         if (hrEl) hrEl.textContent = fmtBRL(hoje.faturamento || 0)
         if (hdEl) hdEl.textContent = fmtBRL(hoje.despesas || 0)
         // Margem de hoje
