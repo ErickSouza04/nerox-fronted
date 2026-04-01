@@ -4667,27 +4667,21 @@ async function salvarProLabore() {
 
 // ── Metas — carregar página com dados reais ──
 async function carregarPaginaMetas() {
-  // Buscar dados frescos do perfil do usuário ao carregar a página de Metas
+  // Lê meta e pró-labore de App.usuario (já em memória após login/save)
+  // GET /usuarios/perfil retorna 404 e GET /metas retorna dados:[]
   if (App.token) {
-    try {
-      const rRes = await api('/usuarios/perfil')
-      if (rRes?.ok) {
-        const json = await rRes.json()
-        const perfil = json.usuario || json.dados || json
-        if (!App.stats) App.stats = {}
-        const metaValorPerfil    = parseFloat(perfil.meta_valor)    || 0
-        const prolaboreValorPerfil = parseFloat(perfil.prolabore_valor) || 0
-        App.stats.metaValor      = metaValorPerfil
-        App.stats.prolaboreValor = prolaboreValorPerfil
-        App.stats.progresso      = metaValorPerfil > 0 && App.stats.lucro > 0
-          ? Math.min(100, Math.round((App.stats.lucro / metaValorPerfil) * 100))
-          : 0
-        const metaInput      = document.getElementById('metas-meta-input')
-        const prolaboreInput = document.getElementById('metas-prolabore-input')
-        if (metaInput)       metaInput.value      = metaValorPerfil      || ''
-        if (prolaboreInput)  prolaboreInput.value = prolaboreValorPerfil || ''
-      }
-    } catch(e) { console.warn('Metas perfil fetch:', e) }
+    if (!App.stats) App.stats = {}
+    const metaValorPerfil      = parseFloat(App.usuario?.meta_valor)      || App.stats.metaValor      || 0
+    const prolaboreValorPerfil = parseFloat(App.usuario?.prolabore_valor) || App.stats.prolaboreValor || 0
+    App.stats.metaValor      = metaValorPerfil
+    App.stats.prolaboreValor = prolaboreValorPerfil
+    App.stats.progresso      = metaValorPerfil > 0 && App.stats.lucro > 0
+      ? Math.min(100, Math.round((App.stats.lucro / metaValorPerfil) * 100))
+      : 0
+    const metaInput      = document.getElementById('metas-meta-input')
+    const prolaboreInput = document.getElementById('metas-prolabore-input')
+    if (metaInput)       metaInput.value      = metaValorPerfil      || ''
+    if (prolaboreInput)  prolaboreInput.value = prolaboreValorPerfil || ''
   }
   const s    = App.stats ? Object.assign({}, App.stats) : {}
   // Modo demo: preenche dados de exemplo para não mostrar página em branco
