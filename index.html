@@ -36,7 +36,7 @@ input, select, textarea { font-size: 16px !important; }
   --shadow: 0 4px 24px rgba(0,0,0,0.45); --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
 }
 html { scroll-behavior: smooth; background: #090E1A; }
-body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Twemoji Mozilla', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; font-variant-emoji: emoji; }
 .bg-orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(90px); opacity: 0.16; }
 .bg-orb-1 { width: 800px; height: 800px; background: #1d4ed8; top: -280px; left: -180px; }
 .bg-orb-2 { width: 520px; height: 520px; background: #16a34a; bottom: -80px; right: 80px; }
@@ -204,8 +204,8 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .meta-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; }
 .meta-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
 .meta-values { display: flex; align-items: baseline; gap: 8px; margin-bottom: 11px; }
-.meta-current { font-size: 27px; font-weight: 800; color: var(--green); }
-.meta-total { font-size: 15px; color: var(--text-muted); }
+.meta-current { font-size: clamp(18px, 2.2vw, 27px); font-weight: 800; color: var(--green); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta-total { font-size: clamp(12px, 1.4vw, 15px); color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
 .progress-bar { background: rgba(255,255,255,0.06); border-radius: 100px; height: 8px; overflow: hidden; }
 .progress-fill { height:100%; background:linear-gradient(90deg,#16a34a,#22c55e,#4ade80); background-size:200% 100%; animation:pshine 3s ease infinite; border-radius:100px; }
 @keyframes pshine { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
@@ -1495,8 +1495,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   font-family:'Syne',sans-serif;
 }
 
-/* ── Emoji rendering universal (Windows / Mac / Android) ── */
-/* Força emojis a renderizarem corretamente em Windows/Chrome */
+/* ── Emoji rendering universal (Windows / Mac / Linux / Android) ── */
+/* Força emojis a renderizarem corretamente em todas as plataformas */
 .nav-icon,
 .ia-msg-avatar, .ia-avatar,
 .card-type-icon, .sp-btn-icon, .sp-preview-icon,
@@ -1506,14 +1506,37 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .copilot-action-item,
 .form-section-title,
 .chart-title,
-.ia-header-name {
+.ia-header-name,
+.hero-stat-label,
+.stat-label,
+.stat-icon,
+.meta-title,
+.nexor-mini-label,
+.nexor-mini-value,
+.nexor-label,
+.perf-chart-title,
+.perf-leg-item,
+.chart-header,
+.proj-card,
+.naa-title,
+.naa-text,
+.alert-card-text,
+.top-product-name,
+.bench-name,
+.ia-msg-text,
+.page-title,
+.page-sub,
+.form-label,
+.score-factor-label {
   font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji','Twemoji Mozilla',
                'Plus Jakarta Sans',sans-serif !important;
   font-style: normal !important;
+  font-variant-emoji: emoji;
 }
 /* Qualquer span sozinho com emoji (padrão comum no código) */
 .nav-icon > span, .stat-icon, .alert-card-icon {
-  font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif !important;
+  font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji','Twemoji Mozilla',sans-serif !important;
+  font-variant-emoji: emoji;
 }
 
 /* Noise texture */
@@ -2645,8 +2668,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
             <button class="btn btn-primary" onclick="salvarProLabore()">Salvar pró-labore</button>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:13px">
-            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:20px;font-weight:800;color:var(--green);margin-top:5px" id="metas-lucro-antes">R$ 3.595</div></div>
-            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Após retirada</div><div style="font-size:20px;font-weight:800;color:var(--blue);margin-top:5px" id="metas-lucro-apos">R$ 2.095</div></div>
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Antes do pró-labore</div><div style="font-size:clamp(14px,1.8vw,20px);font-weight:800;color:var(--green);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="metas-lucro-antes">R$ 3.595</div></div>
+            <div style="background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--radius-sm);padding:13px"><div style="font-size:10.5px;color:var(--text-muted);text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Após retirada</div><div style="font-size:clamp(14px,1.8vw,20px);font-weight:800;color:var(--blue);margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="metas-lucro-apos">R$ 2.095</div></div>
           </div>
           <div style="font-size:12px;color:var(--text-muted);margin-top:11px;padding:11px;background:rgba(34,197,94,0.05);border-radius:var(--radius-sm);border-left:3px solid var(--green);line-height:1.55">💡 <strong style="color:var(--text)">Dica:</strong> Reserve 20% do lucro antes de retirar o pró-labore para garantir capital de giro.</div>
         </div>
