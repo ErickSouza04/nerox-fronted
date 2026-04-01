@@ -4692,6 +4692,7 @@ async function carregarPaginaMetas() {
       }
     } catch(e) { console.warn('Metas data fetch:', e) }
   }
+  console.log('[Metas]', App.stats?.metaValor, App.stats?.progresso)
   const s    = App.stats ? Object.assign({}, App.stats) : {}
   // Modo demo: preenche dados de exemplo para não mostrar página em branco
   if (!App.token && !s.faturamento) {
