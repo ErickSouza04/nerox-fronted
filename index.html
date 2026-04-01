@@ -327,12 +327,12 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 /* ══════════════════════════════════════
    HERO METRIC
 ══════════════════════════════════════ */
-.hero-metric { background: linear-gradient(135deg, rgba(13,21,37,0.95) 0%, rgba(9,14,26,0.98) 100%) padding-box, linear-gradient(145deg, rgba(34,197,94,0.25) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.08) 100%) border-box; border: 1px solid transparent; border-radius: 22px; padding: 28px 28px 24px; margin-bottom: 16px; position: relative; overflow: hidden; }
+.hero-metric { background: linear-gradient(135deg, rgba(13,21,37,0.95) 0%, rgba(9,14,26,0.98) 100%) padding-box, linear-gradient(145deg, rgba(34,197,94,0.25) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.08) 100%) border-box; border: 1px solid transparent; border-radius: 22px; padding: 28px 16px 24px 28px; margin-bottom: 16px; position: relative; overflow: visible; }
 .hero-metric::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(34,197,94,0.7), transparent); }
 .hero-metric-glow { position: absolute; top: -60px; right: -40px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, transparent 65%); pointer-events: none; }
 .hero-label { font-size: 11px; font-weight: 700; color: rgba(34,197,94,0.8); text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .hero-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
-.hero-main-value { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 9vw, 3.5rem); font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; overflow: visible; width: 100%; white-space: nowrap; word-break: keep-all; padding-right: 16px; }
+.hero-main-value { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 8vw, 3rem); font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; display: block; overflow: visible; width: 100%; white-space: nowrap; word-break: keep-all; padding-right: 0; box-sizing: border-box; }
 .hero-main-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
 .hero-stats-row { display: flex; flex-direction: column; gap: 0; margin-top: 4px; }
 .hero-stat { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
