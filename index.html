@@ -4054,16 +4054,17 @@ async function iniciarDashboard() {
       if(vars[1]){vars[1].textContent=(_vDesp>=0?'↑':'↓')+Math.abs(_vDesp).toFixed(0)+'%'; vars[1].className=_vDesp>0?'badge-down':'badge-up'}
       if(vars[2]){vars[2].textContent=(_vLuc>=0?'↑':'↓')+Math.abs(_vLuc).toFixed(0)+'%'; vars[2].className=_vLuc>=0?'badge-up':'badge-down'}
       if(vars[3]){vars[3].textContent=dados.ticket_medio_anterior>0?(dados.ticket_medio>=dados.ticket_medio_anterior?'↑':'↓')+'R$ '+Math.abs((dados.ticket_medio||0)-(dados.ticket_medio_anterior||0)).toFixed(0):'—'; vars[3].className=dados.ticket_medio>=(dados.ticket_medio_anterior||0)?'badge-up':'badge-down'}
-      // Meta do mês
-      const pct=dados.progresso_meta||0
+      // Meta do mês — usa meta_valor da API ou fallback para App.usuario/App.stats
+      const _metaValorFinal = dados.meta_valor > 0 ? dados.meta_valor : (parseFloat(App.usuario?.meta_valor) || App.stats?.metaValor || 0)
+      const pct = dados.progresso_meta > 0 ? dados.progresso_meta : (_metaValorFinal > 0 && dados.lucro > 0 ? Math.min(100, Math.round((dados.lucro / _metaValorFinal) * 100)) : 0)
       const pf=document.querySelector('.progress-fill'); if(pf) pf.style.width=pct+'%'
       const mc=document.querySelector('.meta-current'); if(mc) mc.textContent=fmtBRL(dados.lucro)
       const _mMeses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
       const _mTit=document.querySelector('.meta-title'); if(_mTit) _mTit.textContent='🎯 Meta — '+_mMeses[mes-1]
       const _mTag=document.querySelector('.meta-header .tag'); if(_mTag){ _mTag.textContent=pct+'%'; _mTag.className='tag '+(pct>=100?'green':pct>=50?'blue':'amber') }
-      if (dados.meta_valor > 0) {
-        const _mt=document.querySelector('.meta-total'); if(_mt) _mt.textContent='/ '+fmtBRL(dados.meta_valor)
-        const falta=Math.max(0,(dados.meta_valor||0)-(dados.lucro||0))
+      if (_metaValorFinal > 0) {
+        const _mt=document.querySelector('.meta-total'); if(_mt) _mt.textContent='/ '+fmtBRL(_metaValorFinal)
+        const falta=Math.max(0,_metaValorFinal-(dados.lucro||0))
         const _mi=document.querySelector('.meta-info')
         if(_mi) {
           const diasMes=new Date(ano,mes,0).getDate(), diaHoje=new Date().getDate(), diasRestantes=diasMes-diaHoje
@@ -4087,8 +4088,8 @@ async function iniciarDashboard() {
         varLucro:     parseFloat((dados.variacao?.lucro||0).toFixed(1)),
         varDesp:      parseFloat((dados.variacao?.despesas||0).toFixed(1)),
         totalVendas:  dados.total_vendas || 0,
-        progresso:    Math.round(dados.progresso_meta || 0),
-        metaValor:    Math.round(dados.meta_valor     || 0),
+        progresso:    pct,
+        metaValor:    Math.round(_metaValorFinal),
         diario:       [],  // preenchido abaixo
       }
       // ── Índice Nexor mini-cards ──
