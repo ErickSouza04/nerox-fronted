@@ -4669,8 +4669,11 @@ async function carregarPaginaMetas() {
   if (App.token) {
     try {
       const rRes = await api('/metas')
+      console.log('[Metas] rRes.ok:', rRes?.ok, 'status:', rRes?.status)
       if (rRes?.ok) {
-        const { dados } = await rRes.json()
+        const json = await rRes.json()
+        console.log('[Metas] json:', JSON.stringify(json))
+        const { dados } = json
         if (!App.stats) App.stats = {}
         const metaInput     = document.getElementById('metas-meta-input')
         const prolaboreInput = document.getElementById('metas-prolabore-input')
@@ -4689,6 +4692,8 @@ async function carregarPaginaMetas() {
           if (metaInput)       metaInput.value      = ''
           if (prolaboreInput)  prolaboreInput.value = ''
         }
+      } else {
+        console.warn('[Metas] GET /metas falhou, status:', rRes?.status)
       }
     } catch(e) { console.warn('Metas data fetch:', e) }
   }
