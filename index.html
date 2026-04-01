@@ -181,8 +181,8 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .chart-card { padding: 20px; background: var(--glass) padding-box, linear-gradient(145deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.08) 100%) border-box; border: 1px solid transparent; border-radius: var(--radius); backdrop-filter: blur(10px); box-shadow: var(--shadow); overflow: hidden; max-width: 100%; min-width: 0; }
 .table-wrap { overflow-x: auto; max-width: 100%; }
 .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.chart-title { font-size: 14px; font-weight: 700; color: var(--text); }
-.chart-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+.chart-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: normal; word-spacing: normal; }
+.chart-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; letter-spacing: normal; word-spacing: normal; }
 
 /* GAUGE */
 .gauge-wrap { position: relative; width: 160px; height: 88px; margin: 0 auto; }
@@ -197,7 +197,7 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .nexor-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 13px; position: relative; }
 .nexor-mini-cell { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 9px; padding: 9px 10px; }
 .nexor-mini-label { font-size: 10px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.5px; }
-.nexor-mini-value { font-size: 15px; font-weight: 700; color: #fff; margin-top: 3px; white-space: nowrap; word-break: keep-all; }
+.nexor-mini-value { font-size: 15px; font-weight: 700; color: #fff; margin-top: 3px; white-space: nowrap; word-break: keep-all; font-family: 'Plus Jakarta Sans',sans-serif !important; letter-spacing: normal !important; word-spacing: normal !important; }
 
 /* META */
 .meta-card { padding: 20px; }
@@ -1532,10 +1532,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .page-sub,
 .form-label,
 .score-factor-label {
-  font-family: 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji','Twemoji Mozilla',
-               'Plus Jakarta Sans',sans-serif !important;
+  font-family: 'Plus Jakarta Sans',sans-serif !important;
   font-style: normal !important;
-  font-variant-emoji: emoji;
 }
 /* Qualquer span sozinho com emoji (padrão comum no código) */
 .nav-icon > span, .stat-icon, .alert-card-icon {
