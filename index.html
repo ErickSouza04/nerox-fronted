@@ -3564,7 +3564,6 @@ async function carregarPlanoUsuario() {
   if (!res?.ok) return
   const data = await res.json().catch(() => null)
   if (!data) return
-  console.log('[nexor:/users/me]', data)
   const _planValue = data.plan || data.plano
   if (_planValue) { localStorage.setItem('nexor_plan', _planValue); App.plan = _planValue }
   if (App.usuario) {
@@ -4040,9 +4039,9 @@ async function iniciarDashboard() {
       const {dados} = await rRes.json()
       _resumoDados = dados
       const cards=document.querySelectorAll('[data-target]')
-      if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento);   countUp(cards[0])}
-      if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas); countUp(cards[1])}
-      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
+      if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento   ||0); countUp(cards[0])}
+      if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas||0); countUp(cards[1])}
+      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro         ||0); countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
@@ -4239,7 +4238,7 @@ async function iniciarDashboard() {
         if (todos.length) {
           tbody.innerHTML=todos.map(i=>`<tr>
             <td>${fmtData(i.data)}</td>
-            <td>${i.produto||i.descricao||i.categoria}</td>
+            <td>${esc(i.produto||i.descricao||i.categoria)}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
@@ -4256,7 +4255,7 @@ async function iniciarDashboard() {
             <li class="recent-item">
               <span class="recent-dot ${i._tipo}"></span>
               <div style="flex:1">
-                <div class="recent-name">${i.produto||i.descricao||i.categoria}</div>
+                <div class="recent-name">${esc(i.produto||i.descricao||i.categoria)}</div>
                 <div class="recent-cat">${i._tipo==='venda'?'Venda':'Despesa'} · ${fmtData(i.data)}</div>
               </div>
               <span class="recent-val ${i._tipo==='venda'?'pos':'neg'}">${i._tipo==='venda'?'+':'−'}${fmtBRL(i.valor)}</span>
@@ -4281,7 +4280,7 @@ async function iniciarDashboard() {
           tpEl.innerHTML=topProd.map(([nome,val],i)=>`
             <div class="top-product-item">
               <div class="top-product-rank ${ranks[i]||'rank-other'}">${i+1}°</div>
-              <div class="top-product-name">${nome}</div>
+              <div class="top-product-name">${esc(nome)}</div>
               <div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:${Math.round((val/maxVal)*100)}%"></div></div></div>
               <div class="top-product-val">${fmtBRL(val)}</div>
             </div>`).join('')
@@ -4386,6 +4385,7 @@ const pageSubs={dashboard:_dataFormatada,registrar:'Registre vendas e despesas r
 function navigate(page,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'))
+  atualizarUIPlano()
   document.getElementById('page-'+page).classList.add('active')
   el.classList.add('active')
   document.getElementById('page-title').textContent=pageTitles[page]
@@ -4657,7 +4657,7 @@ async function salvarMeta() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats)   App.stats.metaValor    = Math.round(valor)
-      if (App.usuario) App.usuario.meta_valor = Math.round(valor)
+      if (App.usuario) { App.usuario.meta_valor = Math.round(valor); localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4681,7 +4681,7 @@ async function salvarProLabore() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
     if (res?.ok) {
       if (App.stats)   { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
-      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq }
+      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq; localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -8156,9 +8156,7 @@ function aplicarStatusPlano(usuario) {
 let _estoqueData = []
 
 async function carregarEstoque() {
-  const userId = App.usuario?.id
-  const query = userId ? `?user_id=${userId}` : ''
-  const res = await api('/stock/products' + query)
+  const res = await api('/stock/products')
   if (!res?.ok) return
   const data = await res.json().catch(() => [])
   _estoqueData = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
@@ -8238,8 +8236,10 @@ async function movimentarEstoque(idx, tipo) {
     method: 'POST',
     body: JSON.stringify({
       product_id: productId,
+      tipo: tipo,
       type: tipo,
-      quantity: parseInt(qtdStr)
+      quantity: parseInt(qtdStr),
+      quantidade: parseInt(qtdStr)
     })
   })
   if (res?.ok) {
