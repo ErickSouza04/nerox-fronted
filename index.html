@@ -3564,15 +3564,34 @@ async function carregarPlanoUsuario() {
   if (!res?.ok) return
   const data = await res.json().catch(() => null)
   if (!data) return
-  console.log('[nexor:/users/me]', data)
-  const _planValue = data.plan || data.plano
+  // Bug 1 + Bug 5: ler plano de todas as posições possíveis da resposta
+  const _planValue = data.plan || data.plano || data.usuario?.plan || data.usuario?.plano
   if (_planValue) { localStorage.setItem('nexor_plan', _planValue); App.plan = _planValue }
+  // Bug 1: ler pro_labore do perfil retornado por /users/me
+  const _proLabore = parseFloat(data.usuario?.pro_labore || data.pro_labore || 0)
+  if (!App.stats) App.stats = {}
+  if (_proLabore > 0) App.stats.prolaboreValor = _proLabore
   if (App.usuario) {
     if (_planValue) App.usuario.plan = _planValue
     localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
     aplicarUsuarioUI(App.usuario)
   }
   atualizarUIPlano()
+  // Bug 1: carregar meta do mês atual da API para não depender de variáveis em memória
+  if (App.token) {
+    const _mes = new Date().getMonth() + 1
+    const _ano = new Date().getFullYear()
+    const mRes = await api('/metas')
+    if (mRes?.ok) {
+      const mData = await mRes.json().catch(() => null)
+      const metas = Array.isArray(mData) ? mData : (mData?.dados || mData?.metas || [])
+      const metaMes = metas.find(m => parseInt(m.mes) === _mes && parseInt(m.ano) === _ano)
+      if (metaMes) {
+        if (parseFloat(metaMes.valor_meta) > 0) App.stats.metaValor = parseFloat(metaMes.valor_meta)
+        if (parseFloat(metaMes.pro_labore) > 0) App.stats.prolaboreValor = parseFloat(metaMes.pro_labore)
+      }
+    }
+  }
 }
 
 function atualizarUIPlano() {
@@ -4019,7 +4038,7 @@ async function iniciarDashboard() {
       const cards = document.querySelectorAll('[data-target]')
       if(cards[0]){cards[0].dataset.target=Math.round(_cd.faturamento||0);    countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(_cd.total_despesas||0); countUp(cards[1])}
-      if(cards[2]){cards[2].dataset.target=Math.round(_cd.lucro||0);           countUp(cards[2])}
+      if(cards[2]){cards[2].dataset.target=Math.round(_cd.lucro_pos_prolabore||_cd.lucro||0); countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(_cd.ticket_medio||0);     countUp(cards[3])}
       const hlEl=document.getElementById('hero-lucro'), hrEl=document.getElementById('hero-receita'), hdEl=document.getElementById('hero-despesas')
       if(hlEl && _ch) hlEl.textContent=fmtBRL(_ch.lucro||0)
@@ -4042,7 +4061,7 @@ async function iniciarDashboard() {
       const cards=document.querySelectorAll('[data-target]')
       if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento);   countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas); countUp(cards[1])}
-      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
+      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro_pos_prolabore||dados.lucro||0); countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
@@ -4077,7 +4096,7 @@ async function iniciarDashboard() {
       App.stats = {
         faturamento:  Math.round(dados.faturamento   || 0),
         despesas:     Math.round(dados.total_despesas|| 0),
-        lucro:        Math.round(dados.lucro         || 0),
+        lucro:        Math.round(dados.lucro_pos_prolabore || dados.lucro || 0),
         margem:       Math.round(dados.margem        || 0),
         ticketMedio:  Math.round(dados.ticket_medio  || dados.faturamento/(dados.total_vendas||1) || 0),
         varFat:       parseFloat((dados.variacao?.faturamento||0).toFixed(1)),
@@ -4916,6 +4935,8 @@ async function carregarProdutosPrecificacao() {
   if (res?.ok) {
     const data = await res.json().catch(() => [])
     _produtosEstoquePrec = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
+  } else if (res !== null) {
+    mostrarToast('Erro ao carregar produtos do estoque.', 'error')
   }
   renderizarTabelaPrecificacao()
 }
@@ -8159,7 +8180,10 @@ async function carregarEstoque() {
   const userId = App.usuario?.id
   const query = userId ? `?user_id=${userId}` : ''
   const res = await api('/stock/products' + query)
-  if (!res?.ok) return
+  if (!res?.ok) {
+    mostrarToast('Erro ao carregar estoque. Verifique sua conexão.', 'error')
+    return
+  }
   const data = await res.json().catch(() => [])
   _estoqueData = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
   renderizarEstoque()
@@ -8201,10 +8225,12 @@ async function adicionarProdutoEstoque() {
   const res = await api('/stock/products', {
     method: 'POST',
     body: JSON.stringify({
-      nome, marca,
-      preco_venda, preco_custo,
-      estoque_atual, quantidade: estoque_atual,
-      estoque_minimo, minimo: estoque_minimo,
+      name: nome,
+      brand: marca,
+      sale_price: preco_venda,
+      cost_price: preco_custo,
+      current_stock: estoque_atual,
+      min_stock_alert: estoque_minimo,
       user_id: App.usuario?.id
     })
   })
