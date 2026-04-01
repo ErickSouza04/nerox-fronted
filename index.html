@@ -4633,7 +4633,8 @@ async function salvarMeta() {
   try {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
-      if (App.stats) App.stats.metaValor = Math.round(valor)
+      if (App.stats)   App.stats.metaValor    = Math.round(valor)
+      if (App.usuario) App.usuario.meta_valor = Math.round(valor)
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4656,7 +4657,8 @@ async function salvarProLabore() {
   try {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
     if (res?.ok) {
-      if (App.stats) { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
+      if (App.stats)   { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
+      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4665,39 +4667,28 @@ async function salvarProLabore() {
 
 // ── Metas — carregar página com dados reais ──
 async function carregarPaginaMetas() {
-  // Buscar dados frescos do backend ao carregar a página de Metas
+  // Buscar dados frescos do perfil do usuário ao carregar a página de Metas
   if (App.token) {
     try {
-      const rRes = await api('/metas')
-      console.log('[Metas] rRes.ok:', rRes?.ok, 'status:', rRes?.status)
+      const rRes = await api('/usuarios/perfil')
       if (rRes?.ok) {
         const json = await rRes.json()
-        console.log('[Metas] json:', JSON.stringify(json))
-        const { dados } = json
+        const perfil = json.usuario || json.dados || json
         if (!App.stats) App.stats = {}
-        const metaInput     = document.getElementById('metas-meta-input')
+        const metaValorPerfil    = parseFloat(perfil.meta_valor)    || 0
+        const prolaboreValorPerfil = parseFloat(perfil.prolabore_valor) || 0
+        App.stats.metaValor      = metaValorPerfil
+        App.stats.prolaboreValor = prolaboreValorPerfil
+        App.stats.progresso      = metaValorPerfil > 0 && App.stats.lucro > 0
+          ? Math.min(100, Math.round((App.stats.lucro / metaValorPerfil) * 100))
+          : 0
+        const metaInput      = document.getElementById('metas-meta-input')
         const prolaboreInput = document.getElementById('metas-prolabore-input')
-        if (dados && dados.length > 0) {
-          App.stats.metaValor      = parseFloat(dados[0].valor_meta) || 0
-          App.stats.prolaboreValor = parseFloat(dados[0].pro_labore) || 0
-          App.stats.progresso      = App.stats.metaValor > 0 && App.stats.lucro > 0
-            ? Math.min(100, Math.round((App.stats.lucro / App.stats.metaValor) * 100))
-            : 0
-          if (metaInput)       metaInput.value      = dados[0].valor_meta ?? ''
-          if (prolaboreInput)  prolaboreInput.value = dados[0].pro_labore ?? ''
-        } else {
-          App.stats.metaValor      = 0
-          App.stats.prolaboreValor = 0
-          App.stats.progresso      = 0
-          if (metaInput)       metaInput.value      = ''
-          if (prolaboreInput)  prolaboreInput.value = ''
-        }
-      } else {
-        console.warn('[Metas] GET /metas falhou, status:', rRes?.status)
+        if (metaInput)       metaInput.value      = metaValorPerfil      || ''
+        if (prolaboreInput)  prolaboreInput.value = prolaboreValorPerfil || ''
       }
-    } catch(e) { console.warn('Metas data fetch:', e) }
+    } catch(e) { console.warn('Metas perfil fetch:', e) }
   }
-  console.log('[Metas]', App.stats?.metaValor, App.stats?.progresso)
   const s    = App.stats ? Object.assign({}, App.stats) : {}
   // Modo demo: preenche dados de exemplo para não mostrar página em branco
   if (!App.token && !s.faturamento) {
