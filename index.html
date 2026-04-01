@@ -171,7 +171,7 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .stat-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; float: right; }
 .stat-icon.blue  { background:var(--blue-dim);  } .stat-icon.red   { background:var(--red-dim);   }
 .stat-icon.green { background:var(--green-dim); } .stat-icon.amber { background:var(--amber-dim); }
-.stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; }
 .stat-value { font-size: clamp(16px, 1.8vw, 26px); font-weight: 800; color: var(--text); margin-top: 10px; line-height: 1; font-feature-settings: "tnum"; letter-spacing: -0.02em; white-space: nowrap; word-break: keep-all; overflow: hidden; text-overflow: ellipsis; }
 .stat-value.green { color:var(--green); } .stat-value.red { color:var(--red); }
 .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
@@ -339,7 +339,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .hero-stat:last-child { border-bottom: none; }
 .hero-stat-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px; }
 .hero-stat-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
-.hero-stat-val { font-size: clamp(15px, 1.6vw, 19px); font-weight: 800; line-height: 1; font-feature-settings: 'tnum'; letter-spacing: -0.02em; }
+.hero-stat-val { font-size: clamp(15px, 1.6vw, 19px); font-weight: 800; line-height: 1; font-feature-settings: 'tnum'; letter-spacing: -0.02em; white-space: nowrap; word-break: keep-all; }
 .hero-stat-val.pos { color: var(--green); }
 .hero-stat-val.neg { color: var(--red); }
 .hero-stat-badge { font-size: 0.7rem; color: #aaa; font-weight: 400; background: none; padding: 0; border-radius: 0; }
@@ -3557,6 +3557,8 @@ async function api(path, opts = {}) {
 // -- Formatadores ----------------------
 const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})
 const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
+// Aplica estilos anti-quebra a qualquer elemento que exibe número
+const _applyNumStyle = el => { if(!el) return; el.style.whiteSpace='nowrap'; el.style.letterSpacing='normal'; el.style.wordSpacing='normal' }
 // Escapa HTML entities — usar sempre que texto do usuário/API for colocado em innerHTML
 const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
 
@@ -4032,9 +4034,9 @@ async function iniciarDashboard() {
       if(cards[2]){cards[2].dataset.target=Math.round(_cd.lucro||0);           countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(_cd.ticket_medio||0);     countUp(cards[3])}
       const hlEl=document.getElementById('hero-lucro'), hrEl=document.getElementById('hero-receita'), hdEl=document.getElementById('hero-despesas')
-      if(hlEl && _ch) hlEl.textContent=fmtBRL(_ch.lucro||0)
-      if(hrEl && _ch) hrEl.textContent=fmtBRL(_ch.faturamento||0)
-      if(hdEl && _ch) hdEl.textContent=fmtBRL(_ch.despesas||0)
+      if(hlEl && _ch) { hlEl.textContent=fmtBRL(_ch.lucro||0); _applyNumStyle(hlEl) }
+      if(hrEl && _ch) { hrEl.textContent=fmtBRL(_ch.faturamento||0); _applyNumStyle(hrEl) }
+      if(hdEl && _ch) { hdEl.textContent=fmtBRL(_ch.despesas||0); _applyNumStyle(hdEl) }
     }
   } catch(_e) {}
 
@@ -4057,15 +4059,15 @@ async function iniciarDashboard() {
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
       const _vFat=dados.variacao?.faturamento||0, _vDesp=dados.variacao?.despesas||0, _vLuc=dados.variacao?.lucro||0
-      if(vars[0]){vars[0].textContent=(_vFat>=0?'↑':'↓')+Math.abs(_vFat).toFixed(0)+'%'; vars[0].className=_vFat>=0?'badge-up':'badge-down'}
-      if(vars[1]){vars[1].textContent=(_vDesp>=0?'↑':'↓')+Math.abs(_vDesp).toFixed(0)+'%'; vars[1].className=_vDesp>0?'badge-down':'badge-up'}
-      if(vars[2]){vars[2].textContent=(_vLuc>=0?'↑':'↓')+Math.abs(_vLuc).toFixed(0)+'%'; vars[2].className=_vLuc>=0?'badge-up':'badge-down'}
-      if(vars[3]){vars[3].textContent=dados.ticket_medio_anterior>0?(dados.ticket_medio>=dados.ticket_medio_anterior?'↑':'↓')+'R$ '+Math.abs((dados.ticket_medio||0)-(dados.ticket_medio_anterior||0)).toFixed(0):'—'; vars[3].className=dados.ticket_medio>=(dados.ticket_medio_anterior||0)?'badge-up':'badge-down'}
+      if(vars[0]){vars[0].textContent=(_vFat>=0?'↑':'↓')+Math.abs(_vFat).toFixed(0)+'%'; vars[0].className=_vFat>=0?'badge-up':'badge-down'; _applyNumStyle(vars[0])}
+      if(vars[1]){vars[1].textContent=(_vDesp>=0?'↑':'↓')+Math.abs(_vDesp).toFixed(0)+'%'; vars[1].className=_vDesp>0?'badge-down':'badge-up'; _applyNumStyle(vars[1])}
+      if(vars[2]){vars[2].textContent=(_vLuc>=0?'↑':'↓')+Math.abs(_vLuc).toFixed(0)+'%'; vars[2].className=_vLuc>=0?'badge-up':'badge-down'; _applyNumStyle(vars[2])}
+      if(vars[3]){vars[3].textContent=dados.ticket_medio_anterior>0?(dados.ticket_medio>=dados.ticket_medio_anterior?'↑':'↓')+'R$ '+Math.abs((dados.ticket_medio||0)-(dados.ticket_medio_anterior||0)).toFixed(0):'—'; vars[3].className=dados.ticket_medio>=(dados.ticket_medio_anterior||0)?'badge-up':'badge-down'; _applyNumStyle(vars[3])}
       // Meta do mês — usa meta_valor da API ou fallback para App.usuario/App.stats
       const _metaValorFinal = dados.meta_valor > 0 ? dados.meta_valor : (parseFloat(App.usuario?.meta_valor) || App.stats?.metaValor || 0)
       const pct = dados.progresso_meta > 0 ? dados.progresso_meta : (_metaValorFinal > 0 && dados.lucro > 0 ? Math.min(100, Math.round((dados.lucro / _metaValorFinal) * 100)) : 0)
       const pf=document.querySelector('.progress-fill'); if(pf) pf.style.width=pct+'%'
-      const mc=document.querySelector('.meta-current'); if(mc) mc.textContent=fmtBRL(dados.lucro)
+      const mc=document.querySelector('.meta-current'); if(mc){ mc.textContent=fmtBRL(dados.lucro); _applyNumStyle(mc) }
       const _mMeses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
       const _mTit=document.querySelector('.meta-title'); if(_mTit) _mTit.textContent='🎯 Meta — '+_mMeses[mes-1]
       const _mTag=document.querySelector('.meta-header .tag'); if(_mTag){ _mTag.textContent=pct+'%'; _mTag.className='tag '+(pct>=100?'green':pct>=50?'blue':'amber') }
@@ -4101,23 +4103,23 @@ async function iniciarDashboard() {
       }
       // ── Índice Nexor mini-cards ──
       const _vf = dados.variacao?.faturamento || 0, _vd = dados.variacao?.despesas || 0
-      const _im = document.getElementById('idx-margem'); if(_im) _im.textContent = Math.round(dados.margem||0)+'%'
+      const _im = document.getElementById('idx-margem'); if(_im){ _im.textContent = Math.round(dados.margem||0)+'%'; _applyNumStyle(_im) }
       const _ic = document.getElementById('idx-crescimento')
-      if(_ic){ _ic.textContent=((_vf>=0?'+':'')+_vf.toFixed(0)+'%'); _ic.style.color=_vf>=0?'var(--green)':'var(--red)' }
+      if(_ic){ _ic.textContent=((_vf>=0?'+':'')+_vf.toFixed(0)+'%'); _ic.style.color=_vf>=0?'var(--green)':'var(--red)'; _applyNumStyle(_ic) }
       const _id = document.getElementById('idx-despesas')
-      if(_id){ _id.textContent=((_vd>=0?'+':'')+_vd.toFixed(0)+'%'); _id.style.color=_vd>10?'var(--amber)':_vd<=0?'var(--green)':'var(--text)' }
+      if(_id){ _id.textContent=((_vd>=0?'+':'')+_vd.toFixed(0)+'%'); _id.style.color=_vd>10?'var(--amber)':_vd<=0?'var(--green)':'var(--text)'; _applyNumStyle(_id) }
       // ── Projeção do Mês ──
       const _diasMes=new Date(ano,mes,0).getDate(), _diasDec=new Date().getDate()
       const _fProj=_diasDec>0?_diasMes/_diasDec:1, _conf=Math.min(90,Math.round(_diasDec/_diasMes*100))
-      const _set2=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v }
-      _set2('proj-receita-val', fmtBRL(Math.round((dados.faturamento||0)*_fProj)))
+      const _set2=(id,v,num=false)=>{ const e=document.getElementById(id); if(e){ e.textContent=v; if(num) _applyNumStyle(e) } }
+      _set2('proj-receita-val', fmtBRL(Math.round((dados.faturamento||0)*_fProj)), true)
       _set2('proj-receita-meta', (_vf>=0?'+':'')+_vf.toFixed(0)+'% vs mês anterior')
-      _set2('proj-receita-pct', _conf+'%')
+      _set2('proj-receita-pct', _conf+'%', true)
       const _prf=document.getElementById('proj-receita-fill'); if(_prf) _prf.style.width=_conf+'%'
-      _set2('proj-lucro-val', fmtBRL(Math.round((dados.lucro||0)*_fProj)))
+      _set2('proj-lucro-val', fmtBRL(Math.round((dados.lucro||0)*_fProj)), true)
       _set2('proj-lucro-meta', 'Margem de '+Math.round(dados.margem||0)+'%')
       const _confL=Math.max(0,_conf-6)
-      _set2('proj-lucro-pct', _confL+'%')
+      _set2('proj-lucro-pct', _confL+'%', true)
       const _plf=document.getElementById('proj-lucro-fill'); if(_plf) _plf.style.width=_confL+'%'
       // Exibir alertas inteligentes da Nexor AI com base nos dados do mês
       atualizarSmartAlerts()
@@ -4162,13 +4164,13 @@ async function iniciarDashboard() {
         const hmvEl = document.getElementById('hero-margem-val')
         const hmfEl = document.getElementById('hero-margin-fill')
         const hmpEl = document.querySelector('.hero-margin-pct')
-        if (hlEl) hlEl.textContent = fmtBRL(hoje.lucro || 0)
-        if (hrEl) hrEl.textContent = fmtBRL(hoje.faturamento || 0)
-        if (hdEl) hdEl.textContent = fmtBRL(hoje.despesas || 0)
+        if (hlEl) { hlEl.textContent = fmtBRL(hoje.lucro || 0); _applyNumStyle(hlEl) }
+        if (hrEl) { hrEl.textContent = fmtBRL(hoje.faturamento || 0); _applyNumStyle(hrEl) }
+        if (hdEl) { hdEl.textContent = fmtBRL(hoje.despesas || 0); _applyNumStyle(hdEl) }
         // Margem de hoje
         const margemHoje = (hoje.faturamento || 0) > 0
           ? Math.round((hoje.lucro || 0) / hoje.faturamento * 100) : 0
-        if (hmvEl) hmvEl.textContent = margemHoje + '%'
+        if (hmvEl) { hmvEl.textContent = margemHoje + '%'; _applyNumStyle(hmvEl) }
         if (hmfEl) hmfEl.style.width = Math.max(0, Math.min(100, margemHoje)) + '%'
         if (hmpEl) hmpEl.textContent = margemHoje + '% vs ontem'
         // Variação vs ontem (texto simples)
@@ -4454,6 +4456,7 @@ document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click
 
 // COUNT-UP
 function countUp(el){
+  _applyNumStyle(el)
   const target=parseInt(el.dataset.target), prefix=el.dataset.prefix||'', suffix=el.dataset.suffix||''
   const dur=1400, start=performance.now()
   function frame(now){
@@ -4483,7 +4486,7 @@ function drawGauge(id,value,numElId='gaugeNum'){
   ctx.beginPath(); ctx.arc(ex,ey,5.5,0,2*Math.PI)
   ctx.fillStyle='#22c55e'; ctx.shadowColor='#22c55e'; ctx.shadowBlur=14; ctx.fill(); ctx.shadowBlur=0
   const numEl=document.getElementById(numElId)
-  if(numEl){ let n=0; const t=setInterval(()=>{ n+=2; numEl.textContent=Math.min(n,value); if(n>=value) clearInterval(t) },18) }
+  if(numEl){ _applyNumStyle(numEl); let n=0; const t=setInterval(()=>{ n+=2; numEl.textContent=Math.min(n,value); if(n>=value) clearInterval(t) },18) }
 }
 
 // CHARTS
