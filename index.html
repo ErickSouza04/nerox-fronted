@@ -3564,7 +3564,6 @@ async function carregarPlanoUsuario() {
   if (!res?.ok) return
   const data = await res.json().catch(() => null)
   if (!data) return
-  console.log('[nexor:/users/me]', data)
   const _planValue = data.plan || data.plano
   if (_planValue) { localStorage.setItem('nexor_plan', _planValue); App.plan = _planValue }
   if (App.usuario) {
@@ -4040,9 +4039,9 @@ async function iniciarDashboard() {
       const {dados} = await rRes.json()
       _resumoDados = dados
       const cards=document.querySelectorAll('[data-target]')
-      if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento);   countUp(cards[0])}
-      if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas); countUp(cards[1])}
-      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
+      if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento    || 0); countUp(cards[0])}
+      if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas || 0); countUp(cards[1])}
+      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro          || 0); countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
@@ -4384,6 +4383,7 @@ const _dataISO=`${_hoje.getFullYear()}-${String(_hoje.getMonth()+1).padStart(2,'
 const pageSubs={dashboard:_dataFormatada,registrar:'Registre vendas e despesas rapidamente',precificacao:'Calcule o preço ideal dos seus produtos',metas:'Acompanhe e gerencie suas metas',relatorios:'Análises completas do seu negócio',ia:'Inteligência financeira e consultoria com IA',score:'Reputação financeira e ranking do seu negócio',cards:'Gere e compartilhe seus cards de performance financeira',perfil:'Configurações da sua conta',estoque:'Controle de produtos e movimentação de estoque',whatsapp:'Agente automatizado via WhatsApp'}
 
 function navigate(page,el){
+  atualizarUIPlano()
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'))
   document.getElementById('page-'+page).classList.add('active')
@@ -4657,7 +4657,7 @@ async function salvarMeta() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats)   App.stats.metaValor    = Math.round(valor)
-      if (App.usuario) App.usuario.meta_valor = Math.round(valor)
+      if (App.usuario) { App.usuario.meta_valor = Math.round(valor); localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4681,7 +4681,7 @@ async function salvarProLabore() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
     if (res?.ok) {
       if (App.stats)   { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
-      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq }
+      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq; localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4942,7 +4942,7 @@ function renderizarTabelaPrecificacao() {
     const margemCls = margem >= 45 ? 'green' : margem >= 30 ? 'amber' : 'red'
     const tr = document.createElement('tr')
     tr.innerHTML = `
-      <td style="font-weight:600">${nome}</td>
+      <td style="font-weight:600">${esc(nome)}</td>
       <td>R$ ${custo.toFixed(2).replace('.',',')}</td>
       <td style="color:var(--green);font-weight:700">R$ ${precoSug.toFixed(2).replace('.',',')}</td>
       <td><span class="tag ${margemCls}">${margem.toFixed(0)}%</span></td>
@@ -4957,7 +4957,7 @@ function renderizarTabelaPrecificacao() {
     const tr = document.createElement('tr')
     tr.id = p.id
     tr.innerHTML = `
-      <td style="font-weight:600">${p.nome}</td>
+      <td style="font-weight:600">${esc(p.nome)}</td>
       <td>R$ ${p.custoTotal.toFixed(2).replace('.',',')}</td>
       <td style="color:var(--green);font-weight:700">R$ ${p.precoFinal.toFixed(2).replace('.',',')}</td>
       <td><span class="tag ${margemCls}">${p.margemReal.toFixed(0)}%</span></td>
@@ -8156,9 +8156,7 @@ function aplicarStatusPlano(usuario) {
 let _estoqueData = []
 
 async function carregarEstoque() {
-  const userId = App.usuario?.id
-  const query = userId ? `?user_id=${userId}` : ''
-  const res = await api('/stock/products' + query)
+  const res = await api('/stock/products')
   if (!res?.ok) return
   const data = await res.json().catch(() => [])
   _estoqueData = Array.isArray(data) ? data : (data.produtos || data.products || data.data || data.items || [])
@@ -8238,6 +8236,7 @@ async function movimentarEstoque(idx, tipo) {
     method: 'POST',
     body: JSON.stringify({
       product_id: productId,
+      tipo: tipo,
       type: tipo,
       quantity: parseInt(qtdStr)
     })
