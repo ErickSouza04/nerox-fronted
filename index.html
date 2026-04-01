@@ -171,7 +171,7 @@ body { background: #090E1A; font-family: 'Plus Jakarta Sans', 'Segoe UI Emoji', 
 .stat-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; float: right; }
 .stat-icon.blue  { background:var(--blue-dim);  } .stat-icon.red   { background:var(--red-dim);   }
 .stat-icon.green { background:var(--green-dim); } .stat-icon.amber { background:var(--amber-dim); }
-.stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+.stat-label { font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 42px; }
 .stat-value { font-size: clamp(13px, 4vw, 26px); font-weight: 800; color: var(--text); margin-top: 10px; line-height: 1; font-feature-settings: "tnum"; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .stat-value.green { color:var(--green); } .stat-value.red { color:var(--red); }
 .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
@@ -329,7 +329,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .hero-metric-glow { position: absolute; top: -60px; right: -40px; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, transparent 65%); pointer-events: none; }
 .hero-label { font-size: 11px; font-weight: 700; color: rgba(34,197,94,0.8); text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .hero-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
-.hero-main-value { font-family: 'Syne', sans-serif; font-size: 52px; font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; }
+.hero-main-value { font-family: 'Syne', sans-serif; font-size: clamp(26px, 7vw, 52px); font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 6px; font-feature-settings: 'tnum'; letter-spacing: -0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hero-main-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
 .hero-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
 .hero-stat { background: rgba(255,255,255,0.04) padding-box, linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.03)) border-box; border: 1px solid transparent; border-radius: 13px; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; min-height: 82px; }
@@ -337,7 +337,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .hero-stat-val { font-size: clamp(14px, 1.6vw, 19px); font-weight: 800; line-height: 1; font-feature-settings: 'tnum'; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .hero-stat-val.pos { color: var(--green); }
 .hero-stat-val.neg { color: var(--red); }
-.hero-stat-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; margin-top: 6px; padding: 3px 8px; border-radius: 100px; }
+.hero-stat-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; margin-top: 6px; padding: 3px 8px; border-radius: 100px; white-space: nowrap; max-width: 100%; overflow: hidden; }
 .hero-stat-badge.up { background: rgba(34,197,94,0.12); color: var(--green); }
 .hero-stat-badge.down { background: rgba(248,113,113,0.12); color: var(--red); }
 .hero-margin-wrap { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
@@ -1311,8 +1311,6 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .nexor-desc { font-size: 12px; line-height: 1.5; }
 
 @media (max-width: 640px) {
-  /* Fix number spacing on mobile */
-  .hero-main-value { font-size: 38px; letter-spacing: -1px; }
   /* Fix chart canvas on mobile */
   .perf-chart-card canvas, #chartPerf30 { max-width: 100% !important; }
   /* Hero metric cards horizontal scroll */  
