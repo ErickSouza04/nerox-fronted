@@ -3241,12 +3241,12 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   <!-- ══ ESTOQUE ══ -->
   <div class="page" id="page-estoque">
     <div class="chart-card" style="margin-bottom:16px">
-      <div class="chart-header">
-        <div>
-          <div class="chart-title">📦 Controle de Estoque</div>
-          <div class="chart-sub">Produtos, movimentações e alertas de estoque baixo</div>
+      <div class="chart-header" style="display:flex;align-items:flex-start;gap:12px">
+        <div style="flex:1;min-width:0">
+          <div class="chart-title" style="text-align:left;white-space:nowrap;word-spacing:normal;letter-spacing:normal">📦 Controle de Estoque</div>
+          <div class="chart-sub" style="text-align:left;word-spacing:normal;letter-spacing:normal">Produtos, movimentações e alertas de estoque baixo</div>
         </div>
-        <button class="btn btn-primary" onclick="document.getElementById('estoque-form-add').style.display=document.getElementById('estoque-form-add').style.display==='none'?'block':'none'">+ Adicionar produto</button>
+        <button class="btn btn-primary" style="white-space:nowrap;flex-shrink:0;padding:8px 14px" onclick="document.getElementById('estoque-form-add').style.display=document.getElementById('estoque-form-add').style.display==='none'?'block':'none'">+ Adicionar produto</button>
       </div>
       <!-- Formulário inline de adição -->
       <div id="estoque-form-add" style="display:none;background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px">
