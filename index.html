@@ -4088,6 +4088,8 @@ async function iniciarDashboard() {
         metaValor:    Math.round(dados.meta_valor     || 0),
         diario:       [],  // preenchido abaixo
       }
+      console.log('[Dashboard] meta_valor do resumo=', dados.meta_valor)
+      }
       // ── Índice Nexor mini-cards ──
       const _vf = dados.variacao?.faturamento || 0, _vd = dados.variacao?.despesas || 0
       const _im = document.getElementById('idx-margem'); if(_im) _im.textContent = Math.round(dados.margem||0)+'%'
@@ -4694,8 +4696,10 @@ async function carregarPaginaMetas() {
   // GET /usuarios/perfil retorna 404 e GET /metas retorna dados:[]
   if (App.token) {
     if (!App.stats) App.stats = {}
+    console.log('[Metas] App.usuario.meta_valor=', App.usuario?.meta_valor, '| App.stats.metaValor=', App.stats.metaValor)
     const metaValorPerfil      = parseFloat(App.usuario?.meta_valor)      || App.stats.metaValor      || 0
     const prolaboreValorPerfil = parseFloat(App.usuario?.prolabore_valor) || App.stats.prolaboreValor || 0
+    console.log('[Metas] metaValorPerfil=', metaValorPerfil)
     App.stats.metaValor      = metaValorPerfil
     App.stats.prolaboreValor = prolaboreValorPerfil
     App.stats.progresso      = metaValorPerfil > 0 && App.stats.lucro > 0
