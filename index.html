@@ -8258,10 +8258,12 @@ function _mostrarFormVincularWA() {
 async function carregarStatusWhatsapp() {
   if (!App.token) return
   const res = await api('/whatsapp/status')
-  if (!res?.ok) return
+  if (!res?.ok) { _mostrarFormVincularWA(); return }
   const data = await res.json().catch(() => null)
-  if (data?.phone || data?.numero) {
-    _mostrarNumeroAtivoWA(data.phone || data.numero)
+  // Backend retorna { sucesso, vinculado, dados: { phone, ... } }
+  const phone = data?.dados?.phone || data?.phone || data?.numero
+  if (phone) {
+    _mostrarNumeroAtivoWA(phone)
   } else {
     _mostrarFormVincularWA()
   }
