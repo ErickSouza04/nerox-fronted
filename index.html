@@ -314,6 +314,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .stock-btn.entrada:hover { background: rgba(34,197,94,0.22); }
 .stock-btn.saida { background: var(--red-dim); color: var(--red); border-color: rgba(248,113,113,0.25); }
 .stock-btn.saida:hover { background: rgba(248,113,113,0.22); }
+.stock-btn.excluir { background: transparent; color: rgba(248,113,113,0.6); border-color: rgba(248,113,113,0.15); padding: 5px 8px; }
+.stock-btn.excluir:hover { background: rgba(248,113,113,0.12); color: var(--red); border-color: rgba(248,113,113,0.35); }
 
 /* ═══ WHATSAPP AGENT ═══ */
 .wa-status-ok { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 12px; background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); font-size: 13px; font-weight: 600; color: var(--green); margin-top: 12px; }
@@ -8159,6 +8161,7 @@ function renderizarEstoque() {
       <td><div style="display:flex;gap:6px">
         <button class="stock-btn entrada" onclick="movimentarEstoque(${i},'entrada')">+ Entrada</button>
         <button class="stock-btn saida" onclick="movimentarEstoque(${i},'saida')">− Saída</button>
+        <button class="stock-btn excluir" onclick="excluirProduto(${i})" title="Excluir produto">🗑️</button>
       </div></td>
     </tr>`
   }).join('')
@@ -8227,6 +8230,22 @@ async function movimentarEstoque(idx, tipo) {
   }
 }
 
+async function excluirProduto(idx) {
+  const p = _estoqueData[idx]
+  if (!p) return
+  const nome = p.name ?? p.nome ?? 'este produto'
+  if (!confirm(`Tem certeza que deseja excluir "${nome}"?`)) return
+  const id = p.id ?? p._id
+  const res = await api(`/produtos/${id}`, { method: 'DELETE' })
+  if (res?.ok) {
+    _estoqueData.splice(idx, 1)
+    renderizarEstoque()
+    mostrarToast('Produto removido.', 'success')
+  } else {
+    mostrarToast('Erro ao excluir produto. Tente novamente.', 'error')
+  }
+}
+
 // ======================================
 // WHATSAPP AGENT
 // ======================================
@@ -8258,10 +8277,12 @@ function _mostrarFormVincularWA() {
 async function carregarStatusWhatsapp() {
   if (!App.token) return
   const res = await api('/whatsapp/status')
-  if (!res?.ok) return
+  if (!res?.ok) { _mostrarFormVincularWA(); return }
   const data = await res.json().catch(() => null)
-  if (data?.phone || data?.numero) {
-    _mostrarNumeroAtivoWA(data.phone || data.numero)
+  // Backend retorna { sucesso, vinculado, dados: { phone, ... } }
+  const phone = data?.dados?.phone || data?.phone || data?.numero
+  if (phone) {
+    _mostrarNumeroAtivoWA(phone)
   } else {
     _mostrarFormVincularWA()
   }
