@@ -3291,8 +3291,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
               <th>Produto</th>
               <th>Marca</th>
               <th>Estoque</th>
-              <th>Custo</th>
-              <th>Venda</th>
+              <th style="min-width:80px;white-space:nowrap">Custo</th>
+              <th style="min-width:80px;white-space:nowrap">Venda</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -8156,8 +8156,8 @@ function renderizarEstoque() {
       <td>${esc(p.name ?? p.nome)}</td>
       <td>${esc(p.brand ?? p.marca ?? '-')}</td>
       <td>${qtd}${baixo ? '<span class="stock-badge-low">baixo</span>' : ''}</td>
-      <td>${fmtBRL(p.cost_price ?? p.preco_custo ?? 0)}</td>
-      <td>${fmtBRL(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)}</td>
+      <td style="white-space:nowrap">${fmtBRL(p.cost_price ?? p.preco_custo ?? 0)}</td>
+      <td style="white-space:nowrap">${fmtBRL(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)}</td>
       <td><div style="display:flex;gap:6px">
         <button class="stock-btn entrada" onclick="movimentarEstoque(${i},'entrada')">+ Entrada</button>
         <button class="stock-btn saida" onclick="movimentarEstoque(${i},'saida')">− Saída</button>
