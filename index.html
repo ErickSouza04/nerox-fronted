@@ -3675,7 +3675,7 @@ async function avancarEtapa(etapa) {
 
 function mostrarErroAuth(el, msg) {
   clearTimeout(el._erroTimer)
-  el.innerHTML=msg; el.classList.add('show')
+  el.innerHTML=DOMPurify.sanitize(msg,{ALLOWED_TAGS:['ul','li'],ALLOWED_ATTR:[]}); el.classList.add('show')
   el._erroTimer=setTimeout(()=>el.classList.remove('show'),4000)
 }
 
