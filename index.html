@@ -2,11 +2,19 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-  <!-- ═══ SEGURANÇA ═══ -->
+  <!-- ═══ SEGURANÇA ═══
+       ATENÇÃO: frame-ancestors e X-Frame-Options via meta tag são ignorados pelos browsers.
+       O servidor (Railway/Express) DEVE configurar os seguintes HTTP headers:
+         X-Frame-Options: DENY
+         X-Content-Type-Options: nosniff
+         Content-Security-Policy: frame-ancestors 'none'
+         Strict-Transport-Security: max-age=31536000; includeSubDomains
+       Exemplo Express: app.use(require('helmet')())
+  -->
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://nexor-api-production.up.railway.app https://wa.me; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://nexor-api-production.up.railway.app https://wa.me; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
   <!-- ═══ FAVICON + PWA ═══ -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nexor">
@@ -3675,7 +3683,7 @@ async function avancarEtapa(etapa) {
 
 function mostrarErroAuth(el, msg) {
   clearTimeout(el._erroTimer)
-  el.innerHTML=msg; el.classList.add('show')
+  el.innerHTML=DOMPurify.sanitize(msg,{ALLOWED_TAGS:['ul','li'],ALLOWED_ATTR:[]}); el.classList.add('show')
   el._erroTimer=setTimeout(()=>el.classList.remove('show'),4000)
 }
 
@@ -4215,7 +4223,7 @@ async function iniciarDashboard() {
         if (todos.length) {
           tbody.innerHTML=todos.map(i=>`<tr>
             <td>${fmtData(i.data)}</td>
-            <td>${i.produto||i.descricao||i.categoria}</td>
+            <td>${esc(i.produto||i.descricao||i.categoria)}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
@@ -4232,7 +4240,7 @@ async function iniciarDashboard() {
             <li class="recent-item">
               <span class="recent-dot ${i._tipo}"></span>
               <div style="flex:1">
-                <div class="recent-name">${i.produto||i.descricao||i.categoria}</div>
+                <div class="recent-name">${esc(i.produto||i.descricao||i.categoria)}</div>
                 <div class="recent-cat">${i._tipo==='venda'?'Venda':'Despesa'} · ${fmtData(i.data)}</div>
               </div>
               <span class="recent-val ${i._tipo==='venda'?'pos':'neg'}">${i._tipo==='venda'?'+':'−'}${fmtBRL(i.valor)}</span>
@@ -4257,7 +4265,7 @@ async function iniciarDashboard() {
           tpEl.innerHTML=topProd.map(([nome,val],i)=>`
             <div class="top-product-item">
               <div class="top-product-rank ${ranks[i]||'rank-other'}">${i+1}°</div>
-              <div class="top-product-name">${nome}</div>
+              <div class="top-product-name">${esc(nome)}</div>
               <div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:${Math.round((val/maxVal)*100)}%"></div></div></div>
               <div class="top-product-val">${fmtBRL(val)}</div>
             </div>`).join('')
@@ -6978,7 +6986,7 @@ async function gerarInsightsAI() {
       const colors = ['rgba(34,197,94,0.07)','rgba(96,165,250,0.07)','rgba(251,191,36,0.07)','rgba(167,139,250,0.07)']
       const borders= ['rgba(34,197,94,0.15)','rgba(96,165,250,0.15)','rgba(251,191,36,0.15)','rgba(167,139,250,0.15)']
       list.innerHTML = (linhas.length ? linhas : [data.reply]).slice(0,4).map((l,i) => `
-        <div style="padding:10px 12px;background:${colors[i%4]};border:1px solid ${borders[i%4]};border-radius:10px;font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;margin-bottom:8px">${l.trim()}</div>
+        <div style="padding:10px 12px;background:${colors[i%4]};border:1px solid ${borders[i%4]};border-radius:10px;font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;margin-bottom:8px">${DOMPurify.sanitize(l.trim(),{ALLOWED_TAGS:[],ALLOWED_ATTR:[]})}</div>
       `).join('')
     } else throw new Error('no reply')
   } catch(e) {
@@ -7023,7 +7031,7 @@ async function gerarDiagnostico() {
               <span style="font-size:14px;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif">${icon}</span>
               <div style="flex:1">
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                  <span style="font-size:11.5px;color:rgba(255,255,255,0.7)">${nome}</span>
+                  <span style="font-size:11.5px;color:rgba(255,255,255,0.7)">${DOMPurify.sanitize(nome,{ALLOWED_TAGS:[],ALLOWED_ATTR:[]})}</span>
                   <span style="font-size:12px;font-weight:700;color:${c}">${nota.toFixed(1)}</span>
                 </div>
                 <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px">
@@ -7033,7 +7041,7 @@ async function gerarDiagnostico() {
             </div>`
           }).join('')}
         </div>
-        ${geral ? `<div style="padding:10px 14px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--amber);text-align:center">${geral.trim()}</div>` : ''}
+        ${geral ? `<div style="padding:10px 14px;background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:10px;font-size:12.5px;font-weight:700;color:var(--amber);text-align:center">${DOMPurify.sanitize(geral.trim(),{ALLOWED_TAGS:[],ALLOWED_ATTR:[]})}</div>` : ''}
       `
     } else throw new Error()
   } catch(e) {
