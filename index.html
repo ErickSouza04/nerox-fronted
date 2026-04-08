@@ -4215,7 +4215,7 @@ async function iniciarDashboard() {
         if (todos.length) {
           tbody.innerHTML=todos.map(i=>`<tr>
             <td>${fmtData(i.data)}</td>
-            <td>${i.produto||i.descricao||i.categoria}</td>
+            <td>${esc(i.produto||i.descricao||i.categoria)}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
@@ -4232,7 +4232,7 @@ async function iniciarDashboard() {
             <li class="recent-item">
               <span class="recent-dot ${i._tipo}"></span>
               <div style="flex:1">
-                <div class="recent-name">${i.produto||i.descricao||i.categoria}</div>
+                <div class="recent-name">${esc(i.produto||i.descricao||i.categoria)}</div>
                 <div class="recent-cat">${i._tipo==='venda'?'Venda':'Despesa'} · ${fmtData(i.data)}</div>
               </div>
               <span class="recent-val ${i._tipo==='venda'?'pos':'neg'}">${i._tipo==='venda'?'+':'−'}${fmtBRL(i.valor)}</span>
@@ -4257,7 +4257,7 @@ async function iniciarDashboard() {
           tpEl.innerHTML=topProd.map(([nome,val],i)=>`
             <div class="top-product-item">
               <div class="top-product-rank ${ranks[i]||'rank-other'}">${i+1}°</div>
-              <div class="top-product-name">${nome}</div>
+              <div class="top-product-name">${esc(nome)}</div>
               <div class="top-product-bar-wrap"><div class="top-product-bar"><div class="top-product-bar-fill" style="width:${Math.round((val/maxVal)*100)}%"></div></div></div>
               <div class="top-product-val">${fmtBRL(val)}</div>
             </div>`).join('')
