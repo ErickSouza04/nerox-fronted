@@ -4666,8 +4666,19 @@ async function salvarProLabore() {
 
 // ── Metas — carregar página com dados reais ──
 async function carregarPaginaMetas() {
-  // Lê meta e pró-labore de App.usuario (já em memória após login/save)
-  // GET /usuarios/perfil retorna 404 e GET /metas retorna dados:[]
+  // Busca dados frescos do backend; usa App.usuario em memória como fallback
+  if (App.token) {
+    try {
+      const perfilRes = await api('/usuarios/perfil')
+      if (perfilRes && perfilRes.ok) {
+        const perfilData = await perfilRes.json().catch(() => null)
+        if (perfilData && !perfilData.error) {
+          App.usuario = { ...App.usuario, ...perfilData }
+          localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+        }
+      }
+    } catch (e) { /* falha silenciosa — usa App.usuario em memória */ }
+  }
   if (App.token) {
     if (!App.stats) App.stats = {}
     const metaValorPerfil      = parseFloat(App.usuario?.meta_valor)      || App.stats.metaValor      || 0
