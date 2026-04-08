@@ -2557,7 +2557,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div>
       <div class="chart-card">
           <div class="chart-title" style="margin-bottom:14px">📋 Histórico do Mês</div>
-          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead>
+          <div class="table-wrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Ação</th></tr></thead>
           <tbody id="tabela-registros">
             <tr><td>04/03</td><td>Bolo Gourmet</td><td><span class="tag green">Venda</span></td><td style="color:var(--green);font-weight:700">+R$ 180</td></tr>
             <tr><td>04/03</td><td>Matéria-prima</td><td><span class="tag red">Despesa</span></td><td style="color:var(--red);font-weight:700">−R$ 340</td></tr>
@@ -3557,7 +3557,7 @@ const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'
 // PLANOS — Base / Plus
 // ======================================
 function isPlus() {
-  return App.plan === 'plus' || localStorage.getItem('nexor_plan') === 'plus'
+  return App.plan === 'plus'
 }
 function isBase() { return App.plan === 'base' || App.usuario?.plan === 'base' || App.usuario?.plano === 'base' }
 
@@ -3787,18 +3787,10 @@ async function finalizarCadastro() {
       avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
     }
     salvarSessao(data); entrarApp(data.usuario, true)
-  } catch {
+  } catch (err) {
     btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false
-    const nomeVal=document.getElementById('cad-nome').value.trim()||'Usuário Teste'
-    const emailVal=document.getElementById('cad-email').value.trim()||'teste@nexor.com.br'
-    mostrarToast('Servidor indisponível. Abrindo modo de demonstração…','info')
-    setTimeout(()=>{
-      localStorage.removeItem('nexor_token'); localStorage.removeItem('nexor_refresh')
-      App.token=null; App.refresh=null
-      App.usuario={nome:nomeVal,email:emailVal,plano:'trial',tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento}
-      localStorage.setItem('nexor_usuario',JSON.stringify(App.usuario))
-      entrarApp(App.usuario,true)
-    },1800)
+    mostrarToast('Erro ao finalizar cadastro. Tente novamente.', 'error')
+    return
   }
 }
 
@@ -3884,9 +3876,13 @@ function abrirRecuperarSenha() {
 async function enviarRecuperacao() {
   const email=document.getElementById('rec-email').value.trim()
   const msg=document.getElementById('rec-msg'); if(!email) return
-  await fetch(API_URL+'/auth/recuperar-senha',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}).catch(()=>{})
+  const res = await fetch(API_URL+'/auth/recuperar-senha',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}).catch(()=>null)
+  if (!res?.ok) {
+    mostrarToast('Não foi possível enviar o email. Tente novamente.', 'error')
+    return
+  }
   msg.style.display='block'; msg.style.background='rgba(34,197,94,0.1)'; msg.style.border='1px solid rgba(34,197,94,0.25)'; msg.style.color='var(--green)'
-  msg.textContent='✅ Se esse e-mail estiver cadastrado, você receberá o link em breve.'
+  msg.textContent='✅ Email enviado! Verifique sua caixa de entrada.'
   document.querySelector('#modal-recuperar .btn-primary').disabled=true
 }
 
@@ -3957,7 +3953,7 @@ async function iniciarDashboard() {
     document.querySelectorAll('.stats-grid .badge-up, .stats-grid .badge-down').forEach(el => { el.textContent = '—' })
     // Limpar tabela de registros (apenas no primeiro carregamento, para remover dados demo)
     const _tb = document.getElementById('tabela-registros')
-    if (_tb && _isFirstLoad) _tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
+    if (_tb && _isFirstLoad) _tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Carregando registros...</td></tr>'
     // Limpar top produtos (demo)
     const _tp = document.getElementById('top-products-list')
     if (_tp) _tp.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Carregando...</div>'
@@ -4218,9 +4214,10 @@ async function iniciarDashboard() {
             <td>${i.produto||i.descricao||i.categoria}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
+            <td><button onclick="${i._tipo==='venda'?'excluirVenda':'excluirDespesa'}(${i.id??i._id})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px" title="Excluir">🗑️</button></td>
           </tr>`).join('')
         } else {
-          tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
+          tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
         }
       }
 
@@ -4272,7 +4269,7 @@ async function iniciarDashboard() {
     // Garantir que tabela não fique presa em "Carregando..."
     const _tbErr = document.getElementById('tabela-registros')
     if (_tbErr && _tbErr.textContent.includes('Carregando')) {
-      _tbErr.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
+      _tbErr.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:20px">Nenhuma movimentação registrada este mês</td></tr>'
     }
   }
 
@@ -8236,13 +8233,35 @@ async function excluirProduto(idx) {
   const nome = p.name ?? p.nome ?? 'este produto'
   if (!confirm(`Tem certeza que deseja excluir "${nome}"?`)) return
   const id = p.id ?? p._id
-  const res = await api(`/produtos/${id}`, { method: 'DELETE' })
+  const res = await api(`/stock/products/${id}`, { method: 'DELETE' })
   if (res?.ok) {
     _estoqueData.splice(idx, 1)
     renderizarEstoque()
     mostrarToast('Produto removido.', 'success')
   } else {
     mostrarToast('Erro ao excluir produto. Tente novamente.', 'error')
+  }
+}
+
+async function excluirVenda(id) {
+  if (!confirm('Confirmar exclusão desta venda?')) return
+  try {
+    await api('/vendas/' + id, { method: 'DELETE' })
+    mostrarToast('Venda removida.', 'success')
+    agendarDashboard()
+  } catch (e) {
+    mostrarToast('Erro ao remover venda.', 'error')
+  }
+}
+
+async function excluirDespesa(id) {
+  if (!confirm('Confirmar exclusão desta despesa?')) return
+  try {
+    await api('/despesas/' + id, { method: 'DELETE' })
+    mostrarToast('Despesa removida.', 'success')
+    agendarDashboard()
+  } catch (e) {
+    mostrarToast('Erro ao remover despesa.', 'error')
   }
 }
 
@@ -8342,8 +8361,14 @@ function abrirStripe(url) {
 }
 
 // Re-verifica assinatura ao voltar para a aba (ex: após concluir pagamento no Stripe)
+let _visibilityThrottle = null
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && App.token) verificarPlano()
+  if (document.visibilityState !== 'visible') return
+  if (_visibilityThrottle) return
+  _visibilityThrottle = setTimeout(() => {
+    _visibilityThrottle = null
+  }, 2000)
+  verificarPlano()
 })
 
 window.addEventListener('load',()=>{
