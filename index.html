@@ -2,11 +2,19 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-  <!-- ═══ SEGURANÇA ═══ -->
+  <!-- ═══ SEGURANÇA ═══
+       ATENÇÃO: frame-ancestors e X-Frame-Options via meta tag são ignorados pelos browsers.
+       O servidor (Railway/Express) DEVE configurar os seguintes HTTP headers:
+         X-Frame-Options: DENY
+         X-Content-Type-Options: nosniff
+         Content-Security-Policy: frame-ancestors 'none'
+         Strict-Transport-Security: max-age=31536000; includeSubDomains
+       Exemplo Express: app.use(require('helmet')())
+  -->
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://nexor-api-production.up.railway.app https://wa.me; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://nexor-api-production.up.railway.app https://wa.me; frame-ancestors 'none'; object-src 'none'; base-uri 'self';">
   <!-- ═══ FAVICON + PWA ═══ -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="Nexor">
