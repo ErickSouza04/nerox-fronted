@@ -4223,7 +4223,7 @@ async function iniciarDashboard() {
         if (todos.length) {
           tbody.innerHTML=todos.map(i=>`<tr>
             <td>${fmtData(i.data)}</td>
-            <td>${esc(i.produto||i.descricao||i.categoria)}</td>
+            <td>${esc(i._tipo==='venda' ? (i.produto||'—') : (i.descricao||i.observacao||i.note||i.description||'—'))}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
@@ -4240,7 +4240,7 @@ async function iniciarDashboard() {
             <li class="recent-item">
               <span class="recent-dot ${i._tipo}"></span>
               <div style="flex:1">
-                <div class="recent-name">${esc(i.produto||i.descricao||i.categoria)}</div>
+                <div class="recent-name">${esc(i._tipo==='venda' ? (i.produto||'—') : (i.descricao||i.observacao||i.note||i.description||'—'))}</div>
                 <div class="recent-cat">${i._tipo==='venda'?'Venda':'Despesa'} · ${fmtData(i.data)}</div>
               </div>
               <span class="recent-val ${i._tipo==='venda'?'pos':'neg'}">${i._tipo==='venda'?'+':'−'}${fmtBRL(i.valor)}</span>
