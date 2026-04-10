@@ -3510,6 +3510,46 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal('alertas')">Entendido</button></div>
   </div>
 </div>
+<div class="modal-overlay" id="modal-editar-produto">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar Produto</div>
+      <button class="modal-close" onclick="closeModal('editar-produto')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Nome do produto</label>
+        <input class="form-input" type="text" id="edit-prod-nome" placeholder="Nome do produto">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preço de compra (R$)</label>
+        <input class="form-input" type="number" id="edit-prod-custo" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preço de venda (R$)</label>
+        <input class="form-input" type="number" id="edit-prod-venda" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estoque atual</label>
+        <input class="form-input" type="number" id="edit-prod-qtd" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria/Tipo</label>
+        <select class="form-select" id="edit-prod-categoria">
+          <option value="Produto">Produto</option>
+          <option value="Serviço">Serviço</option>
+          <option value="Combo">Combo</option>
+          <option value="Matéria-prima">Matéria-prima</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('editar-produto')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-edicao" onclick="salvarEdicaoProduto()">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // Safety check - garante que Chart.js carregou
@@ -8298,16 +8338,16 @@ function renderizarEstoque() {
     const qtd = p.current_stock ?? p.estoque_atual ?? p.quantidade ?? 0
     const min  = p.min_stock_alert ?? p.estoque_minimo ?? p.minimo ?? 5
     const baixo = qtd < min
-    return `<tr>
+    return `<tr onclick="abrirModalEditarProduto(${i},event)" style="cursor:pointer" title="Clique para editar">
       <td>${esc(p.name ?? p.nome)}</td>
       <td>${esc(p.brand ?? p.marca ?? '-')}</td>
       <td>${qtd}${baixo ? '<span class="stock-badge-low">baixo</span>' : ''}</td>
       <td>${fmtBRL(p.cost_price ?? p.preco_custo ?? 0)}</td>
       <td>${fmtBRL(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)}</td>
       <td><div style="display:flex;gap:6px">
-        <button class="stock-btn entrada" onclick="movimentarEstoque(${i},'entrada')">+ Entrada</button>
-        <button class="stock-btn saida" onclick="movimentarEstoque(${i},'saida')">− Saída</button>
-        <button class="stock-btn excluir" onclick="excluirProduto(${i})" title="Excluir produto">🗑️</button>
+        <button class="stock-btn entrada" onclick="event.stopPropagation();movimentarEstoque(${i},'entrada')">+ Entrada</button>
+        <button class="stock-btn saida" onclick="event.stopPropagation();movimentarEstoque(${i},'saida')">− Saída</button>
+        <button class="stock-btn excluir" onclick="event.stopPropagation();excluirProduto(${i})" title="Excluir produto">🗑️</button>
       </div></td>
     </tr>`
   }).join('')
@@ -8389,6 +8429,65 @@ async function excluirProduto(idx) {
     mostrarToast('Produto removido.', 'success')
   } else {
     mostrarToast('Erro ao excluir produto. Tente novamente.', 'error')
+  }
+}
+
+let _editandoProdutoIdx = null
+
+function abrirModalEditarProduto(idx, event) {
+  if (event && event.target.closest('button')) return
+  const p = _estoqueData[idx]
+  if (!p) return
+  _editandoProdutoIdx = idx
+  document.getElementById('edit-prod-nome').value = p.name ?? p.nome ?? ''
+  document.getElementById('edit-prod-custo').value = p.cost_price ?? p.preco_custo ?? ''
+  document.getElementById('edit-prod-venda').value = p.sale_price ?? p.preco_venda ?? p.preco ?? ''
+  document.getElementById('edit-prod-qtd').value = p.current_stock ?? p.estoque_atual ?? p.quantidade ?? 0
+  const catEl = document.getElementById('edit-prod-categoria')
+  const catVal = p.category ?? p.categoria ?? p.tipo ?? 'Produto'
+  catEl.value = catVal
+  if (!catEl.value) catEl.value = 'Produto'
+  document.getElementById('modal-editar-produto').classList.add('open')
+}
+
+async function salvarEdicaoProduto() {
+  const idx = _editandoProdutoIdx
+  const p = _estoqueData[idx]
+  if (!p) return
+  const nome = document.getElementById('edit-prod-nome').value.trim()
+  if (!nome) { mostrarToast('Preencha o nome do produto', 'error'); return }
+  const preco_custo  = parseFloat(document.getElementById('edit-prod-custo').value) || 0
+  const preco_venda  = parseFloat(document.getElementById('edit-prod-venda').value) || 0
+  const estoque_atual = parseInt(document.getElementById('edit-prod-qtd').value) || 0
+  const categoria    = document.getElementById('edit-prod-categoria').value
+  const id = p.id ?? p._id
+  const btn = document.getElementById('btn-salvar-edicao')
+  if (btn) btn.disabled = true
+  const res = await api(`/produtos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      nome, name: nome,
+      preco_custo, cost_price: preco_custo,
+      preco_venda, sale_price: preco_venda,
+      estoque_atual, current_stock: estoque_atual, quantidade: estoque_atual,
+      categoria, category: categoria
+    })
+  })
+  if (btn) btn.disabled = false
+  if (res?.ok) {
+    const body = await res.json().catch(() => null)
+    const prodAtualizado = body?.produto || body?.product || body?.data
+    _estoqueData[idx] = prodAtualizado
+      ? prodAtualizado
+      : { ..._estoqueData[idx], nome, name: nome, preco_custo, cost_price: preco_custo, preco_venda, sale_price: preco_venda, estoque_atual, current_stock: estoque_atual, quantidade: estoque_atual, categoria, category: categoria }
+    closeModal('editar-produto')
+    renderizarEstoque()
+    mostrarToast('Produto atualizado!', 'success')
+  } else {
+    const errBody = await res?.json().catch(() => null)
+    const errMsg = errBody?.message || errBody?.erro || errBody?.error || 'Verifique os campos e tente novamente'
+    mostrarToast('Erro ao salvar: ' + errMsg, 'error')
+    console.error('[editar produto PUT]', res?.status, errBody)
   }
 }
 
