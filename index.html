@@ -324,6 +324,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 .stock-btn.saida:hover { background: rgba(248,113,113,0.22); }
 .stock-btn.excluir { background: transparent; color: rgba(248,113,113,0.6); border-color: rgba(248,113,113,0.15); padding: 5px 8px; }
 .stock-btn.excluir:hover { background: rgba(248,113,113,0.12); color: var(--red); border-color: rgba(248,113,113,0.35); }
+.stock-btn.editar { background: transparent; color: #00e5a0; border-color: rgba(0,229,160,0.25); padding: 5px 8px; }
+.stock-btn.editar:hover { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.5); }
 
 /* ═══ WHATSAPP AGENT ═══ */
 .wa-status-ok { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 12px; background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); font-size: 13px; font-weight: 600; color: var(--green); margin-top: 12px; }
@@ -8347,6 +8349,7 @@ function renderizarEstoque() {
       <td><div style="display:flex;gap:6px">
         <button class="stock-btn entrada" onclick="event.stopPropagation();movimentarEstoque(${i},'entrada')">+ Entrada</button>
         <button class="stock-btn saida" onclick="event.stopPropagation();movimentarEstoque(${i},'saida')">− Saída</button>
+        <button class="stock-btn editar" onclick="event.stopPropagation();abrirModalEditarProduto(${i},event)" title="Editar produto">✏️</button>
         <button class="stock-btn excluir" onclick="event.stopPropagation();excluirProduto(${i})" title="Excluir produto">🗑️</button>
       </div></td>
     </tr>`
