@@ -1088,6 +1088,61 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   display: flex; align-items: center; justify-content: center;
   gap: 8px; margin-bottom: 24px;
 }
+.quiz-slider-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 18px 16px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.quiz-slider-card:focus-within {
+  border-color: rgba(0,229,160,0.35);
+}
+.quiz-slider-label {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 8px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.quiz-slider-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #00e5a0;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+.quiz-range {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+.quiz-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #00e5a0;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,229,160,0.5);
+  transition: transform 0.15s;
+}
+.quiz-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.quiz-range-limits {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
 .step-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: rgba(255,255,255,0.1); transition: all 0.3s;
@@ -2140,7 +2195,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <button class="auth-btn-secondary" onclick="avancarEtapa(1)">← Voltar</button>
       </div>
 
-      <!-- ── CADASTRO — Etapa 3: Faturamento ── -->
+      <!-- ── CADASTRO — Etapa 3: Sliders financeiros ── -->
       <div id="auth-cad-3" class="auth-step">
         <div class="step-indicator">
           <div class="step-dot done"></div>
@@ -2149,33 +2204,38 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div class="step-line"></div>
           <div class="step-dot active"></div>
         </div>
-        <div class="step-title">Quanto você fatura? 💰</div>
-        <div class="step-sub">Usamos isso para calibrar suas metas iniciais. Pode ser alterado depois.</div>
 
-        <div class="faturamento-opts" id="fat-opts">
-          <div class="fat-opt" onclick="selecionarFat(this,'Até R$ 1.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">Até R$ 1.000 / mês</span>
-          </div>
-          <div class="fat-opt" onclick="selecionarFat(this,'R$ 1.001 a R$ 5.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">R$ 1.001 – R$ 5.000 / mês</span>
-          </div>
-          <div class="fat-opt" onclick="selecionarFat(this,'R$ 5.001 a R$ 15.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">R$ 5.001 – R$ 15.000 / mês</span>
-          </div>
-          <div class="fat-opt" onclick="selecionarFat(this,'Acima de R$ 15.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">Acima de R$ 15.000 / mês</span>
-          </div>
+        <div class="step-title">3 perguntas rápidas 📊</div>
+        <div class="step-sub">Estimativas são suficientes. Você ajusta depois.</div>
+
+        <div class="quiz-slider-card">
+          <div class="quiz-slider-label">💰 Quanto você fatura por mês, em média?</div>
+          <div class="quiz-slider-value" id="quiz-fat-val">R$ 3.000</div>
+          <input type="range" class="quiz-range" id="quiz-fat"
+            min="500" max="30000" step="500" value="3000"
+            oninput="onboardingSlider('fat', this.value)">
+          <div class="quiz-range-limits"><span>R$ 500</span><span>R$ 30k</span></div>
         </div>
 
-        <div class="auth-error" id="cad-erro-3">Selecione uma opção para continuar.</div>
+        <div class="quiz-slider-card">
+          <div class="quiz-slider-label">📦 Quanto você gasta por mês (produtos, aluguel, etc)?</div>
+          <div class="quiz-slider-value" id="quiz-gasto-val">R$ 1.500</div>
+          <input type="range" class="quiz-range" id="quiz-gasto"
+            min="200" max="20000" step="200" value="1500"
+            oninput="onboardingSlider('gasto', this.value)">
+          <div class="quiz-range-limits"><span>R$ 200</span><span>R$ 20k</span></div>
+        </div>
 
-        <button class="auth-btn" id="btn-finalizar" onclick="finalizarCadastro()">
-          🚀 Criar minha conta grátis
-        </button>
+        <div class="quiz-slider-card">
+          <div class="quiz-slider-label">🎯 Quanto você quer tirar de salário por mês?</div>
+          <div class="quiz-slider-value" id="quiz-sal-val">R$ 1.200</div>
+          <input type="range" class="quiz-range" id="quiz-sal"
+            min="500" max="10000" step="200" value="1200"
+            oninput="onboardingSlider('sal', this.value)">
+          <div class="quiz-range-limits"><span>R$ 500</span><span>R$ 10k</span></div>
+        </div>
+
+        <button class="auth-btn" onclick="finalizarCadastro()">🚀 Criar minha conta grátis</button>
         <button class="auth-btn-secondary" onclick="avancarEtapa(2)">← Voltar</button>
       </div>
 
@@ -2216,6 +2276,25 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       Sua conta está pronta. Agora você tem tudo para organizar suas finanças, precificar seus produtos e crescer com inteligência.
     </div>
 
+    <div id="bv-score-section" style="
+      background: rgba(0,229,160,0.08);
+      border: 1px solid rgba(0,229,160,0.2);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 0 0 16px 0;
+      text-align: center;
+    ">
+      <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
+        Seu Nexor Score inicial
+      </div>
+      <div id="bv-score" style="font-size:48px;font-weight:800;color:#00e5a0;line-height:1;letter-spacing:-2px;">
+        —
+      </div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:6px;">
+        Lucro estimado: <span id="bv-lucro" style="color:#00e5a0;font-weight:600;">—</span>/mês
+      </div>
+    </div>
+
     <div class="welcome-stats">
       <div class="welcome-stat">
         <div class="welcome-stat-val" id="ws-1">0s</div>
@@ -2239,23 +2318,6 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     </button>
   </div>
 
-  <!-- TOUR CARD (oculto inicialmente) -->
-  <div class="tour-card" id="tour-card" style="display:none">
-    <div class="tour-arrow" id="tour-arrow"></div>
-    <div class="tour-progress-bar" id="tour-progress"></div>
-    <div class="tour-step-badge">
-      <span id="tour-step-num">Passo 1 de 5</span>
-    </div>
-    <div class="tour-icon-wrap" id="tour-icon"></div>
-    <div class="tour-title" id="tour-title"></div>
-    <div class="tour-desc"  id="tour-desc"></div>
-    <div class="tour-tip"   id="tour-tip"></div>
-    <div class="tour-actions">
-      <button class="tour-btn-back" id="tour-back" onclick="tourBack()">←</button>
-      <button class="tour-btn-next" id="tour-next" onclick="tourNext()">Próximo →</button>
-      <button class="tour-skip-link" onclick="fecharOnboarding()">Pular</button>
-    </div>
-  </div>
 
 </div>
 
@@ -3681,6 +3743,25 @@ async function avancarEtapa(etapa) {
   document.getElementById(ids[etapa]).classList.add('active')
 }
 
+// ── ONBOARDING QUIZ ──────────────────────────────────────────
+const onboardingData = { faturamento: 3000, gastos: 1500, salario: 1200 }
+
+function onboardingSlider(key, val) {
+  val = parseInt(val)
+  const fmt = v => 'R$ ' + (v >= 1000 ? (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + 'k' : v.toLocaleString('pt-BR'))
+  if (key === 'fat')   { onboardingData.faturamento = val; document.getElementById('quiz-fat-val').textContent  = fmt(val) }
+  if (key === 'gasto') { onboardingData.gastos = val;      document.getElementById('quiz-gasto-val').textContent = fmt(val) }
+  if (key === 'sal')   { onboardingData.salario = val;     document.getElementById('quiz-sal-val').textContent   = fmt(val) }
+}
+
+function calcularNexorScore(fat, gastos, salario) {
+  const lucro = fat - gastos
+  if (lucro <= 0) return 10
+  const margem = lucro / fat
+  const cobresal = lucro >= salario ? 1 : lucro / salario
+  return Math.min(100, Math.round(margem * 80 * cobresal + (lucro > salario ? 15 : 0)))
+}
+
 function mostrarErroAuth(el, msg) {
   clearTimeout(el._erroTimer)
   el.innerHTML=DOMPurify.sanitize(msg,{ALLOWED_TAGS:['ul','li'],ALLOWED_ATTR:[]}); el.classList.add('show')
@@ -3770,43 +3851,101 @@ async function entrarDemo() {
 }
 
 async function finalizarCadastro() {
-  const erro=document.getElementById('cad-erro-3')
-  if (!cadFaturamento) { erro.classList.add('show'); return }
-  erro.classList.remove('show')
-  const btn=document.getElementById('btn-finalizar')
-  btn.textContent='⏳ Criando conta...'; btn.disabled=true
+  const nome  = document.getElementById('cad-nome')?.value?.trim()
+  const email = document.getElementById('cad-email')?.value?.trim()
+  const senha = document.getElementById('cad-senha')?.value
+  const tipo_negocio = cadCategoria || null
+
+  if (!nome || !email || !senha) {
+    mostrarToast('Preencha todos os campos', 'error')
+    return
+  }
+
+  const score = calcularNexorScore(onboardingData.faturamento, onboardingData.gastos, onboardingData.salario)
+
+  const btn = document.querySelector('#auth-cad-3 .auth-btn')
+  if (btn) { btn.textContent = '⏳ Criando conta...'; btn.disabled = true }
+
   try {
-    const ctrl=new AbortController()
-    const _t=setTimeout(()=>ctrl.abort(),15000)
-    const res=await fetch(API_URL+'/auth/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
-      body:JSON.stringify({nome:document.getElementById('cad-nome').value.trim(),email:document.getElementById('cad-email').value.trim(),
-        senha:document.getElementById('cad-senha').value,tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento})
-    }).catch(()=>null)
+    const ctrl = new AbortController()
+    const _t = setTimeout(() => ctrl.abort(), 15000)
+    const res = await fetch(`${API_URL}/auth/cadastrar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        nome,
+        email,
+        senha,
+        tipo_negocio,
+        faturamento_medio: onboardingData.faturamento,
+        gastos_estimados:  onboardingData.gastos,
+        salario_desejado:  onboardingData.salario,
+        nexor_score:       score
+      })
+    }).catch(() => null)
     clearTimeout(_t)
+
     if (!res) throw new Error('offline')
-    const data=await res.json().catch(()=>({}))
+    const data = await res.json().catch(() => ({}))
+
     if (!res.ok) {
-      const errMsg = res.status===409
+      const errMsg = res.status === 409
         ? 'Este e-mail já está cadastrado. Clique em "Entrar" para fazer login.'
-        : (data.erro==='Dados inválidos'
+        : (data.erro === 'Dados inválidos'
           ? 'Verifique nome, e-mail e senha. A senha deve ter:<ul><li>mínimo 8 caracteres</li><li>1 letra maiúscula</li><li>1 letra minúscula</li><li>1 número</li><li>1 caractere especial ($, &, @, !)</li></ul>'
-          : (data.erro||'Erro ao criar conta. Tente novamente.'))
-      mostrarErroAuth(document.getElementById('cad-erro-1'),errMsg)
-      avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
+          : (data.erro || 'Erro ao criar conta. Tente novamente.'))
+      mostrarErroAuth(document.getElementById('cad-erro-1'), errMsg)
+      avancarEtapa(1)
+      if (btn) { btn.textContent = '🚀 Criar minha conta grátis'; btn.disabled = false }
+      return
     }
-    salvarSessao(data); entrarApp(data.usuario, true)
+
+    // Salva sessão (compatível com accessToken ou token)
+    const token   = data.accessToken || data.token
+    const refresh = data.refreshToken || data.refresh_token
+    App.token   = token
+    App.refresh = refresh
+    App.usuario = data.usuario
+    if (token)   localStorage.setItem('nexor_token',   token)
+    if (refresh) localStorage.setItem('nexor_refresh', refresh)
+    localStorage.setItem('nexor_usuario', JSON.stringify(data.usuario))
+
+    App.onboardingScore = score
+    App.onboardingData  = { ...onboardingData }
+
+    // Injeta score no card de bem-vindo antes de exibi-lo
+    const scoreEl = document.getElementById('bv-score')
+    const lucroEl = document.getElementById('bv-lucro')
+    if (scoreEl) scoreEl.textContent = score
+    if (lucroEl) {
+      const lucro = onboardingData.faturamento - onboardingData.gastos
+      lucroEl.textContent = 'R$ ' + lucro.toLocaleString('pt-BR')
+    }
+
+    entrarApp(data.usuario, true)
+
   } catch {
-    btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false
-    const nomeVal=document.getElementById('cad-nome').value.trim()||'Usuário Teste'
-    const emailVal=document.getElementById('cad-email').value.trim()||'teste@nexor.com.br'
-    mostrarToast('Servidor indisponível. Abrindo modo de demonstração…','info')
-    setTimeout(()=>{
+    if (btn) { btn.textContent = '🚀 Criar minha conta grátis'; btn.disabled = false }
+    const nomeVal  = nome  || 'Usuário Teste'
+    const emailVal = email || 'teste@nexor.com.br'
+    mostrarToast('Servidor indisponível. Abrindo modo de demonstração…', 'info')
+    setTimeout(() => {
       localStorage.removeItem('nexor_token'); localStorage.removeItem('nexor_refresh')
-      App.token=null; App.refresh=null
-      App.usuario={nome:nomeVal,email:emailVal,plano:'trial',tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento}
-      localStorage.setItem('nexor_usuario',JSON.stringify(App.usuario))
-      entrarApp(App.usuario,true)
-    },1800)
+      App.token = null; App.refresh = null
+      App.usuario = { nome: nomeVal, email: emailVal, plano: 'trial', tipo_negocio, faturamento_medio: onboardingData.faturamento }
+      localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+      App.onboardingScore = score
+      App.onboardingData  = { ...onboardingData }
+      const scoreEl = document.getElementById('bv-score')
+      const lucroEl = document.getElementById('bv-lucro')
+      if (scoreEl) scoreEl.textContent = score
+      if (lucroEl) {
+        const lucro = onboardingData.faturamento - onboardingData.gastos
+        lucroEl.textContent = 'R$ ' + lucro.toLocaleString('pt-BR')
+      }
+      entrarApp(App.usuario, true)
+    }, 1800)
   }
 }
 
@@ -7448,7 +7587,6 @@ function mostrarBoasVindas(usuario) {
   const overlay = document.getElementById('onboarding-overlay')
   overlay.classList.add('show')
   document.getElementById('welcome-card').style.display = 'block'
-  document.getElementById('tour-card').style.display = 'none'
 }
 
 function gerarConfetti() {
