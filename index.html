@@ -4820,7 +4820,7 @@ async function salvarMeta() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats)   App.stats.metaValor    = Math.round(valor)
-      if (App.usuario) App.usuario.meta_valor = Math.round(valor)
+      if (App.usuario) { App.usuario.meta_valor = Math.round(valor); localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4844,7 +4844,7 @@ async function salvarProLabore() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
     if (res?.ok) {
       if (App.stats)   { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
-      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq }
+      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq; localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4853,10 +4853,24 @@ async function salvarProLabore() {
 
 // ── Metas — carregar página com dados reais ──
 async function carregarPaginaMetas() {
-  // Lê meta e pró-labore de App.usuario (já em memória após login/save)
-  // GET /usuarios/perfil retorna 404 e GET /metas retorna dados:[]
   if (App.token) {
     if (!App.stats) App.stats = {}
+    // Busca dados frescos do perfil antes de renderizar (corrige race condition e reload)
+    try {
+      const perfilRes = await api('/usuarios/perfil')
+      if (perfilRes?.ok) {
+        const perfilData = await perfilRes.json()
+        const perfil = perfilData.dados || perfilData.usuario || perfilData
+        if (perfil?.meta_valor != null && App.usuario) {
+          App.usuario.meta_valor = perfil.meta_valor
+          localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+        }
+        if (perfil?.prolabore_valor != null && App.usuario) {
+          App.usuario.prolabore_valor = perfil.prolabore_valor
+          App.usuario.prolabore_freq  = perfil.prolabore_freq
+        }
+      }
+    } catch (_e) {}
     const metaValorPerfil      = parseFloat(App.usuario?.meta_valor)      || App.stats.metaValor      || 0
     const prolaboreValorPerfil = parseFloat(App.usuario?.prolabore_valor) || App.stats.prolaboreValor || 0
     App.stats.metaValor      = metaValorPerfil
