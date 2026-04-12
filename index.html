@@ -7240,7 +7240,13 @@ function irParaPrecificacao() {
 // ══════════════════════════════════════════════
 function openModal(n) {
   document.getElementById('modal-'+n).classList.add('open')
-  if (n === 'nova-venda') _syncModalSelectProdutos()
+  if (n === 'nova-venda') {
+    if (App.token && !_estoqueData.length) {
+      carregarEstoque().then(() => _syncModalSelectProdutos())
+    } else {
+      _syncModalSelectProdutos()
+    }
+  }
 }
 
 function abrirModalAlertas() {
@@ -7298,15 +7304,27 @@ function _syncModalSelectProdutos() {
   const aviso = document.getElementById('modal-sem-produtos')
   if (!sel) return
   sel.innerHTML = '<option value="">— Selecione um produto —</option>'
+  // Produtos salvos pela calculadora de precificação
   produtosCadastrados.forEach(p => {
     const opt = document.createElement('option')
     opt.value       = p.id
     opt.textContent = `${p.nome}  —  R$ ${p.precoFinal.toFixed(2).replace('.',',')}`
     sel.appendChild(opt)
   })
-  if (aviso) aviso.style.display = produtosCadastrados.length === 0 ? 'block' : 'none'
+  // Produtos cadastrados no Estoque (API)
+  _estoqueData.forEach(p => {
+    const nome  = p.name ?? p.nome ?? ''
+    if (!nome) return
+    const preco = parseFloat(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)
+    const opt = document.createElement('option')
+    opt.value       = 'estq-' + (p.id ?? p._id)
+    opt.textContent = `${nome}  —  R$ ${preco.toFixed(2).replace('.',',')}`
+    sel.appendChild(opt)
+  })
+  const totalProdutos = produtosCadastrados.length + _estoqueData.length
+  if (aviso) aviso.style.display = totalProdutos === 0 ? 'block' : 'none'
   const tabCad = document.getElementById('modal-tab-cadastrado')
-  if (tabCad) tabCad.style.opacity = produtosCadastrados.length === 0 ? '0.5' : '1'
+  if (tabCad) tabCad.style.opacity = totalProdutos === 0 ? '0.5' : '1'
   // Reset preview
   const preview = document.getElementById('modal-produto-preview')
   if (preview) preview.style.display = 'none'
@@ -7335,13 +7353,24 @@ function modalAlternarProduto(modo) {
 function modalOnSelecionarProduto(sel) {
   const preview = document.getElementById('modal-produto-preview')
   if (!sel.value) { preview.style.display = 'none'; return }
-  const prod = produtosCadastrados.find(p => p.id === sel.value)
-  if (!prod) return
-  document.getElementById('modal-prev-nome').textContent  = prod.nome
-  document.getElementById('modal-prev-preco').textContent = 'R$ ' + prod.precoFinal.toFixed(2).replace('.',',')
+  let nome = '', precoFinal = 0
+  if (sel.value.startsWith('estq-')) {
+    const estqId = sel.value.slice(5)
+    const p = _estoqueData.find(x => String(x.id ?? x._id) === estqId)
+    if (!p) return
+    nome = p.name ?? p.nome ?? ''
+    precoFinal = parseFloat(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)
+  } else {
+    const p = produtosCadastrados.find(p => p.id === sel.value)
+    if (!p) return
+    nome = p.nome
+    precoFinal = p.precoFinal
+  }
+  document.getElementById('modal-prev-nome').textContent  = nome
+  document.getElementById('modal-prev-preco').textContent = 'R$ ' + precoFinal.toFixed(2).replace('.',',')
   preview.style.display = 'block'
   const valInput = document.getElementById('modal-val')
-  if (valInput && !valInput.value) valInput.value = prod.precoFinal.toFixed(2)
+  if (valInput && !valInput.value) valInput.value = precoFinal.toFixed(2)
 }
 
 async function modalRegistrarVenda() {
@@ -7359,8 +7388,14 @@ async function modalRegistrarVenda() {
   } else {
     const selId = document.getElementById('modal-select-produto')?.value
     if (selId) {
-      const p = produtosCadastrados.find(x => x.id === selId)
-      prod = p ? p.nome : ''
+      if (selId.startsWith('estq-')) {
+        const estqId = selId.slice(5)
+        const p = _estoqueData.find(x => String(x.id ?? x._id) === estqId)
+        prod = p ? (p.name ?? p.nome ?? '') : ''
+      } else {
+        const p = produtosCadastrados.find(x => x.id === selId)
+        prod = p ? p.nome : ''
+      }
     }
   }
 
