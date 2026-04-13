@@ -7944,15 +7944,15 @@ async function initPerf30Chart() {
       const r = await api('/dashboard/diario')
       if (r?.ok) {
         const {dados} = await r.json()
-        console.log('[perf30]', dados)
+        console.log('[perf30] dados recebidos:', JSON.stringify(dados?.slice(0,3)))
         if (dados?.length) {
           labels   = dados.map(d => fmtData(d.data))
           receita  = dados.map(d => d.faturamento || 0)
           despesas = dados.map(d => d.despesas    || 0)
           lucro    = dados.map(d => d.lucro       || 0)
-        }
+        } else { console.warn('[perf30] dados vazios ou nulos:', dados) }
       }
-    } catch(e) {}
+    } catch(e) { console.error('[perf30] erro na API:', e) }
   }
   const makeGrad = (ctx, color) => {
     const g = ctx.chart.ctx.createLinearGradient(0,0,0,200)
