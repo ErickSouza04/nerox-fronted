@@ -4208,6 +4208,7 @@ async function iniciarDashboard() {
     ])
 
     let _resumoDados = null
+    let _heroDiarioOk = false  // sinaliza se /dashboard/diario trouxe dados de hoje
     if (rRes?.ok) {
       const {dados} = await rRes.json()
       _resumoDados = dados
@@ -4352,6 +4353,7 @@ async function iniciarDashboard() {
           if (hbEl)  hbEl.textContent  = ''
           if (hdbEl) hdbEl.textContent = ''
         }
+        if ((hoje.faturamento||0) > 0) _heroDiarioOk = true
       }
       // Insight IA dinâmico no dashboard (não bloqueia)
       setTimeout(carregarInsightDiario, 800)
@@ -4468,6 +4470,45 @@ async function iniciarDashboard() {
             </div>`).join('')
         } else {
           tpEl.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Nenhuma venda registrada ainda</div>'
+        }
+      }
+
+      // ── Fallback hero card: calcula hoje dos registros quando /dashboard/diario não trouxe dados de hoje ──
+      if (!_heroDiarioOk) {
+        const _fatHojeFb = v.dados
+          .filter(i => i.data && i.data.slice(0,10) === _brHoje)
+          .reduce((s, i) => s + parseFloat(i.valor||0), 0)
+        if (_fatHojeFb > 0) {
+          const _despHojeFb = de.dados
+            .filter(i => i.data && i.data.slice(0,10) === _brHoje)
+            .reduce((s, i) => s + parseFloat(i.valor||0), 0)
+          const _lucroHojeFb = _fatHojeFb - _despHojeFb
+          const _hlFb = document.getElementById('hero-lucro')
+          const _hrFb = document.getElementById('hero-receita')
+          const _hdFb = document.getElementById('hero-despesas')
+          const _hmvFb = document.getElementById('hero-margem-val')
+          const _hmfFb = document.getElementById('hero-margin-fill')
+          const _hmpFb = document.querySelector('.hero-margin-pct')
+          if (_hlFb) _hlFb.textContent = fmtBRL(_lucroHojeFb)
+          if (_hrFb) _hrFb.textContent = fmtBRL(_fatHojeFb)
+          if (_hdFb) _hdFb.textContent = fmtBRL(_despHojeFb)
+          const _mFb = Math.round(_lucroHojeFb / _fatHojeFb * 100)
+          if (_hmvFb) _hmvFb.textContent = _mFb + '%'
+          if (_hmfFb) _hmfFb.style.width = Math.max(0, Math.min(100, _mFb)) + '%'
+          if (_hmpFb) _hmpFb.textContent = _mFb + '%'
+          // Atualizar gráfico diário se hoje ainda não aparece ou estava zerado
+          const _cDiFb = Chart.getChart('chartDiario')
+          if (_cDiFb) {
+            const _lbFb = fmtData(_brHoje)
+            const _idxFb = _cDiFb.data.labels.indexOf(_lbFb)
+            if (_idxFb >= 0) {
+              _cDiFb.data.datasets[0].data[_idxFb] = _lucroHojeFb
+            } else {
+              _cDiFb.data.labels.push(_lbFb)
+              _cDiFb.data.datasets[0].data.push(_lucroHojeFb)
+            }
+            _cDiFb.update()
+          }
         }
       }
     }
