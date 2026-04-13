@@ -4294,7 +4294,13 @@ async function iniciarDashboard() {
 
     if (dRes?.ok) {
       const {dados} = await dRes.json()
-      console.log('[NEXOR DEBUG] /dashboard/diario retornou', dados?.length, 'dias:', dados)
+      console.log('[NEXOR DEBUG chartDiario] /dashboard/diario retornou', dados?.length, 'registros')
+      console.log('[NEXOR DEBUG chartDiario] primeiro:', dados?.[0], '| último:', dados?.[dados?.length-1])
+      console.log('[NEXOR DEBUG chartDiario] labels gerados:', dados?.map(d=>fmtData(d.data)))
+      console.log('[NEXOR DEBUG chartDiario] lucro[]:', dados?.map(d=>d.lucro))
+      console.log('[NEXOR DEBUG chartDiario] faturamento[]:', dados?.map(d=>d.faturamento))
+      console.log('[NEXOR DEBUG chartDiario] despesas[]:', dados?.map(d=>d.despesas))
+      console.log('[NEXOR DEBUG chartDiario] dados completos:', JSON.stringify(dados))
       const c=Chart.getChart('chartDiario')
       if(c){ c.data.labels=dados.map(d=>fmtData(d.data)); c.data.datasets[0].data=dados.map(d=>d.lucro); c.update() }
       // Salvar série diária para gráfico do Profit Card
@@ -7901,16 +7907,28 @@ async function initPerf30Chart() {
   if (App.token) {
     try {
       const r = await api('/dashboard/diario')
+      console.log('[NEXOR DEBUG perf30] /dashboard/diario status ok?', r?.ok)
       if (r?.ok) {
         const {dados} = await r.json()
+        console.log('[NEXOR DEBUG perf30] registros recebidos:', dados?.length)
+        console.log('[NEXOR DEBUG perf30] primeiro:', dados?.[0], '| último:', dados?.[dados?.length-1])
+        console.log('[NEXOR DEBUG perf30] dados completos:', JSON.stringify(dados))
         if (dados?.length) {
           labels   = dados.map(d => fmtData(d.data))
           receita  = dados.map(d => d.faturamento || 0)
           despesas = dados.map(d => d.despesas    || 0)
           lucro    = dados.map(d => d.lucro       || 0)
+          console.log('[NEXOR DEBUG perf30] labels→Chart:', labels)
+          console.log('[NEXOR DEBUG perf30] receita→Chart:', receita)
+          console.log('[NEXOR DEBUG perf30] despesas→Chart:', despesas)
+          console.log('[NEXOR DEBUG perf30] lucro→Chart:', lucro)
+        } else {
+          console.warn('[NEXOR DEBUG perf30] dados vazio/null — gráfico ficará zerado')
         }
+      } else {
+        console.warn('[NEXOR DEBUG perf30] resposta não-ok, gráfico ficará zerado')
       }
-    } catch(e) {}
+    } catch(e) { console.error('[NEXOR DEBUG perf30] erro na chamada:', e) }
   }
   const makeGrad = (ctx, color) => {
     const g = ctx.chart.ctx.createLinearGradient(0,0,0,200)
