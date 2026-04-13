@@ -3662,6 +3662,12 @@ const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFrac
 const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
 // Escapa HTML entities — usar sempre que texto do usuário/API for colocado em innerHTML
 const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
+// Retorna data no fuso America/Sao_Paulo como string YYYY-MM-DD
+function getDataBrasil(d) {
+  const fmt = new Intl.DateTimeFormat('pt-BR', {timeZone:'America/Sao_Paulo', year:'numeric', month:'2-digit', day:'2-digit'}).format(d || new Date())
+  const [dd, mm, yyyy] = fmt.split('/')
+  return `${yyyy}-${mm}-${dd}`
+}
 
 // ======================================
 // PLANOS — Base / Plus
@@ -4091,7 +4097,8 @@ function agendarDashboard() {
 }
 async function iniciarDashboard() {
   const reqId = ++_dashReqId
-  const mes=new Date().getMonth()+1, ano=new Date().getFullYear()
+  const _brHoje = getDataBrasil(new Date())
+  const mes = parseInt(_brHoje.slice(5,7)), ano = parseInt(_brHoje.slice(0,4))
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
   if (App.token) {
@@ -4758,7 +4765,7 @@ function atualizarDicasDashboard() {
 // ── Relatórios — carrega dados reais ──
 async function carregarRelatorios() {
   if (!App.token) return
-  const hoje = new Date(), mes = hoje.getMonth()+1, ano = hoje.getFullYear()
+  const _brHojeRel = getDataBrasil(new Date()), mes = parseInt(_brHojeRel.slice(5,7)), ano = parseInt(_brHojeRel.slice(0,4))
   const mesesNomes = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
   // Atualizar header
   const hSub = document.getElementById('rel-header-sub')
@@ -4999,9 +5006,10 @@ let relInit=false
 async function initRelatorioChart(){
   if (typeof Chart === 'undefined') return
   if(relInit) return; relInit=true
-  const _rNow = new Date()
-  const _rDias = new Date(_rNow.getFullYear(), _rNow.getMonth()+1, 0).getDate()
-  const _rMm = String(_rNow.getMonth()+1).padStart(2,'0')
+  const _rBr = getDataBrasil(new Date())
+  const _rYyyy = parseInt(_rBr.slice(0,4)), _rMon = parseInt(_rBr.slice(5,7))
+  const _rDias = new Date(_rYyyy, _rMon, 0).getDate()
+  const _rMm = String(_rMon).padStart(2,'0')
   let rLabels = Array.from({length:_rDias},(_,i)=>(i+1)+'/'+_rMm)
   let rData = App.token ? [] : [40,95,60,140,80,210,165,120,200,90,180,250,130,310,170,195,120,260,145,300,180,220,140,280,160,320,200,230]
   if (App.token) {
@@ -7884,7 +7892,8 @@ async function initPerf30Chart() {
   perf30Initing = true
   let labels = Array.from({length:30},(_,i)=>{
     const d = new Date(); d.setDate(d.getDate()-29+i)
-    return (d.getDate()).toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')
+    const brFmt = new Intl.DateTimeFormat('pt-BR', {timeZone:'America/Sao_Paulo', day:'2-digit', month:'2-digit'}).format(d)
+    return brFmt
   })
   let receita  = App.token ? new Array(30).fill(0) : [680,920,780,1100,850,1400,960,1250,1080,1560,890,1320,1150,1480,1020,1380,950,1620,1100,1780,1230,1560,1040,1890,1340,1720,1150,2100,1580,2430]
   let despesas = App.token ? new Array(30).fill(0) : [420,580,510,680,530,820,600,740,660,890,550,780,710,850,640,810,600,930,680,1020,750,900,640,1080,820,1000,700,1150,950,1150]
