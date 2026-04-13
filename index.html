@@ -7944,6 +7944,7 @@ async function initPerf30Chart() {
       const r = await api('/dashboard/diario')
       if (r?.ok) {
         const {dados} = await r.json()
+        console.log('[perf30]', dados)
         if (dados?.length) {
           labels   = dados.map(d => fmtData(d.data))
           receita  = dados.map(d => d.faturamento || 0)
