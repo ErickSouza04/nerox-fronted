@@ -4099,11 +4099,11 @@ async function iniciarDashboard() {
   const reqId = ++_dashReqId
   const _brHoje = getDataBrasil(new Date())
   const mes = parseInt(_brHoje.slice(5,7)), ano = parseInt(_brHoje.slice(0,4))
+  const _isFirstLoad = _lastDashLoad === 0
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
   if (App.token) {
     // Primeiro carregamento: limpa dados demo. Refresh pós-registro: preserva valores atuais.
-    const _isFirstLoad = _lastDashLoad === 0
     document.querySelectorAll('[data-target]').forEach(el => el.dataset.target = '0')
     const hlEl = document.getElementById('hero-lucro')
     const hrEl = document.getElementById('hero-receita')
