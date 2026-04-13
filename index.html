@@ -4175,9 +4175,12 @@ async function iniciarDashboard() {
   try {
     const _cacheKey = 'nexor_dash_' + (App.usuario?.id || 'u')
     const _cached = JSON.parse(sessionStorage.getItem(_cacheKey) || 'null')
+    const _cacheAge = _cached ? Math.round((Date.now() - _cached.ts) / 1000) : null
+    console.log('[NEXOR DEBUG] Cache encontrado:', !!_cached, '| Idade (s):', _cacheAge, '| hoje do cache:', _cached?.hoje)
     if (_cached && _isFirstLoad && (Date.now() - _cached.ts) < 10 * 60 * 1000) {
       const _cd = _cached.resumo
       const _ch = _cached.hoje
+      console.log('[NEXOR DEBUG] Aplicando cache: hoje =', _ch)
       const cards = document.querySelectorAll('[data-target]')
       if(cards[0]){cards[0].dataset.target=Math.round(_cd.faturamento||0);    countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(_cd.total_despesas||0); countUp(cards[1])}
@@ -4188,7 +4191,7 @@ async function iniciarDashboard() {
       if(hrEl && _ch) hrEl.textContent=fmtBRL(_ch.faturamento||0)
       if(hdEl && _ch) hdEl.textContent=fmtBRL(_ch.despesas||0)
     }
-  } catch(_e) {}
+  } catch(_e) { console.warn('[NEXOR DEBUG] Erro no cache:', _e) }
 
   try {
     const [rRes, iRes, dRes] = await Promise.all([
@@ -4284,6 +4287,7 @@ async function iniciarDashboard() {
 
     if (dRes?.ok) {
       const {dados} = await dRes.json()
+      console.log('[NEXOR DEBUG] /dashboard/diario retornou', dados?.length, 'dias:', dados)
       const c=Chart.getChart('chartDiario')
       if(c){ c.data.labels=dados.map(d=>fmtData(d.data)); c.data.datasets[0].data=dados.map(d=>d.lucro); c.update() }
       // Salvar série diária para gráfico do Profit Card
@@ -4304,7 +4308,9 @@ async function iniciarDashboard() {
         }
       }
       // Atualizar hero do dia com dados reais de hoje
-      const hoje = dados[dados.length - 1]
+      const _hoje_str = new Date().toISOString().slice(0,10) // "YYYY-MM-DD"
+      const hoje = dados.find(d => d.data && d.data.slice(0,10) === _hoje_str) || dados[dados.length - 1]
+      console.log('[NEXOR DEBUG] hoje procurado (data local):', _hoje_str, '| hoje encontrado:', hoje)
       if (hoje) {
         const hlEl = document.getElementById('hero-lucro')
         const hrEl = document.getElementById('hero-receita')
