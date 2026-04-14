@@ -3870,7 +3870,7 @@ async function fazerLogin() {
     if (!res) throw new Error('offline')
     const data=await res.json().catch(()=>({}))
     if (!res.ok) { mostrarErroAuth(erro,data.erro||'E-mail ou senha incorretos.'); if(btn){btn.textContent='Entrar no Nexor';btn.disabled=false} return }
-    salvarSessao(data); entrarApp(data.usuario, false)
+    salvarSessao(data); limparCacheDashboard(); entrarApp(data.usuario, false)
   } catch {
     mostrarErroAuth(erro,'Erro de conexão. Tente o modo demo.')
     if (btn) { btn.textContent='Entrar no Nexor'; btn.disabled=false }
@@ -3999,9 +3999,14 @@ function salvarSessao(data) {
   else localStorage.removeItem('nexor_plan')
 }
 
+function limparCacheDashboard() {
+  sessionStorage.clear()
+}
+
 function fazerLogout() {
   if (App.token&&App.refresh) fetch(API_URL+'/auth/logout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+App.token},body:JSON.stringify({refresh_token:App.refresh})}).catch(()=>{})
   ;['nexor_token','nexor_refresh','nexor_usuario','nexor_plan'].forEach(k=>localStorage.removeItem(k))
+  limparCacheDashboard()
   App.token=null; App.refresh=null; App.usuario=null; App.plan=null
   location.reload()
 }
@@ -4178,7 +4183,7 @@ async function iniciarDashboard() {
     const _cached = JSON.parse(sessionStorage.getItem(_cacheKey) || 'null')
     const _cacheAge = _cached ? Math.round((Date.now() - _cached.ts) / 1000) : null
     console.log('[NEXOR DEBUG] Cache encontrado:', !!_cached, '| Idade (s):', _cacheAge, '| hoje do cache:', _cached?.hoje)
-    if (_cached && _isFirstLoad && (Date.now() - _cached.ts) < 2 * 60 * 1000) {
+    if (_cached && _isFirstLoad && (Date.now() - _cached.ts) < 60 * 1000) {
       const _cd = _cached.resumo
       const _ch = _cached.hoje
       console.log('[NEXOR DEBUG] Aplicando cache: hoje =', _ch)
