@@ -2441,7 +2441,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div class="perf-chart-card" style="margin-bottom:16px">
       <div class="perf-chart-header">
         <div>
-          <div class="perf-chart-title">Evolução do Lucro — Últimos 30 dias</div>
+          <div class="perf-chart-title">Desempenho — Últimos 30 dias</div>
         </div>
       </div>
       <div style="position:relative;height:220px"><canvas id="chartEvolucao30"></canvas></div>
@@ -7934,15 +7934,19 @@ async function initEvolucao30Chart() {
     const d = new Date(); d.setDate(d.getDate()-29+i)
     return new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(d)
   })
-  let lucro = App.token ? new Array(30).fill(0) : [260,340,270,420,320,580,360,510,420,670,340,540,440,630,380,570,350,690,420,760,480,660,400,810,520,720,450,950,630,1280]
+  let lucro    = App.token ? new Array(30).fill(0) : [260,340,270,420,320,580,360,510,420,670,340,540,440,630,380,570,350,690,420,760,480,660,400,810,520,720,450,950,630,1280]
+  let receita  = App.token ? new Array(30).fill(0) : [468,612,486,756,576,1044,648,918,756,1206,612,972,792,1134,684,1026,630,1242,756,1368,864,1188,720,1458,936,1296,810,1710,1134,2304]
+  let despesas = App.token ? new Array(30).fill(0) : [208,272,216,336,256,464,288,408,336,536,272,432,352,504,304,456,280,552,336,608,384,528,320,648,416,576,360,760,504,1024]
   if (App.token) {
     try {
       const r = await api('/dashboard/diario')
       if (r?.ok) {
         const {dados} = await r.json()
         if (dados?.length) {
-          labels = dados.map(d => new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(new Date(d.data + 'T12:00:00')))
-          lucro  = dados.map(d => d.lucro || 0)
+          labels   = dados.map(d => new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(new Date(d.data + 'T12:00:00')))
+          lucro    = dados.map(d => d.lucro       || 0)
+          receita  = dados.map(d => d.faturamento || 0)
+          despesas = dados.map(d => d.despesas    || 0)
         }
       }
     } catch(e) { console.error('[evolucao30] erro na API:', e) }
@@ -7951,25 +7955,62 @@ async function initEvolucao30Chart() {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        data: lucro,
-        borderColor: '#22c55e',
-        backgroundColor: ctx => {
-          const g = ctx.chart.ctx.createLinearGradient(0,0,0,180)
-          g.addColorStop(0, 'rgba(34,197,94,0.18)'); g.addColorStop(1, 'rgba(34,197,94,0)')
-          return g
+      datasets: [
+        {
+          label: 'Receita',
+          data: receita,
+          borderColor: '#60a5fa',
+          backgroundColor: ctx => {
+            const g = ctx.chart.ctx.createLinearGradient(0,0,0,180)
+            g.addColorStop(0, 'rgba(96,165,250,0.13)'); g.addColorStop(1, 'rgba(96,165,250,0)')
+            return g
+          },
+          borderWidth: 2.5, tension: 0.42, fill: true,
+          pointBackgroundColor: '#60a5fa', pointBorderColor: '#090e1a',
+          pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 6
         },
-        borderWidth: 2.5, tension: 0.42, fill: true,
-        pointBackgroundColor: '#22c55e', pointBorderColor: '#090e1a',
-        pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 6
-      }]
+        {
+          label: 'Despesas',
+          data: despesas,
+          borderColor: '#f87171',
+          backgroundColor: ctx => {
+            const g = ctx.chart.ctx.createLinearGradient(0,0,0,180)
+            g.addColorStop(0, 'rgba(248,113,113,0.10)'); g.addColorStop(1, 'rgba(248,113,113,0)')
+            return g
+          },
+          borderWidth: 2.5, tension: 0.42, fill: true,
+          pointBackgroundColor: '#f87171', pointBorderColor: '#090e1a',
+          pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 6
+        },
+        {
+          label: 'Lucro',
+          data: lucro,
+          borderColor: '#22c55e',
+          backgroundColor: ctx => {
+            const g = ctx.chart.ctx.createLinearGradient(0,0,0,180)
+            g.addColorStop(0, 'rgba(34,197,94,0.18)'); g.addColorStop(1, 'rgba(34,197,94,0)')
+            return g
+          },
+          borderWidth: 2.5, tension: 0.42, fill: true,
+          pointBackgroundColor: '#22c55e', pointBorderColor: '#090e1a',
+          pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 6
+        }
+      ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
-        legend: {display: false},
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            boxWidth: 10, boxHeight: 10, borderRadius: 3, useBorderRadius: true,
+            padding: 14, font: {size: 11}, color: '#8faabe'
+          }
+        },
         tooltip: {backgroundColor:'rgba(11,18,34,0.96)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:10,
-          callbacks: {label: c => ' ' + fmtBRL(c.raw)}}
+          callbacks: {label: c => ' ' + c.dataset.label + ': ' + fmtBRL(c.raw)}}
       },
       scales: {
         x: {grid:{display:false}, ticks:{font:{size:10},color:'#3A506B'}},
