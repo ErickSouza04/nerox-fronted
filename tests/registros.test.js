@@ -112,7 +112,7 @@ function buildSandbox(fetchMock, token = 'fake-token') {
     aplicarStatusPlano: jest.fn(),
     aplicarUsuarioUI:   jest.fn(),
     atualizarHeroHora:  jest.fn(),
-    initPerf30Chart:    jest.fn(),
+    initEvolucao30Chart: jest.fn(),
     mostrarBoasVindas:  jest.fn(),
     fazerLogout:        jest.fn(),
     drawGauge:          jest.fn(),

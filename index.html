@@ -1088,6 +1088,61 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   display: flex; align-items: center; justify-content: center;
   gap: 8px; margin-bottom: 24px;
 }
+.quiz-slider-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.quiz-slider-card:focus-within {
+  border-color: rgba(0,229,160,0.35);
+}
+.quiz-slider-label {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-bottom: 6px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.quiz-slider-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #00e5a0;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+.quiz-range {
+  width: 100%;
+  -webkit-appearance: none;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+.quiz-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #00e5a0;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0,229,160,0.5);
+  transition: transform 0.15s;
+}
+.quiz-range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.quiz-range-limits {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
 .step-dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: rgba(255,255,255,0.1); transition: all 0.3s;
@@ -1330,7 +1385,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   .hero-main-value { letter-spacing: -1px; }
   .sc-content .stat-value { font-size: 20px; }
   /* Fix chart canvas on mobile */
-  .perf-chart-card canvas, #chartPerf30 { max-width: 100% !important; }
+  .perf-chart-card canvas, #chartEvolucao30 { max-width: 100% !important; }
   /* Hero metric cards vertical list — no scroll needed on mobile */
   .hero-stats-row { overflow-x: visible; padding-bottom: 0; }
   /* Stat cards 2 columns on mobile */
@@ -2140,7 +2195,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
         <button class="auth-btn-secondary" onclick="avancarEtapa(1)">← Voltar</button>
       </div>
 
-      <!-- ── CADASTRO — Etapa 3: Faturamento ── -->
+      <!-- ── CADASTRO — Etapa 3: Sliders financeiros ── -->
       <div id="auth-cad-3" class="auth-step">
         <div class="step-indicator">
           <div class="step-dot done"></div>
@@ -2149,33 +2204,38 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           <div class="step-line"></div>
           <div class="step-dot active"></div>
         </div>
-        <div class="step-title">Quanto você fatura? 💰</div>
-        <div class="step-sub">Usamos isso para calibrar suas metas iniciais. Pode ser alterado depois.</div>
 
-        <div class="faturamento-opts" id="fat-opts">
-          <div class="fat-opt" onclick="selecionarFat(this,'Até R$ 1.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">Até R$ 1.000 / mês</span>
-          </div>
-          <div class="fat-opt" onclick="selecionarFat(this,'R$ 1.001 a R$ 5.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">R$ 1.001 – R$ 5.000 / mês</span>
-          </div>
-          <div class="fat-opt" onclick="selecionarFat(this,'R$ 5.001 a R$ 15.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">R$ 5.001 – R$ 15.000 / mês</span>
-          </div>
-          <div class="fat-opt" onclick="selecionarFat(this,'Acima de R$ 15.000/mês')">
-            <div class="fat-opt-radio"></div>
-            <span class="fat-opt-text">Acima de R$ 15.000 / mês</span>
-          </div>
+        <div class="step-title">3 perguntas rápidas 📊</div>
+        <div class="step-sub">Estimativas são suficientes. Você ajusta depois.</div>
+
+        <div class="quiz-slider-card">
+          <div class="quiz-slider-label">💰 Quanto você fatura por mês, em média?</div>
+          <div class="quiz-slider-value" id="quiz-fat-val">R$ 3.000</div>
+          <input type="range" class="quiz-range" id="quiz-fat"
+            min="500" max="30000" step="500" value="3000"
+            oninput="onboardingSlider('fat', this.value)">
+          <div class="quiz-range-limits"><span>R$ 500</span><span>R$ 30k</span></div>
         </div>
 
-        <div class="auth-error" id="cad-erro-3">Selecione uma opção para continuar.</div>
+        <div class="quiz-slider-card">
+          <div class="quiz-slider-label">📦 Quanto você gasta por mês (produtos, aluguel, etc)?</div>
+          <div class="quiz-slider-value" id="quiz-gasto-val">R$ 1.500</div>
+          <input type="range" class="quiz-range" id="quiz-gasto"
+            min="200" max="20000" step="200" value="1500"
+            oninput="onboardingSlider('gasto', this.value)">
+          <div class="quiz-range-limits"><span>R$ 200</span><span>R$ 20k</span></div>
+        </div>
 
-        <button class="auth-btn" id="btn-finalizar" onclick="finalizarCadastro()">
-          🚀 Criar minha conta grátis
-        </button>
+        <div class="quiz-slider-card">
+          <div class="quiz-slider-label">🎯 Quanto você quer tirar de salário por mês?</div>
+          <div class="quiz-slider-value" id="quiz-sal-val">R$ 1.200</div>
+          <input type="range" class="quiz-range" id="quiz-sal"
+            min="500" max="10000" step="200" value="1200"
+            oninput="onboardingSlider('sal', this.value)">
+          <div class="quiz-range-limits"><span>R$ 500</span><span>R$ 10k</span></div>
+        </div>
+
+        <button class="auth-btn" onclick="finalizarCadastro()">🚀 Criar minha conta grátis</button>
         <button class="auth-btn-secondary" onclick="avancarEtapa(2)">← Voltar</button>
       </div>
 
@@ -2216,6 +2276,25 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       Sua conta está pronta. Agora você tem tudo para organizar suas finanças, precificar seus produtos e crescer com inteligência.
     </div>
 
+    <div id="bv-score-section" style="
+      background: rgba(0,229,160,0.08);
+      border: 1px solid rgba(0,229,160,0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin: 0 0 16px 0;
+      text-align: center;
+    ">
+      <div style="font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">
+        Seu Nexor Score inicial
+      </div>
+      <div id="bv-score" style="font-size:28px;font-weight:800;color:#00e5a0;line-height:1;letter-spacing:-2px;">
+        —
+      </div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:6px;">
+        Lucro estimado: <span id="bv-lucro" style="color:#00e5a0;font-weight:600;">—</span>/mês
+      </div>
+    </div>
+
     <div class="welcome-stats">
       <div class="welcome-stat">
         <div class="welcome-stat-val" id="ws-1">0s</div>
@@ -2231,31 +2310,14 @@ tr:hover td { background:rgba(255,255,255,0.02); }
       </div>
     </div>
 
-    <button class="welcome-btn" onclick="iniciarTour()">
-      <span>🗺️</span> Ver tour rápido do app
-    </button>
+    <button class="welcome-btn" onclick="fecharOnboarding()">
+  💚 Começar agora
+</button>
     <button class="welcome-skip" onclick="fecharOnboarding()">
       Pular e ir direto para o Dashboard →
     </button>
   </div>
 
-  <!-- TOUR CARD (oculto inicialmente) -->
-  <div class="tour-card" id="tour-card" style="display:none">
-    <div class="tour-arrow" id="tour-arrow"></div>
-    <div class="tour-progress-bar" id="tour-progress"></div>
-    <div class="tour-step-badge">
-      <span id="tour-step-num">Passo 1 de 5</span>
-    </div>
-    <div class="tour-icon-wrap" id="tour-icon"></div>
-    <div class="tour-title" id="tour-title"></div>
-    <div class="tour-desc"  id="tour-desc"></div>
-    <div class="tour-tip"   id="tour-tip"></div>
-    <div class="tour-actions">
-      <button class="tour-btn-back" id="tour-back" onclick="tourBack()">←</button>
-      <button class="tour-btn-next" id="tour-next" onclick="tourNext()">Próximo →</button>
-      <button class="tour-skip-link" onclick="fecharOnboarding()">Pular</button>
-    </div>
-  </div>
 
 </div>
 
@@ -2379,16 +2441,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div class="perf-chart-card" style="margin-bottom:16px">
       <div class="perf-chart-header">
         <div>
-          <div class="perf-chart-title">Desempenho — Últimos 30 dias</div>
-          <div class="perf-chart-sub">Receita · Despesas · Lucro</div>
-        </div>
-        <div class="perf-legend">
-          <div class="perf-leg-item"><div class="perf-leg-dot" style="background:#60a5fa"></div>Receita</div>
-          <div class="perf-leg-item"><div class="perf-leg-dot" style="background:#f87171"></div>Despesas</div>
-          <div class="perf-leg-item"><div class="perf-leg-dot" style="background:#22c55e"></div>Lucro</div>
+          <div class="perf-chart-title">Evolução do Lucro — Últimos 30 dias</div>
         </div>
       </div>
-      <div style="position:relative;height:220px"><canvas id="chartPerf30"></canvas></div>
+      <div style="position:relative;height:220px"><canvas id="chartEvolucao30"></canvas></div>
     </div>
 
     <!-- ═══ CARDS 2×4 uniformes ═══ -->
@@ -3448,6 +3504,46 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeModal('alertas')">Entendido</button></div>
   </div>
 </div>
+<div class="modal-overlay" id="modal-editar-produto">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Editar Produto</div>
+      <button class="modal-close" onclick="closeModal('editar-produto')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Nome do produto</label>
+        <input class="form-input" type="text" id="edit-prod-nome" placeholder="Nome do produto">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preço de compra (R$)</label>
+        <input class="form-input" type="number" id="edit-prod-custo" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preço de venda (R$)</label>
+        <input class="form-input" type="number" id="edit-prod-venda" placeholder="0,00" step="0.01" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estoque atual</label>
+        <input class="form-input" type="number" id="edit-prod-qtd" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria/Tipo</label>
+        <select class="form-select" id="edit-prod-categoria">
+          <option value="Produto">Produto</option>
+          <option value="Serviço">Serviço</option>
+          <option value="Combo">Combo</option>
+          <option value="Matéria-prima">Matéria-prima</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('editar-produto')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-edicao" onclick="salvarEdicaoProduto()">Salvar</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // Safety check - garante que Chart.js carregou
@@ -3560,6 +3656,12 @@ const fmtBRL = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-BR',{minimumFrac
 const fmtData = d => { if(!d) return ''; const p = (d.split('T')[0]||d).split('-'); return p[2]+'/'+p[1] }
 // Escapa HTML entities — usar sempre que texto do usuário/API for colocado em innerHTML
 const esc = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;')
+// Retorna data no fuso America/Sao_Paulo como string YYYY-MM-DD
+function getDataBrasil(d) {
+  const fmt = new Intl.DateTimeFormat('pt-BR', {timeZone:'America/Sao_Paulo', year:'numeric', month:'2-digit', day:'2-digit'}).format(d || new Date())
+  const [dd, mm, yyyy] = fmt.split('/')
+  return `${yyyy}-${mm}-${dd}`
+}
 
 // ======================================
 // PLANOS — Base / Plus
@@ -3681,6 +3783,25 @@ async function avancarEtapa(etapa) {
   document.getElementById(ids[etapa]).classList.add('active')
 }
 
+// ── ONBOARDING QUIZ ──────────────────────────────────────────
+const onboardingData = { faturamento: 3000, gastos: 1500, salario: 1200 }
+
+function onboardingSlider(key, val) {
+  val = parseInt(val)
+  const fmt = v => 'R$ ' + (v >= 1000 ? (v / 1000).toFixed(v % 1000 === 0 ? 0 : 1) + 'k' : v.toLocaleString('pt-BR'))
+  if (key === 'fat')   { onboardingData.faturamento = val; document.getElementById('quiz-fat-val').textContent  = fmt(val) }
+  if (key === 'gasto') { onboardingData.gastos = val;      document.getElementById('quiz-gasto-val').textContent = fmt(val) }
+  if (key === 'sal')   { onboardingData.salario = val;     document.getElementById('quiz-sal-val').textContent   = fmt(val) }
+}
+
+function calcularNexorScore(fat, gastos, salario) {
+  const lucro = fat - gastos
+  if (lucro <= 0) return 10
+  const margem = lucro / fat
+  const cobresal = lucro >= salario ? 1 : lucro / salario
+  return Math.min(100, Math.round(margem * 80 * cobresal + (lucro > salario ? 15 : 0)))
+}
+
 function mostrarErroAuth(el, msg) {
   clearTimeout(el._erroTimer)
   el.innerHTML=DOMPurify.sanitize(msg,{ALLOWED_TAGS:['ul','li'],ALLOWED_ATTR:[]}); el.classList.add('show')
@@ -3770,43 +3891,101 @@ async function entrarDemo() {
 }
 
 async function finalizarCadastro() {
-  const erro=document.getElementById('cad-erro-3')
-  if (!cadFaturamento) { erro.classList.add('show'); return }
-  erro.classList.remove('show')
-  const btn=document.getElementById('btn-finalizar')
-  btn.textContent='⏳ Criando conta...'; btn.disabled=true
+  const nome  = document.getElementById('cad-nome')?.value?.trim()
+  const email = document.getElementById('cad-email')?.value?.trim()
+  const senha = document.getElementById('cad-senha')?.value
+  const tipo_negocio = cadCategoria || null
+
+  if (!nome || !email || !senha) {
+    mostrarToast('Preencha todos os campos', 'error')
+    return
+  }
+
+  const score = calcularNexorScore(onboardingData.faturamento, onboardingData.gastos, onboardingData.salario)
+
+  const btn = document.querySelector('#auth-cad-3 .auth-btn')
+  if (btn) { btn.textContent = '⏳ Criando conta...'; btn.disabled = true }
+
   try {
-    const ctrl=new AbortController()
-    const _t=setTimeout(()=>ctrl.abort(),15000)
-    const res=await fetch(API_URL+'/auth/cadastro',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
-      body:JSON.stringify({nome:document.getElementById('cad-nome').value.trim(),email:document.getElementById('cad-email').value.trim(),
-        senha:document.getElementById('cad-senha').value,tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento})
-    }).catch(()=>null)
+    const ctrl = new AbortController()
+    const _t = setTimeout(() => ctrl.abort(), 15000)
+    const res = await fetch(`${API_URL}/auth/cadastrar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        nome,
+        email,
+        senha,
+        tipo_negocio,
+        faturamento_medio: onboardingData.faturamento,
+        gastos_estimados:  onboardingData.gastos,
+        salario_desejado:  onboardingData.salario,
+        nexor_score:       score
+      })
+    }).catch(() => null)
     clearTimeout(_t)
+
     if (!res) throw new Error('offline')
-    const data=await res.json().catch(()=>({}))
+    const data = await res.json().catch(() => ({}))
+
     if (!res.ok) {
-      const errMsg = res.status===409
+      const errMsg = res.status === 409
         ? 'Este e-mail já está cadastrado. Clique em "Entrar" para fazer login.'
-        : (data.erro==='Dados inválidos'
+        : (data.erro === 'Dados inválidos'
           ? 'Verifique nome, e-mail e senha. A senha deve ter:<ul><li>mínimo 8 caracteres</li><li>1 letra maiúscula</li><li>1 letra minúscula</li><li>1 número</li><li>1 caractere especial ($, &, @, !)</li></ul>'
-          : (data.erro||'Erro ao criar conta. Tente novamente.'))
-      mostrarErroAuth(document.getElementById('cad-erro-1'),errMsg)
-      avancarEtapa(1); btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false; return
+          : (data.erro || 'Erro ao criar conta. Tente novamente.'))
+      mostrarErroAuth(document.getElementById('cad-erro-1'), errMsg)
+      avancarEtapa(1)
+      if (btn) { btn.textContent = '🚀 Criar minha conta grátis'; btn.disabled = false }
+      return
     }
-    salvarSessao(data); entrarApp(data.usuario, true)
+
+    // Salva sessão (compatível com accessToken ou token)
+    const token   = data.accessToken || data.token
+    const refresh = data.refreshToken || data.refresh_token
+    App.token   = token
+    App.refresh = refresh
+    App.usuario = data.usuario
+    if (token)   localStorage.setItem('nexor_token',   token)
+    if (refresh) localStorage.setItem('nexor_refresh', refresh)
+    localStorage.setItem('nexor_usuario', JSON.stringify(data.usuario))
+
+    App.onboardingScore = score
+    App.onboardingData  = { ...onboardingData }
+
+    // Injeta score no card de bem-vindo antes de exibi-lo
+    const scoreEl = document.getElementById('bv-score')
+    const lucroEl = document.getElementById('bv-lucro')
+    if (scoreEl) scoreEl.textContent = score
+    if (lucroEl) {
+      const lucro = onboardingData.faturamento - onboardingData.gastos
+      lucroEl.textContent = 'R$ ' + lucro.toLocaleString('pt-BR')
+    }
+
+    entrarApp(data.usuario, true)
+
   } catch {
-    btn.textContent='🚀 Criar minha conta grátis'; btn.disabled=false
-    const nomeVal=document.getElementById('cad-nome').value.trim()||'Usuário Teste'
-    const emailVal=document.getElementById('cad-email').value.trim()||'teste@nexor.com.br'
-    mostrarToast('Servidor indisponível. Abrindo modo de demonstração…','info')
-    setTimeout(()=>{
+    if (btn) { btn.textContent = '🚀 Criar minha conta grátis'; btn.disabled = false }
+    const nomeVal  = nome  || 'Usuário Teste'
+    const emailVal = email || 'teste@nexor.com.br'
+    mostrarToast('Servidor indisponível. Abrindo modo de demonstração…', 'info')
+    setTimeout(() => {
       localStorage.removeItem('nexor_token'); localStorage.removeItem('nexor_refresh')
-      App.token=null; App.refresh=null
-      App.usuario={nome:nomeVal,email:emailVal,plano:'trial',tipo_negocio:cadCategoria,faturamento_medio:cadFaturamento}
-      localStorage.setItem('nexor_usuario',JSON.stringify(App.usuario))
-      entrarApp(App.usuario,true)
-    },1800)
+      App.token = null; App.refresh = null
+      App.usuario = { nome: nomeVal, email: emailVal, plano: 'trial', tipo_negocio, faturamento_medio: onboardingData.faturamento }
+      localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+      App.onboardingScore = score
+      App.onboardingData  = { ...onboardingData }
+      const scoreEl = document.getElementById('bv-score')
+      const lucroEl = document.getElementById('bv-lucro')
+      if (scoreEl) scoreEl.textContent = score
+      if (lucroEl) {
+        const lucro = onboardingData.faturamento - onboardingData.gastos
+        lucroEl.textContent = 'R$ ' + lucro.toLocaleString('pt-BR')
+      }
+      entrarApp(App.usuario, true)
+    }, 1800)
   }
 }
 
@@ -3842,7 +4021,7 @@ async function entrarApp(usuario, isNewUser = false) {
     screen.classList.add('hidden')
     iniciarDashboard()
     atualizarHeroHora()
-    setTimeout(initPerf30Chart, 300)
+    setTimeout(initEvolucao30Chart, 300)
     // Boas-vindas apenas no cadastro. Retornando: frase motivacional 1x por sessão.
     if (isNewUser) {
       localStorage.removeItem('nexor_onboarding_done')
@@ -3912,12 +4091,13 @@ function agendarDashboard() {
 }
 async function iniciarDashboard() {
   const reqId = ++_dashReqId
-  const mes=new Date().getMonth()+1, ano=new Date().getFullYear()
+  const _brHoje = getDataBrasil(new Date())
+  const mes = parseInt(_brHoje.slice(5,7)), ano = parseInt(_brHoje.slice(0,4))
+  const _isFirstLoad = _lastDashLoad === 0
 
   // Anima valores: se logado parte de zero; se demo usa os valores do HTML
   if (App.token) {
     // Primeiro carregamento: limpa dados demo. Refresh pós-registro: preserva valores atuais.
-    const _isFirstLoad = _lastDashLoad === 0
     document.querySelectorAll('[data-target]').forEach(el => el.dataset.target = '0')
     const hlEl = document.getElementById('hero-lucro')
     const hrEl = document.getElementById('hero-receita')
@@ -3950,8 +4130,8 @@ async function iniciarDashboard() {
     if (_cD) { _cD.data.labels=['Sem despesas']; _cD.data.datasets[0].data=[1]; _cD.data.datasets[0].backgroundColor=['#1e2d45']; _cD.update() }
     const _cDi = Chart.getChart('chartDiario')
     if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
-    // Destruir chart de desempenho 30 dias para forçar reload com dados reais
-    if (typeof perf30Chart !== 'undefined' && perf30Chart) { perf30Chart.destroy(); perf30Chart = null; perf30Initing = false }
+    // Destruir chart de evolução do lucro 30 dias para forçar reload com dados reais
+    if (typeof evolucao30Chart !== 'undefined' && evolucao30Chart) { evolucao30Chart.destroy(); evolucao30Chart = null; evolucao30Initing = false }
     // Zerar cards de texto com dados demo (apenas no primeiro carregamento)
     const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
     if (_isFirstLoad) {
@@ -3996,9 +4176,12 @@ async function iniciarDashboard() {
   try {
     const _cacheKey = 'nexor_dash_' + (App.usuario?.id || 'u')
     const _cached = JSON.parse(sessionStorage.getItem(_cacheKey) || 'null')
-    if (_cached && _isFirstLoad && (Date.now() - _cached.ts) < 10 * 60 * 1000) {
+    const _cacheAge = _cached ? Math.round((Date.now() - _cached.ts) / 1000) : null
+    console.log('[NEXOR DEBUG] Cache encontrado:', !!_cached, '| Idade (s):', _cacheAge, '| hoje do cache:', _cached?.hoje)
+    if (_cached && _isFirstLoad && (Date.now() - _cached.ts) < 2 * 60 * 1000) {
       const _cd = _cached.resumo
       const _ch = _cached.hoje
+      console.log('[NEXOR DEBUG] Aplicando cache: hoje =', _ch)
       const cards = document.querySelectorAll('[data-target]')
       if(cards[0]){cards[0].dataset.target=Math.round(_cd.faturamento||0);    countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(_cd.total_despesas||0); countUp(cards[1])}
@@ -4009,7 +4192,7 @@ async function iniciarDashboard() {
       if(hrEl && _ch) hrEl.textContent=fmtBRL(_ch.faturamento||0)
       if(hdEl && _ch) hdEl.textContent=fmtBRL(_ch.despesas||0)
     }
-  } catch(_e) {}
+  } catch(_e) { console.warn('[NEXOR DEBUG] Erro no cache:', _e) }
 
   try {
     const [rRes, iRes, dRes] = await Promise.all([
@@ -4019,6 +4202,7 @@ async function iniciarDashboard() {
     ])
 
     let _resumoDados = null
+    let _heroDiarioOk = false  // sinaliza se /dashboard/diario trouxe dados de hoje
     if (rRes?.ok) {
       const {dados} = await rRes.json()
       _resumoDados = dados
@@ -4105,6 +4289,7 @@ async function iniciarDashboard() {
 
     if (dRes?.ok) {
       const {dados} = await dRes.json()
+      console.log('[NEXOR DEBUG] /dashboard/diario retornou', dados?.length, 'dias:', dados)
       const c=Chart.getChart('chartDiario')
       if(c){ c.data.labels=dados.map(d=>fmtData(d.data)); c.data.datasets[0].data=dados.map(d=>d.lucro); c.update() }
       // Salvar série diária para gráfico do Profit Card
@@ -4125,7 +4310,14 @@ async function iniciarDashboard() {
         }
       }
       // Atualizar hero do dia com dados reais de hoje
-      const hoje = dados[dados.length - 1]
+      // Usa timezone Brasil para não pular para o dia seguinte UTC após 21h
+      const _brFmt = new Intl.DateTimeFormat('pt-BR', {timeZone:'America/Sao_Paulo', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date())
+      const [_dd, _mm, _yyyy] = _brFmt.split('/')
+      const _hoje_str = `${_yyyy}-${_mm}-${_dd}` // "YYYY-MM-DD" no horário de Brasília
+      const hoje = dados.find(d => d.data && d.data.slice(0,10) === _hoje_str)
+              || dados.filter(d=>(d.faturamento||0)>0).slice(-1)[0]
+              || dados[dados.length - 1]
+      console.log('[NEXOR DEBUG] hoje BR:', _hoje_str, '| UTC:', new Date().toISOString().slice(0,10), '| hoje encontrado:', hoje)
       if (hoje) {
         const hlEl = document.getElementById('hero-lucro')
         const hrEl = document.getElementById('hero-receita')
@@ -4155,6 +4347,7 @@ async function iniciarDashboard() {
           if (hbEl)  hbEl.textContent  = ''
           if (hdbEl) hdbEl.textContent = ''
         }
+        if ((hoje.faturamento||0) > 0) _heroDiarioOk = true
       }
       // Insight IA dinâmico no dashboard (não bloqueia)
       setTimeout(carregarInsightDiario, 800)
@@ -4223,7 +4416,7 @@ async function iniciarDashboard() {
         if (todos.length) {
           tbody.innerHTML=todos.map(i=>`<tr>
             <td>${fmtData(i.data)}</td>
-            <td>${esc(i.produto||i.descricao||i.categoria)}</td>
+            <td>${esc(i._tipo==='venda' ? (i.produto||'—') : (i.descricao||i.observacao||i.note||i.description||'—'))}</td>
             <td><span class="tag ${i._tipo==='venda'?'green':'red'}">${i._tipo==='venda'?'Venda':'Despesa'}</span></td>
             <td style="color:var(--${i._tipo==='venda'?'green':'red'});font-weight:700">${i._tipo==='venda'?'+':'-'}${fmtBRL(i.valor)}</td>
           </tr>`).join('')
@@ -4240,7 +4433,7 @@ async function iniciarDashboard() {
             <li class="recent-item">
               <span class="recent-dot ${i._tipo}"></span>
               <div style="flex:1">
-                <div class="recent-name">${esc(i.produto||i.descricao||i.categoria)}</div>
+                <div class="recent-name">${esc(i._tipo==='venda' ? (i.produto||'—') : (i.descricao||i.observacao||i.note||i.description||'—'))}</div>
                 <div class="recent-cat">${i._tipo==='venda'?'Venda':'Despesa'} · ${fmtData(i.data)}</div>
               </div>
               <span class="recent-val ${i._tipo==='venda'?'pos':'neg'}">${i._tipo==='venda'?'+':'−'}${fmtBRL(i.valor)}</span>
@@ -4273,6 +4466,45 @@ async function iniciarDashboard() {
           tpEl.innerHTML='<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px">Nenhuma venda registrada ainda</div>'
         }
       }
+
+      // ── Fallback hero card: calcula hoje dos registros quando /dashboard/diario não trouxe dados de hoje ──
+      if (!_heroDiarioOk) {
+        const _fatHojeFb = v.dados
+          .filter(i => i.data && i.data.slice(0,10) === _brHoje)
+          .reduce((s, i) => s + parseFloat(i.valor||0), 0)
+        if (_fatHojeFb > 0) {
+          const _despHojeFb = de.dados
+            .filter(i => i.data && i.data.slice(0,10) === _brHoje)
+            .reduce((s, i) => s + parseFloat(i.valor||0), 0)
+          const _lucroHojeFb = _fatHojeFb - _despHojeFb
+          const _hlFb = document.getElementById('hero-lucro')
+          const _hrFb = document.getElementById('hero-receita')
+          const _hdFb = document.getElementById('hero-despesas')
+          const _hmvFb = document.getElementById('hero-margem-val')
+          const _hmfFb = document.getElementById('hero-margin-fill')
+          const _hmpFb = document.querySelector('.hero-margin-pct')
+          if (_hlFb) _hlFb.textContent = fmtBRL(_lucroHojeFb)
+          if (_hrFb) _hrFb.textContent = fmtBRL(_fatHojeFb)
+          if (_hdFb) _hdFb.textContent = fmtBRL(_despHojeFb)
+          const _mFb = Math.round(_lucroHojeFb / _fatHojeFb * 100)
+          if (_hmvFb) _hmvFb.textContent = _mFb + '%'
+          if (_hmfFb) _hmfFb.style.width = Math.max(0, Math.min(100, _mFb)) + '%'
+          if (_hmpFb) _hmpFb.textContent = _mFb + '%'
+          // Atualizar gráfico diário se hoje ainda não aparece ou estava zerado
+          const _cDiFb = Chart.getChart('chartDiario')
+          if (_cDiFb) {
+            const _lbFb = fmtData(_brHoje)
+            const _idxFb = _cDiFb.data.labels.indexOf(_lbFb)
+            if (_idxFb >= 0) {
+              _cDiFb.data.datasets[0].data[_idxFb] = _lucroHojeFb
+            } else {
+              _cDiFb.data.labels.push(_lbFb)
+              _cDiFb.data.datasets[0].data.push(_lucroHojeFb)
+            }
+            _cDiFb.update()
+          }
+        }
+      }
     }
 
   } catch(e) {
@@ -4284,8 +4516,8 @@ async function iniciarDashboard() {
     }
   }
 
-  // Recriar chart de desempenho 30 dias com dados reais (foi destruído no início)
-  if (App.token) setTimeout(initPerf30Chart, 200)
+  // Recriar chart de evolução do lucro 30 dias com dados reais (foi destruído no início)
+  if (App.token) setTimeout(initEvolucao30Chart, 200)
   _lastDashLoad = Date.now()
 }
 
@@ -4568,7 +4800,7 @@ function atualizarDicasDashboard() {
 // ── Relatórios — carrega dados reais ──
 async function carregarRelatorios() {
   if (!App.token) return
-  const hoje = new Date(), mes = hoje.getMonth()+1, ano = hoje.getFullYear()
+  const _brHojeRel = getDataBrasil(new Date()), mes = parseInt(_brHojeRel.slice(5,7)), ano = parseInt(_brHojeRel.slice(0,4))
   const mesesNomes = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro']
   // Atualizar header
   const hSub = document.getElementById('rel-header-sub')
@@ -4641,7 +4873,7 @@ async function salvarMeta() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ meta_valor: Math.round(valor) }) })
     if (res?.ok) {
       if (App.stats)   App.stats.metaValor    = Math.round(valor)
-      if (App.usuario) App.usuario.meta_valor = Math.round(valor)
+      if (App.usuario) { App.usuario.meta_valor = Math.round(valor); localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4665,7 +4897,7 @@ async function salvarProLabore() {
     const res = await api('/usuarios/perfil', { method: 'PUT', body: JSON.stringify({ prolabore_valor: Math.round(valor), prolabore_freq: freq }) })
     if (res?.ok) {
       if (App.stats)   { App.stats.prolaboreValor = Math.round(valor); App.stats.prolaboreFreq = freq }
-      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq }
+      if (App.usuario) { App.usuario.prolabore_valor = Math.round(valor); App.usuario.prolabore_freq = freq; localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario)) }
       ok.style.display = 'block'; setTimeout(() => ok.style.display = 'none', 3000)
       carregarPaginaMetas()
     } else { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 4000) }
@@ -4674,10 +4906,24 @@ async function salvarProLabore() {
 
 // ── Metas — carregar página com dados reais ──
 async function carregarPaginaMetas() {
-  // Lê meta e pró-labore de App.usuario (já em memória após login/save)
-  // GET /usuarios/perfil retorna 404 e GET /metas retorna dados:[]
   if (App.token) {
     if (!App.stats) App.stats = {}
+    // Busca dados frescos do perfil antes de renderizar (corrige race condition e reload)
+    try {
+      const perfilRes = await api('/usuarios/perfil')
+      if (perfilRes?.ok) {
+        const perfilData = await perfilRes.json()
+        const perfil = perfilData.dados || perfilData.usuario || perfilData
+        if (perfil?.meta_valor != null && App.usuario) {
+          App.usuario.meta_valor = perfil.meta_valor
+          localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+        }
+        if (perfil?.prolabore_valor != null && App.usuario) {
+          App.usuario.prolabore_valor = perfil.prolabore_valor
+          App.usuario.prolabore_freq  = perfil.prolabore_freq
+        }
+      }
+    } catch (_e) {}
     const metaValorPerfil      = parseFloat(App.usuario?.meta_valor)      || App.stats.metaValor      || 0
     const prolaboreValorPerfil = parseFloat(App.usuario?.prolabore_valor) || App.stats.prolaboreValor || 0
     App.stats.metaValor      = metaValorPerfil
@@ -4795,9 +5041,10 @@ let relInit=false
 async function initRelatorioChart(){
   if (typeof Chart === 'undefined') return
   if(relInit) return; relInit=true
-  const _rNow = new Date()
-  const _rDias = new Date(_rNow.getFullYear(), _rNow.getMonth()+1, 0).getDate()
-  const _rMm = String(_rNow.getMonth()+1).padStart(2,'0')
+  const _rBr = getDataBrasil(new Date())
+  const _rYyyy = parseInt(_rBr.slice(0,4)), _rMon = parseInt(_rBr.slice(5,7))
+  const _rDias = new Date(_rYyyy, _rMon, 0).getDate()
+  const _rMm = String(_rMon).padStart(2,'0')
   let rLabels = Array.from({length:_rDias},(_,i)=>(i+1)+'/'+_rMm)
   let rData = App.token ? [] : [40,95,60,140,80,210,165,120,200,90,180,250,130,310,170,195,120,260,145,300,180,220,140,280,160,320,200,230]
   if (App.token) {
@@ -7061,7 +7308,13 @@ function irParaPrecificacao() {
 // ══════════════════════════════════════════════
 function openModal(n) {
   document.getElementById('modal-'+n).classList.add('open')
-  if (n === 'nova-venda') _syncModalSelectProdutos()
+  if (n === 'nova-venda') {
+    if (App.token && !_estoqueData.length) {
+      carregarEstoque().then(() => _syncModalSelectProdutos())
+    } else {
+      _syncModalSelectProdutos()
+    }
+  }
 }
 
 function abrirModalAlertas() {
@@ -7119,15 +7372,27 @@ function _syncModalSelectProdutos() {
   const aviso = document.getElementById('modal-sem-produtos')
   if (!sel) return
   sel.innerHTML = '<option value="">— Selecione um produto —</option>'
+  // Produtos salvos pela calculadora de precificação
   produtosCadastrados.forEach(p => {
     const opt = document.createElement('option')
     opt.value       = p.id
     opt.textContent = `${p.nome}  —  R$ ${p.precoFinal.toFixed(2).replace('.',',')}`
     sel.appendChild(opt)
   })
-  if (aviso) aviso.style.display = produtosCadastrados.length === 0 ? 'block' : 'none'
+  // Produtos cadastrados no Estoque (API)
+  _estoqueData.forEach(p => {
+    const nome  = p.name ?? p.nome ?? ''
+    if (!nome) return
+    const preco = parseFloat(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)
+    const opt = document.createElement('option')
+    opt.value       = 'estq-' + (p.id ?? p._id)
+    opt.textContent = `${nome}  —  R$ ${preco.toFixed(2).replace('.',',')}`
+    sel.appendChild(opt)
+  })
+  const totalProdutos = produtosCadastrados.length + _estoqueData.length
+  if (aviso) aviso.style.display = totalProdutos === 0 ? 'block' : 'none'
   const tabCad = document.getElementById('modal-tab-cadastrado')
-  if (tabCad) tabCad.style.opacity = produtosCadastrados.length === 0 ? '0.5' : '1'
+  if (tabCad) tabCad.style.opacity = totalProdutos === 0 ? '0.5' : '1'
   // Reset preview
   const preview = document.getElementById('modal-produto-preview')
   if (preview) preview.style.display = 'none'
@@ -7156,13 +7421,24 @@ function modalAlternarProduto(modo) {
 function modalOnSelecionarProduto(sel) {
   const preview = document.getElementById('modal-produto-preview')
   if (!sel.value) { preview.style.display = 'none'; return }
-  const prod = produtosCadastrados.find(p => p.id === sel.value)
-  if (!prod) return
-  document.getElementById('modal-prev-nome').textContent  = prod.nome
-  document.getElementById('modal-prev-preco').textContent = 'R$ ' + prod.precoFinal.toFixed(2).replace('.',',')
+  let nome = '', precoFinal = 0
+  if (sel.value.startsWith('estq-')) {
+    const estqId = sel.value.slice(5)
+    const p = _estoqueData.find(x => String(x.id ?? x._id) === estqId)
+    if (!p) return
+    nome = p.name ?? p.nome ?? ''
+    precoFinal = parseFloat(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)
+  } else {
+    const p = produtosCadastrados.find(p => p.id === sel.value)
+    if (!p) return
+    nome = p.nome
+    precoFinal = p.precoFinal
+  }
+  document.getElementById('modal-prev-nome').textContent  = nome
+  document.getElementById('modal-prev-preco').textContent = 'R$ ' + precoFinal.toFixed(2).replace('.',',')
   preview.style.display = 'block'
   const valInput = document.getElementById('modal-val')
-  if (valInput && !valInput.value) valInput.value = prod.precoFinal.toFixed(2)
+  if (valInput && !valInput.value) valInput.value = precoFinal.toFixed(2)
 }
 
 async function modalRegistrarVenda() {
@@ -7180,8 +7456,14 @@ async function modalRegistrarVenda() {
   } else {
     const selId = document.getElementById('modal-select-produto')?.value
     if (selId) {
-      const p = produtosCadastrados.find(x => x.id === selId)
-      prod = p ? p.nome : ''
+      if (selId.startsWith('estq-')) {
+        const estqId = selId.slice(5)
+        const p = _estoqueData.find(x => String(x.id ?? x._id) === estqId)
+        prod = p ? (p.name ?? p.nome ?? '') : ''
+      } else {
+        const p = produtosCadastrados.find(x => x.id === selId)
+        prod = p ? p.nome : ''
+      }
     }
   }
 
@@ -7448,7 +7730,6 @@ function mostrarBoasVindas(usuario) {
   const overlay = document.getElementById('onboarding-overlay')
   overlay.classList.add('show')
   document.getElementById('welcome-card').style.display = 'block'
-  document.getElementById('tour-card').style.display = 'none'
 }
 
 function gerarConfetti() {
@@ -7636,65 +7917,63 @@ function atualizarHeroHora() {
 setInterval(atualizarHeroHora, 60000)
 
 // ======================================
-// PERFORMANCE 30 DIAS - Gráfico
+// EVOLUÇÃO DO LUCRO 30 DIAS - Gráfico
 // ======================================
-let perf30Chart = null, perf30Initing = false
-async function initPerf30Chart() {
+let evolucao30Chart = null, evolucao30Initing = false
+async function initEvolucao30Chart() {
   if (typeof Chart === 'undefined') return
-  const el = document.getElementById('chartPerf30')
-  if (!el || perf30Chart || perf30Initing) return
-  perf30Initing = true
+  const el = document.getElementById('chartEvolucao30')
+  if (!el || evolucao30Chart || evolucao30Initing) return
+  evolucao30Initing = true
   let labels = Array.from({length:30},(_,i)=>{
     const d = new Date(); d.setDate(d.getDate()-29+i)
-    return (d.getDate()).toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')
+    return new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(d)
   })
-  let receita  = App.token ? new Array(30).fill(0) : [680,920,780,1100,850,1400,960,1250,1080,1560,890,1320,1150,1480,1020,1380,950,1620,1100,1780,1230,1560,1040,1890,1340,1720,1150,2100,1580,2430]
-  let despesas = App.token ? new Array(30).fill(0) : [420,580,510,680,530,820,600,740,660,890,550,780,710,850,640,810,600,930,680,1020,750,900,640,1080,820,1000,700,1150,950,1150]
-  let lucro    = receita.map((r,i)=>r-despesas[i])
+  let lucro = App.token ? new Array(30).fill(0) : [260,340,270,420,320,580,360,510,420,670,340,540,440,630,380,570,350,690,420,760,480,660,400,810,520,720,450,950,630,1280]
   if (App.token) {
     try {
       const r = await api('/dashboard/diario')
       if (r?.ok) {
         const {dados} = await r.json()
         if (dados?.length) {
-          labels   = dados.map(d => fmtData(d.data))
-          receita  = dados.map(d => d.faturamento || 0)
-          despesas = dados.map(d => d.despesas    || 0)
-          lucro    = dados.map(d => d.lucro       || 0)
+          labels = dados.map(d => new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(new Date(d.data + 'T12:00:00')))
+          lucro  = dados.map(d => d.lucro || 0)
         }
       }
-    } catch(e) {}
+    } catch(e) { console.error('[evolucao30] erro na API:', e) }
   }
-  const makeGrad = (ctx, color) => {
-    const g = ctx.chart.ctx.createLinearGradient(0,0,0,200)
-    g.addColorStop(0, color.replace('1)','0.18)')); g.addColorStop(1, color.replace('1)','0)'))
-    return g
-  }
-  perf30Chart = new Chart(el, {
+  evolucao30Chart = new Chart(el, {
     type: 'line',
     data: {
       labels,
-      datasets: [
-        {label:'Receita', data:receita, borderColor:'#60a5fa', backgroundColor:ctx=>makeGrad(ctx,'rgba(96,165,250,1)'), borderWidth:2, tension:0.4, fill:true, pointRadius:0, pointHoverRadius:5},
-        {label:'Despesas', data:despesas, borderColor:'#f87171', backgroundColor:ctx=>makeGrad(ctx,'rgba(248,113,113,1)'), borderWidth:2, tension:0.4, fill:true, pointRadius:0, pointHoverRadius:5},
-        {label:'Lucro', data:lucro, borderColor:'#22c55e', backgroundColor:ctx=>makeGrad(ctx,'rgba(34,197,94,1)'), borderWidth:2.5, tension:0.4, fill:true, pointRadius:0, pointHoverRadius:5},
-      ]
+      datasets: [{
+        data: lucro,
+        borderColor: '#22c55e',
+        backgroundColor: ctx => {
+          const g = ctx.chart.ctx.createLinearGradient(0,0,0,180)
+          g.addColorStop(0, 'rgba(34,197,94,0.18)'); g.addColorStop(1, 'rgba(34,197,94,0)')
+          return g
+        },
+        borderWidth: 2.5, tension: 0.42, fill: true,
+        pointBackgroundColor: '#22c55e', pointBorderColor: '#090e1a',
+        pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 6
+      }]
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{backgroundColor:'rgba(9,14,26,0.95)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:12,
-          callbacks:{label:c=>' '+c.dataset.label+': '+fmtBRL(c.raw)}}
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {backgroundColor:'rgba(11,18,34,0.96)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:10,
+          callbacks: {label: c => ' ' + fmtBRL(c.raw)}}
       },
-      scales:{
-        x:{grid:{display:false},ticks:{font:{size:10},color:'#3A506B',maxTicksLimit:8}},
-        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#3A506B',callback:v=>'R$'+(v/1000).toFixed(1)+'k'}}
+      scales: {
+        x: {grid:{display:false}, ticks:{font:{size:10},color:'#3A506B'}},
+        y: {grid:{color:'rgba(255,255,255,0.04)'}, ticks:{font:{size:10},color:'#3A506B',
+          callback: v => v >= 1000 ? 'R$'+(v/1000).toFixed(1)+'k' : 'R$'+Math.round(v)}}
       }
     }
   })
-  perf30Initing = false
+  evolucao30Initing = false
 }
 
 // ======================================
@@ -8160,16 +8439,16 @@ function renderizarEstoque() {
     const qtd = p.current_stock ?? p.estoque_atual ?? p.quantidade ?? 0
     const min  = p.min_stock_alert ?? p.estoque_minimo ?? p.minimo ?? 5
     const baixo = qtd < min
-    return `<tr>
+    return `<tr onclick="abrirModalEditarProduto(${i},event)" style="cursor:pointer" title="Clique para editar">
       <td>${esc(p.name ?? p.nome)}</td>
       <td>${esc(p.brand ?? p.marca ?? '-')}</td>
       <td>${qtd}${baixo ? '<span class="stock-badge-low">baixo</span>' : ''}</td>
       <td>${fmtBRL(p.cost_price ?? p.preco_custo ?? 0)}</td>
       <td>${fmtBRL(p.sale_price ?? p.preco_venda ?? p.preco ?? 0)}</td>
       <td><div style="display:flex;gap:6px">
-        <button class="stock-btn entrada" onclick="movimentarEstoque(${i},'entrada')">+ Entrada</button>
-        <button class="stock-btn saida" onclick="movimentarEstoque(${i},'saida')">− Saída</button>
-        <button class="stock-btn excluir" onclick="excluirProduto(${i})" title="Excluir produto">🗑️</button>
+        <button class="stock-btn entrada" onclick="event.stopPropagation();movimentarEstoque(${i},'entrada')">+ Entrada</button>
+        <button class="stock-btn saida" onclick="event.stopPropagation();movimentarEstoque(${i},'saida')">− Saída</button>
+        <button class="stock-btn excluir" onclick="event.stopPropagation();excluirProduto(${i})" title="Excluir produto">🗑️</button>
       </div></td>
     </tr>`
   }).join('')
@@ -8251,6 +8530,65 @@ async function excluirProduto(idx) {
     mostrarToast('Produto removido.', 'success')
   } else {
     mostrarToast('Erro ao excluir produto. Tente novamente.', 'error')
+  }
+}
+
+let _editandoProdutoIdx = null
+
+function abrirModalEditarProduto(idx, event) {
+  if (event && event.target.closest('button')) return
+  const p = _estoqueData[idx]
+  if (!p) return
+  _editandoProdutoIdx = idx
+  document.getElementById('edit-prod-nome').value = p.name ?? p.nome ?? ''
+  document.getElementById('edit-prod-custo').value = p.cost_price ?? p.preco_custo ?? ''
+  document.getElementById('edit-prod-venda').value = p.sale_price ?? p.preco_venda ?? p.preco ?? ''
+  document.getElementById('edit-prod-qtd').value = p.current_stock ?? p.estoque_atual ?? p.quantidade ?? 0
+  const catEl = document.getElementById('edit-prod-categoria')
+  const catVal = p.category ?? p.categoria ?? p.tipo ?? 'Produto'
+  catEl.value = catVal
+  if (!catEl.value) catEl.value = 'Produto'
+  document.getElementById('modal-editar-produto').classList.add('open')
+}
+
+async function salvarEdicaoProduto() {
+  const idx = _editandoProdutoIdx
+  const p = _estoqueData[idx]
+  if (!p) return
+  const nome = document.getElementById('edit-prod-nome').value.trim()
+  if (!nome) { mostrarToast('Preencha o nome do produto', 'error'); return }
+  const preco_custo  = parseFloat(document.getElementById('edit-prod-custo').value) || 0
+  const preco_venda  = parseFloat(document.getElementById('edit-prod-venda').value) || 0
+  const estoque_atual = parseInt(document.getElementById('edit-prod-qtd').value) || 0
+  const categoria    = document.getElementById('edit-prod-categoria').value
+  const id = p.id ?? p._id
+  const btn = document.getElementById('btn-salvar-edicao')
+  if (btn) btn.disabled = true
+  const res = await api(`/produtos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      nome, name: nome,
+      preco_custo, cost_price: preco_custo,
+      preco_venda, sale_price: preco_venda,
+      estoque_atual, current_stock: estoque_atual, quantidade: estoque_atual,
+      categoria, category: categoria
+    })
+  })
+  if (btn) btn.disabled = false
+  if (res?.ok) {
+    const body = await res.json().catch(() => null)
+    const prodAtualizado = body?.produto || body?.product || body?.data
+    _estoqueData[idx] = prodAtualizado
+      ? prodAtualizado
+      : { ..._estoqueData[idx], nome, name: nome, preco_custo, cost_price: preco_custo, preco_venda, sale_price: preco_venda, estoque_atual, current_stock: estoque_atual, quantidade: estoque_atual, categoria, category: categoria }
+    closeModal('editar-produto')
+    renderizarEstoque()
+    mostrarToast('Produto atualizado!', 'success')
+  } else {
+    const errBody = await res?.json().catch(() => null)
+    const errMsg = errBody?.message || errBody?.erro || errBody?.error || 'Verifique os campos e tente novamente'
+    mostrarToast('Erro ao salvar: ' + errMsg, 'error')
+    console.error('[editar produto PUT]', res?.status, errBody)
   }
 }
 
@@ -8374,8 +8712,8 @@ window.addEventListener('load',()=>{
   document.getElementById('page-subtitle').textContent = _dataFormatada
   // Hero hora
   atualizarHeroHora()
-  // Init perf30 chart (dashboard é a tela inicial)
-  setTimeout(initPerf30Chart, 200)
+  // Init evolucao30 chart (dashboard é a tela inicial)
+  setTimeout(initEvolucao30Chart, 200)
 })
 </script>
 
