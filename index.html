@@ -1385,7 +1385,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   .hero-main-value { letter-spacing: -1px; }
   .sc-content .stat-value { font-size: 20px; }
   /* Fix chart canvas on mobile */
-  .perf-chart-card canvas, #chartPerf30 { max-width: 100% !important; }
+  .perf-chart-card canvas, #chartEvolucao30 { max-width: 100% !important; }
   /* Hero metric cards vertical list — no scroll needed on mobile */
   .hero-stats-row { overflow-x: visible; padding-bottom: 0; }
   /* Stat cards 2 columns on mobile */
@@ -2441,16 +2441,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div class="perf-chart-card" style="margin-bottom:16px">
       <div class="perf-chart-header">
         <div>
-          <div class="perf-chart-title">Desempenho — Últimos 30 dias</div>
-          <div class="perf-chart-sub">Receita · Despesas · Lucro</div>
-        </div>
-        <div class="perf-legend">
-          <div class="perf-leg-item"><div class="perf-leg-dot" style="background:#60a5fa"></div>Receita</div>
-          <div class="perf-leg-item"><div class="perf-leg-dot" style="background:#f87171"></div>Despesas</div>
-          <div class="perf-leg-item"><div class="perf-leg-dot" style="background:#22c55e"></div>Lucro</div>
+          <div class="perf-chart-title">Evolução do Lucro — Últimos 30 dias</div>
         </div>
       </div>
-      <div style="position:relative;height:220px"><canvas id="chartPerf30"></canvas></div>
+      <div style="position:relative;height:220px"><canvas id="chartEvolucao30"></canvas></div>
     </div>
 
     <!-- ═══ CARDS 2×4 uniformes ═══ -->
@@ -4027,7 +4021,7 @@ async function entrarApp(usuario, isNewUser = false) {
     screen.classList.add('hidden')
     iniciarDashboard()
     atualizarHeroHora()
-    setTimeout(initPerf30Chart, 300)
+    setTimeout(initEvolucao30Chart, 300)
     // Boas-vindas apenas no cadastro. Retornando: frase motivacional 1x por sessão.
     if (isNewUser) {
       localStorage.removeItem('nexor_onboarding_done')
@@ -4136,8 +4130,8 @@ async function iniciarDashboard() {
     if (_cD) { _cD.data.labels=['Sem despesas']; _cD.data.datasets[0].data=[1]; _cD.data.datasets[0].backgroundColor=['#1e2d45']; _cD.update() }
     const _cDi = Chart.getChart('chartDiario')
     if (_cDi) { _cDi.data.labels=[]; _cDi.data.datasets[0].data=[]; _cDi.update() }
-    // Destruir chart de desempenho 30 dias para forçar reload com dados reais
-    if (typeof perf30Chart !== 'undefined' && perf30Chart) { perf30Chart.destroy(); perf30Chart = null; perf30Initing = false }
+    // Destruir chart de evolução do lucro 30 dias para forçar reload com dados reais
+    if (typeof evolucao30Chart !== 'undefined' && evolucao30Chart) { evolucao30Chart.destroy(); evolucao30Chart = null; evolucao30Initing = false }
     // Zerar cards de texto com dados demo (apenas no primeiro carregamento)
     const _set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v }
     if (_isFirstLoad) {
@@ -4522,8 +4516,8 @@ async function iniciarDashboard() {
     }
   }
 
-  // Recriar chart de desempenho 30 dias com dados reais (foi destruído no início)
-  if (App.token) setTimeout(initPerf30Chart, 200)
+  // Recriar chart de evolução do lucro 30 dias com dados reais (foi destruído no início)
+  if (App.token) setTimeout(initEvolucao30Chart, 200)
   _lastDashLoad = Date.now()
 }
 
@@ -7923,67 +7917,63 @@ function atualizarHeroHora() {
 setInterval(atualizarHeroHora, 60000)
 
 // ======================================
-// PERFORMANCE 30 DIAS - Gráfico
+// EVOLUÇÃO DO LUCRO 30 DIAS - Gráfico
 // ======================================
-let perf30Chart = null, perf30Initing = false
-async function initPerf30Chart() {
+let evolucao30Chart = null, evolucao30Initing = false
+async function initEvolucao30Chart() {
   if (typeof Chart === 'undefined') return
-  const el = document.getElementById('chartPerf30')
-  if (!el || perf30Chart || perf30Initing) return
-  perf30Initing = true
+  const el = document.getElementById('chartEvolucao30')
+  if (!el || evolucao30Chart || evolucao30Initing) return
+  evolucao30Initing = true
   let labels = Array.from({length:30},(_,i)=>{
     const d = new Date(); d.setDate(d.getDate()-29+i)
-    const brFmt = new Intl.DateTimeFormat('pt-BR', {timeZone:'America/Sao_Paulo', day:'2-digit', month:'2-digit'}).format(d)
-    return brFmt
+    return new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(d)
   })
-  let receita  = App.token ? new Array(30).fill(0) : [680,920,780,1100,850,1400,960,1250,1080,1560,890,1320,1150,1480,1020,1380,950,1620,1100,1780,1230,1560,1040,1890,1340,1720,1150,2100,1580,2430]
-  let despesas = App.token ? new Array(30).fill(0) : [420,580,510,680,530,820,600,740,660,890,550,780,710,850,640,810,600,930,680,1020,750,900,640,1080,820,1000,700,1150,950,1150]
-  let lucro    = receita.map((r,i)=>r-despesas[i])
+  let lucro = App.token ? new Array(30).fill(0) : [260,340,270,420,320,580,360,510,420,670,340,540,440,630,380,570,350,690,420,760,480,660,400,810,520,720,450,950,630,1280]
   if (App.token) {
     try {
       const r = await api('/dashboard/diario')
       if (r?.ok) {
         const {dados} = await r.json()
-        console.log('[perf30] dados recebidos:', JSON.stringify(dados?.slice(0,3)))
         if (dados?.length) {
-          labels   = dados.map(d => fmtData(d.data))
-          receita  = dados.map(d => d.faturamento || 0)
-          despesas = dados.map(d => d.despesas    || 0)
-          lucro    = dados.map(d => d.lucro       || 0)
-        } else { console.warn('[perf30] dados vazios ou nulos:', dados) }
+          labels = dados.map(d => new Intl.DateTimeFormat('pt-BR', {day:'2-digit', month:'2-digit'}).format(new Date(d.data + 'T12:00:00')))
+          lucro  = dados.map(d => d.lucro || 0)
+        }
       }
-    } catch(e) { console.error('[perf30] erro na API:', e) }
+    } catch(e) { console.error('[evolucao30] erro na API:', e) }
   }
-  const makeGrad = (ctx, color) => {
-    const g = ctx.chart.ctx.createLinearGradient(0,0,0,200)
-    g.addColorStop(0, color.replace('1)','0.18)')); g.addColorStop(1, color.replace('1)','0)'))
-    return g
-  }
-  perf30Chart = new Chart(el, {
+  evolucao30Chart = new Chart(el, {
     type: 'line',
     data: {
       labels,
-      datasets: [
-        {label:'Receita', data:receita, borderColor:'#60a5fa', backgroundColor:ctx=>makeGrad(ctx,'rgba(96,165,250,1)'), borderWidth:2, tension:0.4, fill:true, pointRadius:0, pointHoverRadius:5},
-        {label:'Despesas', data:despesas, borderColor:'#f87171', backgroundColor:ctx=>makeGrad(ctx,'rgba(248,113,113,1)'), borderWidth:2, tension:0.4, fill:true, pointRadius:0, pointHoverRadius:5},
-        {label:'Lucro', data:lucro, borderColor:'#22c55e', backgroundColor:ctx=>makeGrad(ctx,'rgba(34,197,94,1)'), borderWidth:2.5, tension:0.4, fill:true, pointRadius:0, pointHoverRadius:5},
-      ]
+      datasets: [{
+        data: lucro,
+        borderColor: '#22c55e',
+        backgroundColor: ctx => {
+          const g = ctx.chart.ctx.createLinearGradient(0,0,0,180)
+          g.addColorStop(0, 'rgba(34,197,94,0.18)'); g.addColorStop(1, 'rgba(34,197,94,0)')
+          return g
+        },
+        borderWidth: 2.5, tension: 0.42, fill: true,
+        pointBackgroundColor: '#22c55e', pointBorderColor: '#090e1a',
+        pointBorderWidth: 2, pointRadius: 3, pointHoverRadius: 6
+      }]
     },
     options: {
-      responsive:true, maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{display:false},
-        tooltip:{backgroundColor:'rgba(9,14,26,0.95)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:12,
-          callbacks:{label:c=>' '+c.dataset.label+': '+fmtBRL(c.raw)}}
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {display: false},
+        tooltip: {backgroundColor:'rgba(11,18,34,0.96)',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,padding:10,
+          callbacks: {label: c => ' ' + fmtBRL(c.raw)}}
       },
-      scales:{
-        x:{grid:{display:false},ticks:{font:{size:10},color:'#3A506B',maxTicksLimit:8}},
-        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:10},color:'#3A506B',callback:v=>v>=1000?'R$'+(v/1000).toFixed(1)+'k':'R$'+v}}
+      scales: {
+        x: {grid:{display:false}, ticks:{font:{size:10},color:'#3A506B'}},
+        y: {grid:{color:'rgba(255,255,255,0.04)'}, ticks:{font:{size:10},color:'#3A506B',
+          callback: v => v >= 1000 ? 'R$'+(v/1000).toFixed(1)+'k' : 'R$'+Math.round(v)}}
       }
     }
   })
-  perf30Initing = false
+  evolucao30Initing = false
 }
 
 // ======================================
@@ -8722,8 +8712,8 @@ window.addEventListener('load',()=>{
   document.getElementById('page-subtitle').textContent = _dataFormatada
   // Hero hora
   atualizarHeroHora()
-  // Init perf30 chart (dashboard é a tela inicial)
-  setTimeout(initPerf30Chart, 200)
+  // Init evolucao30 chart (dashboard é a tela inicial)
+  setTimeout(initEvolucao30Chart, 200)
 })
 </script>
 
