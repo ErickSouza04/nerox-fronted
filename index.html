@@ -5144,8 +5144,30 @@ function recalcMargemFinal() {
 const produtosCadastrados = []
 let _produtosEstoquePrec = []
 
+// ── Precificação: persiste/restaura produtos da calculadora no localStorage ──
+function _salvarProdutosLocal() {
+  const key = 'nexor_prec_produtos_' + (App.usuario?.id || 'guest')
+  localStorage.setItem(key, JSON.stringify(produtosCadastrados))
+}
+
+function _restaurarProdutosLocal() {
+  const key = 'nexor_prec_produtos_' + (App.usuario?.id || 'guest')
+  try {
+    const saved = localStorage.getItem(key)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      produtosCadastrados.length = 0
+      parsed.forEach(p => produtosCadastrados.push(p))
+    }
+  } catch(e) {}
+}
+
 // ── Precificação: carrega produtos do estoque via API ──
 async function carregarProdutosPrecificacao() {
+  // Restaura produtos salvos pela calculadora (persistência entre reloads)
+  _restaurarProdutosLocal()
+  console.log('[Precificação] Produtos da calculadora na inicialização:', [...produtosCadastrados])
+
   const userId = App.usuario?.id
   const query = userId ? `?user_id=${userId}` : ''
   const res = await api('/stock/products' + query)
@@ -5230,9 +5252,10 @@ function salvarProduto() {
   const precoFinal = parseFloat(finalInput?.value) || precoSug
   const margemReal = ((precoFinal - custoTotal) / precoFinal) * 100
 
-  // Salva no array global
+  // Salva no array global e persiste no localStorage
   const id = 'prod-' + Date.now()
   produtosCadastrados.push({ id, nome, custoTotal, precoFinal, margemReal })
+  _salvarProdutosLocal()
   _syncSelectProdutos()
   renderizarTabelaPrecificacao()
 
@@ -5253,6 +5276,7 @@ function salvarProduto() {
 function removerProduto(id) {
   const idx = produtosCadastrados.findIndex(p => p.id === id)
   if (idx >= 0) produtosCadastrados.splice(idx, 1)
+  _salvarProdutosLocal()
   _syncSelectProdutos()
   renderizarTabelaPrecificacao()
 }
