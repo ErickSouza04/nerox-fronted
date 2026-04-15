@@ -5212,7 +5212,7 @@ function renderizarTabelaPrecificacao() {
 }
 
 // ── Precificação: salvar produto ──
-function salvarProduto() {
+async function salvarProduto() {
   const nomeInput = document.querySelector('#page-precificacao input[type="text"]')
   const nome = nomeInput.value.trim()
   if (!nome) { mostrarToast('Digite o nome do produto!', 'error'); return }
@@ -5230,24 +5230,47 @@ function salvarProduto() {
   const precoFinal = parseFloat(finalInput?.value) || precoSug
   const margemReal = ((precoFinal - custoTotal) / precoFinal) * 100
 
-  // Salva no array global
-  const id = 'prod-' + Date.now()
-  produtosCadastrados.push({ id, nome, custoTotal, precoFinal, margemReal })
-  _syncSelectProdutos()
-  renderizarTabelaPrecificacao()
+  // Persiste no banco ANTES do push
+  try {
+    const res = await api('/stock/products', {
+      method: 'POST',
+      body: JSON.stringify({
+        nome: nome,
+        preco_venda: precoFinal,
+        preco_custo: custoTotal,
+        estoque_atual: 0,
+        estoque_minimo: 0,
+        user_id: App.usuario?.id
+      })
+    })
 
-  // Limpar form
-  nomeInput.value = ''
-  document.getElementById('custo').value = ''
-  document.getElementById('embalagem').value = ''
-  document.getElementById('price-result').style.display = 'none'
-  if (finalInput) { finalInput.value = ''; delete finalInput.dataset.edited }
-  const mf = document.getElementById('margem-final-val')
-  if (mf) mf.textContent = '—'
-  const av = document.getElementById('preco-final-aviso')
-  if (av) av.style.display = 'none'
+    if (!res.ok) {
+      mostrarToast('Erro ao salvar produto. Tente novamente.', 'error')
+      return
+    }
 
-  mostrarToast(`"${nome}" salvo! Disponível em Registrar 📦`, 'success')
+    const data = await res.json().catch(() => ({}))
+    const id = data?.id ?? data?.data?.id ?? 'prod-' + Date.now()
+
+    produtosCadastrados.push({ id, nome, custoTotal, precoFinal, margemReal })
+    _syncSelectProdutos()
+    renderizarTabelaPrecificacao()
+    mostrarToast(`"${nome}" salvo! Disponível em Registrar 📦`, 'success')
+
+    // Limpar form
+    nomeInput.value = ''
+    document.getElementById('custo').value = ''
+    document.getElementById('embalagem').value = ''
+    document.getElementById('price-result').style.display = 'none'
+    if (finalInput) { finalInput.value = ''; delete finalInput.dataset.edited }
+    const mf = document.getElementById('margem-final-val')
+    if (mf) mf.textContent = '—'
+    const av = document.getElementById('preco-final-aviso')
+    if (av) av.style.display = 'none'
+
+  } catch(e) {
+    mostrarToast('Erro ao salvar produto. Tente novamente.', 'error')
+  }
 }
 
 function removerProduto(id) {
