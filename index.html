@@ -5144,30 +5144,25 @@ function recalcMargemFinal() {
 const produtosCadastrados = []
 let _produtosEstoquePrec = []
 
-// ── Precificação: persiste/restaura produtos da calculadora no localStorage ──
-function _salvarProdutosLocal() {
-  const key = 'nexor_prec_produtos_' + (App.usuario?.id || 'guest')
-  localStorage.setItem(key, JSON.stringify(produtosCadastrados))
-}
-
-function _restaurarProdutosLocal() {
-  const key = 'nexor_prec_produtos_' + (App.usuario?.id || 'guest')
-  try {
-    const saved = localStorage.getItem(key)
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      produtosCadastrados.length = 0
-      parsed.forEach(p => produtosCadastrados.push(p))
-    }
-  } catch(e) {}
-}
-
-// ── Precificação: carrega produtos do estoque via API ──
+// ── Precificação: carrega produtos do estoque e da calculadora via API ──
 async function carregarProdutosPrecificacao() {
-  // Restaura produtos salvos pela calculadora (persistência entre reloads)
-  _restaurarProdutosLocal()
+  // Carrega produtos salvos pela calculadora (persistência via backend)
+  const resPrec = await api('/precificacao/produtos')
+  if (resPrec?.ok) {
+    const dataPrec = await resPrec.json().catch(() => ({}))
+    const lista = dataPrec.dados || []
+    produtosCadastrados.length = 0
+    lista.forEach(p => produtosCadastrados.push({
+      id:         p.id,
+      nome:       p.nome,
+      custoTotal: parseFloat(p.custo),
+      precoFinal: parseFloat(p.preco_venda),
+      margemReal: parseFloat(p.margem),
+    }))
+  }
   console.log('[Precificação] Produtos da calculadora na inicialização:', [...produtosCadastrados])
 
+  // Carrega produtos do estoque via API
   const userId = App.usuario?.id
   const query = userId ? `?user_id=${userId}` : ''
   const res = await api('/stock/products' + query)
@@ -5234,7 +5229,7 @@ function renderizarTabelaPrecificacao() {
 }
 
 // ── Precificação: salvar produto ──
-function salvarProduto() {
+async function salvarProduto() {
   const nomeInput = document.querySelector('#page-precificacao input[type="text"]')
   const nome = nomeInput.value.trim()
   if (!nome) { mostrarToast('Digite o nome do produto!', 'error'); return }
@@ -5252,10 +5247,15 @@ function salvarProduto() {
   const precoFinal = parseFloat(finalInput?.value) || precoSug
   const margemReal = ((precoFinal - custoTotal) / precoFinal) * 100
 
-  // Salva no array global e persiste no localStorage
-  const id = 'prod-' + Date.now()
+  // Persiste no backend e adiciona ao array local com o ID retornado pelo servidor
+  const res = await api('/precificacao/produtos', {
+    method: 'POST',
+    body: JSON.stringify({ nome, custo: custoTotal, margem: margemReal, preco_venda: precoFinal }),
+  })
+  if (!res?.ok) { mostrarToast('Erro ao salvar produto. Tente novamente.', 'error'); return }
+  const data = await res.json().catch(() => ({}))
+  const id = data.dados?.id
   produtosCadastrados.push({ id, nome, custoTotal, precoFinal, margemReal })
-  _salvarProdutosLocal()
   _syncSelectProdutos()
   renderizarTabelaPrecificacao()
 
@@ -5273,10 +5273,11 @@ function salvarProduto() {
   mostrarToast(`"${nome}" salvo! Disponível em Registrar 📦`, 'success')
 }
 
-function removerProduto(id) {
+async function removerProduto(id) {
+  const res = await api('/precificacao/produtos/' + id, { method: 'DELETE' })
+  if (!res?.ok) { mostrarToast('Erro ao remover produto. Tente novamente.', 'error'); return }
   const idx = produtosCadastrados.findIndex(p => p.id === id)
   if (idx >= 0) produtosCadastrados.splice(idx, 1)
-  _salvarProdutosLocal()
   _syncSelectProdutos()
   renderizarTabelaPrecificacao()
 }
