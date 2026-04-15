@@ -7314,7 +7314,7 @@ function irParaPrecificacao() {
 function openModal(n) {
   document.getElementById('modal-'+n).classList.add('open')
   if (n === 'nova-venda') {
-    if (App.token && !_estoqueData.length) {
+    if (App.token) {
       carregarEstoque().then(() => _syncModalSelectProdutos())
     } else {
       _syncModalSelectProdutos()
