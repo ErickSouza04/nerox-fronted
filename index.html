@@ -2432,7 +2432,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <div class="stats-grid" style="margin-bottom:16px">
       <div class="stat-card c-blue"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon blue">💰</div><div class="stat-label">Faturamento</div><div class="stat-value count-anim" data-target="12840" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 18%</span> vs mês anterior</div></div></div>
       <div class="stat-card c-red"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon red">📤</div><div class="stat-label">Despesas</div><div class="stat-value red count-anim" data-target="9245" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-down">↑ 12%</span> vs mês anterior</div></div></div>
-      <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">📈</div><div class="stat-label">Lucro Real</div><div class="stat-value green count-anim" data-target="3595" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 31%</span> vs mês anterior</div></div></div>
+      <div class="stat-card c-green"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon green">📈</div><div class="stat-label">Lucro Líquido<span style="font-size:10px;opacity:0.65;display:block;margin-top:1px">(após pró-labore)</span></div><div class="stat-value green count-anim" data-target="3595" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 31%</span> vs mês anterior</div></div></div>
       <div class="stat-card c-amber"><div class="sc-bg"></div><div class="sc-glow"></div><div class="sc-content"><div class="stat-icon amber">🎫</div><div class="stat-label">Ticket Médio</div><div class="stat-value count-anim" data-target="285" data-prefix="R$ ">R$ 0</div><div class="stat-sub"><span class="badge-up">↑ 8%</span> vs mês anterior</div></div></div>
     </div>
     <div class="smart-alerts" id="smart-alerts"></div>
@@ -4214,7 +4214,7 @@ async function iniciarDashboard() {
       const cards=document.querySelectorAll('[data-target]')
       if(cards[0]){cards[0].dataset.target=Math.round(dados.faturamento);   countUp(cards[0])}
       if(cards[1]){cards[1].dataset.target=Math.round(dados.total_despesas); countUp(cards[1])}
-      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro);          countUp(cards[2])}
+      if(cards[2]){cards[2].dataset.target=Math.round(dados.lucro_pos_prolabore);countUp(cards[2])}
       if(cards[3]){cards[3].dataset.target=Math.round(dados.ticket_medio||dados.faturamento/(dados.total_vendas||1)||0); countUp(cards[3])}
       // Variações
       const vars=document.querySelectorAll('.stats-grid .badge-up,.stats-grid .badge-down')
