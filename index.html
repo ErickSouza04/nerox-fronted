@@ -4269,14 +4269,16 @@ async function iniciarDashboard() {
       const _id = document.getElementById('idx-despesas')
       if(_id){ _id.textContent=((_vd>=0?'+':'')+_vd.toFixed(0)+'%'); _id.style.color=_vd>10?'var(--amber)':_vd<=0?'var(--green)':'var(--text)' }
       // ── Projeção do Mês ──
-      const _diasMes=new Date(ano,mes,0).getDate(), _diasDec=new Date().getDate()
+      const _hoje=new Date(), _mesAtual=_hoje.getMonth()+1, _anoAtual=_hoje.getFullYear()
+      const _mesEncerrado=(ano<_anoAtual)||(ano===_anoAtual&&mes<_mesAtual)
+      const _diasMes=new Date(ano,mes,0).getDate(), _diasDec=_mesEncerrado?_diasMes:_hoje.getDate()
       const _fProj=_diasDec>0?_diasMes/_diasDec:1, _conf=Math.min(90,Math.round(_diasDec/_diasMes*100))
       const _set2=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v }
       _set2('proj-receita-val', fmtBRL(Math.round((dados.faturamento||0)*_fProj)))
       _set2('proj-receita-meta', (_vf>=0?'+':'')+_vf.toFixed(0)+'% vs mês anterior')
       _set2('proj-receita-pct', _conf+'%')
       const _prf=document.getElementById('proj-receita-fill'); if(_prf) _prf.style.width=_conf+'%'
-      _set2('proj-lucro-val', fmtBRL(Math.round((dados.lucro||0)*_fProj)))
+      _set2('proj-lucro-val', fmtBRL(Math.round((dados.lucro_pos_prolabore||0)*_fProj)))
       _set2('proj-lucro-meta', 'Margem de '+Math.round(dados.margem||0)+'%')
       const _confL=Math.max(0,_conf-6)
       _set2('proj-lucro-pct', _confL+'%')
