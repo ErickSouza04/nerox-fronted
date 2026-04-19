@@ -3792,6 +3792,15 @@ function onboardingSlider(key, val) {
   if (key === 'fat')   { onboardingData.faturamento = val; document.getElementById('quiz-fat-val').textContent  = fmt(val) }
   if (key === 'gasto') { onboardingData.gastos = val;      document.getElementById('quiz-gasto-val').textContent = fmt(val) }
   if (key === 'sal')   { onboardingData.salario = val;     document.getElementById('quiz-sal-val').textContent   = fmt(val) }
+  // Recalcular score em tempo real
+  const _scorePreview = calcularNexorScore(
+    onboardingData.faturamento,
+    onboardingData.gastos,
+    onboardingData.salario
+  )
+  onboardingData.nexor_score = _scorePreview
+  const _elScore = document.getElementById('bv-score')
+  if (_elScore) _elScore.textContent = _scorePreview
 }
 
 function calcularNexorScore(fat, gastos, salario) {
