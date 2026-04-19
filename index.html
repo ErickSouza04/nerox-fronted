@@ -7014,7 +7014,8 @@ async function iniciarPaginaScore() {
     s.progresso = 86; s.totalVendas = 45; s.indice = 74
   }
 
-  const score = s.indice || calcularScoreLocal(s)
+  const scoreLocal = calcularScoreLocal(s)
+  const score = s.indice || (scoreLocal > 0 ? scoreLocal : null) || (App.onboardingScore > 0 ? App.onboardingScore : null) || 74
 
   // ── Liga ──
   const ligaInfo = getLigaInfo(score)
