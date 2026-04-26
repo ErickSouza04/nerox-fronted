@@ -3991,7 +3991,7 @@ async function finalizarCadastro() {
 
 function salvarSessao(data) {
   App.token=data.token; App.refresh=data.refresh_token; App.usuario=data.usuario
-  App.plan = data.usuario?.plan || null
+  App.plan = data.usuario?.plan || data.usuario?.plano || null
   localStorage.setItem('nexor_token',data.token)
   localStorage.setItem('nexor_refresh',data.refresh_token)
   localStorage.setItem('nexor_usuario',JSON.stringify(data.usuario))
@@ -8720,6 +8720,11 @@ async function verificarPlano() {
         App.usuario.plano = data.plano
         App.usuario.diasRestantes = data.diasRestantes
         localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+        if (data.plano && data.plano !== 'trial' && data.plano !== 'expirado') {
+          App.plan = data.plano
+          localStorage.setItem('nexor_plan', data.plano)
+          atualizarUIPlano()
+        }
       }
       aplicarStatusPlano(App.usuario)
     }
