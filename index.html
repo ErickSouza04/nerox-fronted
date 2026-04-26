@@ -8442,7 +8442,7 @@ function aplicarStatusPlano(usuario) {
 
   if (!banner || !paywall) return
 
-  if (plano === 'trial' && dias > 0) {
+  if (dias > 0 && plano !== 'expirado' && plano !== 'cancelado' && plano !== 'ativo') {
     // Mostra banner de trial
     banner.style.display = 'flex'
     const label = document.getElementById('trial-dias-label')
