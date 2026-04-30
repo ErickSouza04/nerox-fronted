@@ -2406,7 +2406,7 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <!-- HERO + STATS -->
     <div class="hero-metric">
       <div class="hero-metric-glow"></div>
-      <div class="hero-label"><span class="hero-label-dot"></span>Lucro Real — Hoje</div>
+      <div class="hero-label" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:8px"><span class="hero-label-dot"></span>Lucro Real — Hoje</span><button id="hero-refresh-btn" onclick="limparCacheDashboard();iniciarDashboard()" title="Atualizar dados" style="background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:6px;color:rgba(34,197,94,0.7);font-size:13px;line-height:1;transition:color 0.2s" onmouseover="this.style.color='#22c55e'" onmouseout="this.style.color='rgba(34,197,94,0.7)'">↻</button></div>
       <div class="hero-main-value" id="hero-lucro">R$ 1.280</div>
       <div class="hero-main-sub">Atualizado agora · <span id="hero-hora"></span></div>
       <div class="hero-stats-row">
@@ -4320,8 +4320,6 @@ async function iniciarDashboard() {
       const [_dd, _mm, _yyyy] = _brFmt.split('/')
       const _hoje_str = `${_yyyy}-${_mm}-${_dd}` // "YYYY-MM-DD" no horário de Brasília
       const hoje = dados.find(d => d.data && d.data.slice(0,10) === _hoje_str)
-              || dados.filter(d=>(d.faturamento||0)>0).slice(-1)[0]
-              || dados[dados.length - 1]
       console.log('[NEXOR DEBUG] hoje BR:', _hoje_str, '| UTC:', new Date().toISOString().slice(0,10), '| hoje encontrado:', hoje)
       if (hoje) {
         const hlEl = document.getElementById('hero-lucro')
@@ -4352,7 +4350,7 @@ async function iniciarDashboard() {
           if (hbEl)  hbEl.textContent  = ''
           if (hdbEl) hdbEl.textContent = ''
         }
-        if ((hoje.faturamento||0) > 0) _heroDiarioOk = true
+        _heroDiarioOk = true
       }
       // Insight IA dinâmico no dashboard (não bloqueia)
       setTimeout(carregarInsightDiario, 800)
@@ -4474,13 +4472,14 @@ async function iniciarDashboard() {
 
       // ── Fallback hero card: calcula hoje dos registros quando /dashboard/diario não trouxe dados de hoje ──
       if (!_heroDiarioOk) {
+        // Usa getDataBrasil() para converter datas UTC dos registros para fuso SP antes de comparar
         const _fatHojeFb = v.dados
-          .filter(i => i.data && i.data.slice(0,10) === _brHoje)
+          .filter(i => i.data && getDataBrasil(new Date(i.data)) === _brHoje)
           .reduce((s, i) => s + parseFloat(i.valor||0), 0)
-        if (_fatHojeFb > 0) {
-          const _despHojeFb = de.dados
-            .filter(i => i.data && i.data.slice(0,10) === _brHoje)
-            .reduce((s, i) => s + parseFloat(i.valor||0), 0)
+        const _despHojeFb = de.dados
+          .filter(i => i.data && getDataBrasil(new Date(i.data)) === _brHoje)
+          .reduce((s, i) => s + parseFloat(i.valor||0), 0)
+        if (_fatHojeFb > 0 || _despHojeFb > 0) {
           const _lucroHojeFb = _fatHojeFb - _despHojeFb
           const _hlFb = document.getElementById('hero-lucro')
           const _hrFb = document.getElementById('hero-receita')
@@ -4491,7 +4490,7 @@ async function iniciarDashboard() {
           if (_hlFb) _hlFb.textContent = fmtBRL(_lucroHojeFb)
           if (_hrFb) _hrFb.textContent = fmtBRL(_fatHojeFb)
           if (_hdFb) _hdFb.textContent = fmtBRL(_despHojeFb)
-          const _mFb = Math.round(_lucroHojeFb / _fatHojeFb * 100)
+          const _mFb = _fatHojeFb > 0 ? Math.round(_lucroHojeFb / _fatHojeFb * 100) : 0
           if (_hmvFb) _hmvFb.textContent = _mFb + '%'
           if (_hmfFb) _hmfFb.style.width = Math.max(0, Math.min(100, _mFb)) + '%'
           if (_hmpFb) _hmpFb.textContent = _mFb + '%'
@@ -4623,7 +4622,7 @@ function navigate(page,el){
   if(page==='cards')  setTimeout(iniciarPaginaCards, 80)
   if(page==='score')  { setTimeout(iniciarPaginaScore, 80) }
   if(page==='ia')     {} // já tem hook abaixo
-  if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 30000) setTimeout(iniciarDashboard, 80)
+  if(page==='dashboard' && App.token && Date.now() - _lastDashLoad > 5000) { limparCacheDashboard(); setTimeout(iniciarDashboard, 80) }
   if(page==='ia') {
     setTimeout(initScoreCanvas, 80)
     setTimeout(() => carregarPaginaIA().then(() => {
