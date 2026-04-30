@@ -3578,7 +3578,7 @@ async function api(path, opts = {}) {
   if (_loggingOut) return null
   const headers = { 'Content-Type': 'application/json', ...(opts.headers||{}) }
   if (App.token) headers['Authorization'] = 'Bearer ' + App.token
-  let res = await fetch(API_URL + path, { ...opts, headers }).catch(()=>null)
+  let res = await fetch(API_URL + path, { cache: 'no-store', ...opts, headers }).catch(()=>null)
   if (!res) return null
   if (res.status === 401) {
     if (App.refresh) {
@@ -4523,6 +4523,23 @@ async function iniciarDashboard() {
   // Recriar chart de evolução do lucro 30 dias com dados reais (foi destruído no início)
   if (App.token) setTimeout(initEvolucao30Chart, 200)
   _lastDashLoad = Date.now()
+
+  // Auto-retry: se hero ainda mostra R$ 0,00 mas há faturamento mensal, agenda re-fetch em 15s.
+  // Cobre casos onde backend processa transações com pequeno atraso (ex: via WhatsApp Agent).
+  if (App.token) {
+    const _hlCheck = document.getElementById('hero-lucro')
+    const _hasMensalData = (App.stats?.faturamento || 0) > 0
+    const _heroIsZero = _hlCheck && (_hlCheck.textContent === 'R$ 0,00' || _hlCheck.textContent === 'R$ 0')
+    if (_heroIsZero && _hasMensalData) {
+      console.log('[NEXOR DEBUG] Auto-retry agendado: hero zerado mas há dados mensais')
+      setTimeout(() => {
+        if (document.getElementById('page-dashboard')?.classList.contains('active')) {
+          limparCacheDashboard()
+          iniciarDashboard()
+        }
+      }, 15000)
+    }
+  }
 }
 
 // ======================================
