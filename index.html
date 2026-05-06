@@ -2355,8 +2355,10 @@ tr:hover td { background:rgba(255,255,255,0.02); }
     <button class="nav-item nav-item-score" onclick="navigate('score',this)"><span class="nav-icon" style="background:rgba(251,191,36,0.1)">🏆</span> Nexor Score</button>
     <button class="nav-item nav-item-ai" onclick="navigate('ia',this)"><span class="nav-icon" style="background:rgba(167,139,250,0.1)">🤖</span> Nexor AI</button>
     <div class="divider"></div>
+    <div class="nav-section-label">Gestão</div>
+    <button class="nav-item" id="nav-estoque" onclick="navigate('estoque',this)"><span class="nav-icon" style="background:rgba(96,165,250,0.1)">📦</span> Estoque</button>
+    <div class="divider"></div>
     <div class="nav-section-label">Plus</div>
-    <button class="nav-item nav-item-plus locked" id="nav-estoque" onclick="navegarPlus('estoque',this)"><span class="nav-icon" style="background:rgba(96,165,250,0.1)">📦</span> Estoque<span class="nav-lock" id="lock-estoque">🔒</span></button>
     <button class="nav-item nav-item-plus locked" id="nav-whatsapp" onclick="navegarPlus('whatsapp',this)"><span class="nav-icon" style="background:rgba(34,197,94,0.1)">💬</span> WhatsApp Agent<span class="nav-lock" id="lock-whatsapp">🔒</span></button>
     <div class="divider"></div>
     <div class="nav-section-label">Conta</div>
@@ -2382,8 +2384,8 @@ tr:hover td { background:rgba(255,255,255,0.02); }
 </div>
 <!-- TRIAL BANNER -->
 <div class="trial-banner" id="trial-banner" style="display:none">
-  <div class="trial-banner-text">⏳ Período de teste ativo — <span class="trial-banner-dias" id="trial-dias-label">7 dias restantes</span></div>
-  <button class="trial-banner-btn" onclick="mostrarPaywall()">🚀 Ver planos</button>
+  <div class="trial-banner-text">⏳ <span id="trial-dias-label">7 dias restantes</span> no seu trial Plus</div>
+  <button class="trial-banner-btn" onclick="mostrarPaywall()">Ver planos</button>
 </div>
 <header class="topbar">
     <div class="topbar-left">
@@ -2924,19 +2926,21 @@ tr:hover td { background:rgba(255,255,255,0.02); }
           </div>
         </div>
         <div class="chart-card" id="perfil-plano-card">
-          <div class="chart-title" style="margin-bottom:13px">🚀 Assine o Nexor</div>
+          <div class="chart-title" style="margin-bottom:13px">🚀 Escolha seu plano</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-            <div onclick="abrirStripe('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center;transition:all 0.2s" onmouseover="this.style.borderColor='rgba(34,197,94,0.4)'" onmouseout="this.style.borderColor=''">
+            <div style="padding:14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.03);text-align:center">
               <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">BASE</div>
-              <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 37<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
-              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
-              <div style="margin-top:10px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">Assinar →</div>
+              <div style="font-size:22px;font-weight:800;color:var(--green)">Grátis</div>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">para sempre</div>
+              <div style="margin-top:6px;font-size:10px;color:var(--text-muted);line-height:1.4">Dashboard · Estoque · Nexor Score</div>
+              <div style="margin-top:10px;font-size:10px;color:rgba(248,113,113,0.7)">🔒 Sem WhatsApp Agent</div>
             </div>
-            <div onclick="abrirStripe('https://buy.stripe.com/00w8wP5ZNbKDg7ffPf6Na02')" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
-              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">PLUS</div>
-              <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 67<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
+            <div onclick="fazerUpgrade()" style="cursor:pointer;padding:14px;border-radius:10px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);text-align:center;transition:all 0.2s">
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">PLUS ⭐</div>
+              <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 29<span style="font-size:12px;color:var(--text-muted);font-weight:400">,90</span></div>
               <div style="font-size:10px;color:var(--text-muted);margin-top:2px">por mês</div>
-              <div style="margin-top:10px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">🚀 Melhor valor →</div>
+              <div style="margin-top:6px;font-size:10px;color:var(--text-muted);line-height:1.4">Base + WhatsApp Agent</div>
+              <div style="margin-top:10px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:5px;border-radius:6px">Assinar o Plus →</div>
             </div>
           </div>
           <div style="text-align:center;font-size:11px;color:var(--text-muted)">Cancele quando quiser · Pagamento seguro via Stripe</div>
@@ -3369,7 +3373,14 @@ tr:hover td { background:rgba(255,255,255,0.02); }
   </div><!-- end page-estoque -->
 
   <!-- ══ WHATSAPP AGENT ══ -->
-  <div class="page" id="page-whatsapp">
+  <div class="page" id="page-whatsapp" style="position:relative">
+    <!-- Overlay para usuários sem Nexor Plus -->
+    <div id="wa-locked-overlay" style="display:none;position:absolute;inset:0;background:rgba(10,12,15,0.88);backdrop-filter:blur(10px);z-index:20;border-radius:16px;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px">
+      <div style="font-size:52px;margin-bottom:16px">🔒</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">WhatsApp Agent</div>
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">Disponível no Nexor Plus — R$ 29,90/mês</div>
+      <button class="btn btn-primary" onclick="abrirModalUpgrade()" style="font-size:14px;padding:12px 28px">⭐ Conhecer o Nexor Plus</button>
+    </div>
     <div class="wa-page-grid">
       <div>
         <!-- Formulário: exibido quando não há número vinculado -->
@@ -3691,8 +3702,12 @@ async function carregarPlanoUsuario() {
 
 function atualizarUIPlano() {
   const plus = isPlus()
-  document.querySelectorAll('.nav-item-plus').forEach(el => el.classList.toggle('locked', !plus))
-  document.querySelectorAll('.nav-lock').forEach(el => { el.style.display = plus ? 'none' : 'inline' })
+  const navWa     = document.getElementById('nav-whatsapp')
+  const lockWa    = document.getElementById('lock-whatsapp')
+  const waOverlay = document.getElementById('wa-locked-overlay')
+  if (navWa)     navWa.classList.toggle('locked', !plus)
+  if (lockWa)    lockWa.style.display = plus ? 'none' : 'inline'
+  if (waOverlay) waOverlay.style.display = plus ? 'none' : 'flex'
 }
 
 function navegarPlus(page, el) {
@@ -3718,7 +3733,7 @@ async function fazerUpgrade() {
   if (!res?.ok) {
     errEl.textContent = 'Erro ao iniciar o checkout. Tente novamente.'
     errEl.style.display = 'block'
-    btn.textContent = '🚀 Fazer upgrade — R$67,90/mês'; btn.disabled = false
+    btn.textContent = '⭐ Assinar o Plus — R$29,90/mês'; btn.disabled = false
     return
   }
   const data = await res.json().catch(() => null)
@@ -3727,7 +3742,7 @@ async function fazerUpgrade() {
   } else {
     errEl.textContent = 'URL de pagamento não encontrada. Tente novamente.'
     errEl.style.display = 'block'
-    btn.textContent = '🚀 Fazer upgrade — R$67,90/mês'; btn.disabled = false
+    btn.textContent = '⭐ Assinar o Plus — R$29,90/mês'; btn.disabled = false
   }
 }
 
@@ -8401,7 +8416,6 @@ function perguntarSobreAcao(idx) {
 // TRIAL + PAYWALL
 // ======================================================
 function mostrarPaywall() {
-  document.getElementById('paywall-screen').style.display = 'flex'
   const plano = App.usuario?.plano
   const dias  = App.usuario?.diasRestantes
   const isTrialAtivo = plano === 'trial' && dias > 0
@@ -8409,27 +8423,33 @@ function mostrarPaywall() {
   const backBtn = document.getElementById('paywall-back-btn')
   if (backBtn) backBtn.style.display = isTrialAtivo ? 'block' : 'none'
 
-  const title = document.getElementById('paywall-title')
-  const sub   = document.getElementById('paywall-sub')
-  if (title) {
-    if (isTrialAtivo) {
-      const label = dias === 1 ? '1 dia restante' : `${dias} dias restantes`
-      title.innerHTML = `Seu teste — <span>${label}</span>`
-    } else {
-      title.innerHTML = 'Seu teste <span>encerrou</span>'
-    }
-  }
-  if (sub) {
-    if (isTrialAtivo) {
-      sub.textContent = 'Aproveite os dias restantes ou assine agora para continuar controlando seu negócio.'
-    } else {
-      sub.textContent = 'Você aproveitou 7 dias grátis do Nexor. Assine agora para continuar controlando seu negócio.'
-    }
-  }
+  document.getElementById('paywall-screen').style.display = 'flex'
 }
 
 function fecharPaywall() {
   document.getElementById('paywall-screen').style.display = 'none'
+}
+
+async function continuarNoBase() {
+  const btn = document.getElementById('paywall-base-btn')
+  if (btn) { btn.textContent = 'Aguarde...'; btn.disabled = true }
+  const res = await api('/auth/downgrade-to-base', { method: 'PUT' })
+  if (res?.ok) {
+    if (App.usuario) {
+      App.usuario.plano = 'base'
+      App.plan = 'base'
+      localStorage.setItem('nexor_plan', 'base')
+      localStorage.setItem('nexor_usuario', JSON.stringify(App.usuario))
+    }
+    document.getElementById('paywall-screen').style.display = 'none'
+    document.getElementById('trial-banner').style.display = 'none'
+    atualizarUIPlano()
+    mostrarToast('Bem-vindo ao Nexor Base!', 'success')
+    if (typeof iniciarDashboard === 'function') iniciarDashboard()
+  } else {
+    mostrarToast('Erro ao processar. Tente novamente.', 'error')
+    if (btn) { btn.textContent = 'Continuar no Base'; btn.disabled = false }
+  }
 }
 
 function aplicarStatusPlano(usuario) {
@@ -8772,42 +8792,27 @@ window.addEventListener('load',()=>{
 
 <!-- MODAL UPGRADE PLUS -->
 <div class="modal-overlay" id="modal-upgrade">
-  <div class="modal" style="max-width:520px">
+  <div class="modal" style="max-width:400px">
     <div class="modal-header">
-      <div class="modal-title">🚀 Conheça o Nexor Plus</div>
+      <div class="modal-title">⭐ Nexor Plus</div>
       <button class="modal-close" onclick="fecharModalUpgrade()">×</button>
     </div>
-    <p style="font-size:13px;color:var(--text-muted);margin-bottom:4px;line-height:1.5">Desbloqueie controle de <strong style="color:var(--text)">Estoque</strong> e o <strong style="color:var(--text)">WhatsApp Agent</strong> para gerenciar seu negócio sem abrir o app.</p>
-    <div class="upgrade-plan-grid">
-      <div class="upgrade-plan-card">
-        <div class="upgrade-plan-name">Base</div>
-        <div class="upgrade-plan-price">R$ 37<span style="font-size:13px;color:var(--text-muted);font-weight:400">,90/mês</span></div>
-        <div class="upgrade-plan-features">
-          <div class="upgrade-plan-feature ok">✅ Dashboard financeiro</div>
-          <div class="upgrade-plan-feature ok">✅ Vendas e Despesas</div>
-          <div class="upgrade-plan-feature ok">✅ Relatórios</div>
-          <div class="upgrade-plan-feature ok">✅ Nexor AI</div>
-          <div class="upgrade-plan-feature">🔒 Estoque</div>
-          <div class="upgrade-plan-feature">🔒 WhatsApp Agent</div>
-        </div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.5">O <strong style="color:var(--text)">WhatsApp Agent</strong> é exclusivo do Nexor Plus. Gerencie seu negócio enviando comandos pelo WhatsApp, sem abrir o app.</p>
+    <div style="padding:16px;border-radius:12px;border:1.5px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.06);margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:16px;font-weight:700">Nexor Plus</div>
+        <div style="font-size:22px;font-weight:800;color:var(--green)">R$ 29<span style="font-size:13px;color:var(--text-muted);font-weight:400">,90/mês</span></div>
       </div>
-      <div class="upgrade-plan-card plus">
-        <div class="upgrade-plan-name">Plus</div>
-        <div class="upgrade-plan-price">R$ 67<span style="font-size:13px;color:var(--text-muted);font-weight:400">,90/mês</span></div>
-        <div class="upgrade-plan-features">
-          <div class="upgrade-plan-feature ok">✅ Dashboard financeiro</div>
-          <div class="upgrade-plan-feature ok">✅ Vendas e Despesas</div>
-          <div class="upgrade-plan-feature ok">✅ Relatórios</div>
-          <div class="upgrade-plan-feature ok">✅ Nexor AI</div>
-          <div class="upgrade-plan-feature ok">✅ Estoque completo</div>
-          <div class="upgrade-plan-feature ok">✅ WhatsApp Agent</div>
-        </div>
+      <div style="font-size:12px;color:var(--text-muted);line-height:2">
+        ✅ Tudo do Base<br>
+        ✅ WhatsApp Agent com IA<br>
+        ✅ Relatórios avançados
       </div>
     </div>
     <div id="upgrade-err" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;padding:9px 12px;background:var(--red-dim);border-radius:8px"></div>
     <div class="modal-actions">
-      <button id="assinar-base-btn" class="btn btn-secondary" onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')">Assinar Base</button>
-      <button class="btn btn-primary" id="upgrade-btn" onclick="fazerUpgrade()">🚀 Fazer upgrade — R$67,90/mês</button>
+      <button class="btn btn-secondary" onclick="fecharModalUpgrade()">Agora não</button>
+      <button class="btn btn-primary" id="upgrade-btn" onclick="fazerUpgrade()">⭐ Assinar o Plus — R$29,90/mês</button>
     </div>
   </div>
 </div>
@@ -8816,36 +8821,37 @@ window.addEventListener('load',()=>{
 <div class="paywall-screen" id="paywall-screen" style="display:none">
   <div class="paywall-card">
     <div class="paywall-icon">🔒</div>
-    <div class="paywall-title" id="paywall-title">Seu teste <span>encerrou</span></div>
-    <div class="paywall-sub" id="paywall-sub">Você aproveitou 7 dias grátis do Nexor.<br>Assine agora para continuar controlando seu negócio.</div>
-    <div class="paywall-benefits">
-      <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Dashboard financeiro completo</div>
-      <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Registro ilimitado de vendas e despesas</div>
-      <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Nexor IA — insights inteligentes</div>
-      <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Relatórios e precificação</div>
-      <div class="paywall-benefit"><span class="paywall-benefit-icon">✅</span> Suporte prioritário</div>
-    </div>
-    <!-- Planos -->
-    <div style="display:flex;flex-direction:row;gap:10px;margin-bottom:18px">
-      <!-- Base -->
-      <div class="paywall-price" style="flex:1;cursor:pointer;transition:all 0.2s;margin-bottom:0;padding:12px 14px" onclick="window.open('https://buy.stripe.com/6oU6oH5ZNcOH7AJ9qR6Na00','_blank')">
-        <div class="paywall-price-label">Base</div>
-        <div class="paywall-price-value" style="font-size:26px;margin:4px 0 2px">R$ 37<span style="font-size:13px">,90</span></div>
-        <div class="paywall-price-period">por mês</div>
-        <div style="margin-top:6px;font-size:10px;color:var(--text-muted);line-height:1.3">Dashboard · Vendas · Relatórios · Nexor IA</div>
-        <div style="margin-top:8px;background:rgba(34,197,94,0.15);color:var(--green);font-size:11px;font-weight:700;padding:7px 10px;border-radius:8px;text-align:center">Assinar →</div>
+    <div class="paywall-title">Seu período de teste <span>encerrou</span></div>
+    <div class="paywall-sub">Escolha como quer continuar no Nexor</div>
+    <!-- Planos lado a lado -->
+    <div style="display:flex;flex-direction:row;gap:12px;margin-bottom:18px">
+      <!-- Base (Grátis) -->
+      <div style="flex:1;padding:16px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,0.03);display:flex;flex-direction:column">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Base</div>
+        <div style="font-size:26px;font-weight:800;color:var(--green);margin-bottom:0">Grátis</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:14px">para sempre</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:2;margin-bottom:16px;flex:1">
+          ✅ Dashboard financeiro<br>
+          ✅ Controle de estoque<br>
+          ✅ Nexor Score<br>
+          🔒 Sem WhatsApp Agent
+        </div>
+        <button id="paywall-base-btn" onclick="continuarNoBase()" style="width:100%;padding:11px;border-radius:10px;border:1.5px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.08);color:var(--green);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s">Continuar no Base</button>
       </div>
       <!-- Plus -->
-      <div class="paywall-price" style="flex:1;cursor:pointer;transition:all 0.2s;border-color:rgba(34,197,94,0.5);background:rgba(34,197,94,0.1);margin-bottom:0;padding:12px 14px" onclick="window.open('https://buy.stripe.com/00w8wP5ZNbKDg7ffPf6Na02','_blank')">
-        <div class="paywall-price-label">Plus <span style="background:rgba(34,197,94,0.25);color:var(--green);padding:1px 5px;border-radius:4px;font-size:9px;margin-left:3px">TOTAL</span></div>
-        <div class="paywall-price-value" style="font-size:26px;margin:4px 0 2px">R$ 67<span style="font-size:13px">,90</span></div>
-        <div class="paywall-price-period">por mês</div>
-        <div style="margin-top:6px;font-size:10px;color:var(--text-muted);line-height:1.3">Base + WhatsApp Agent + Estoque</div>
-        <div style="margin-top:8px;background:rgba(34,197,94,0.2);color:var(--green);font-size:11px;font-weight:700;padding:7px 10px;border-radius:8px;text-align:center">⭐ Assinar →</div>
+      <div style="flex:1;padding:16px;border-radius:14px;border:1.5px solid rgba(34,197,94,0.5);background:rgba(34,197,94,0.08);display:flex;flex-direction:column">
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Plus ⭐</div>
+        <div style="font-size:26px;font-weight:800;color:var(--green);margin-bottom:0">R$ 29<span style="font-size:14px;font-weight:400;color:var(--text-muted)">,90</span></div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:14px">por mês</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:2;margin-bottom:16px;flex:1">
+          ✅ Tudo do Base<br>
+          ✅ WhatsApp Agent com IA<br>
+          ✅ Relatórios avançados
+        </div>
+        <button onclick="fazerUpgrade()" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--green);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s">⭐ Assinar o Plus</button>
       </div>
     </div>
-    <div id="paywall-back-btn" style="display:none;margin-bottom:10px"><button onclick="fecharPaywall()" style="background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.3);color:var(--green);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;padding:11px 16px;border-radius:10px;transition:all 0.2s">← Voltar ao período de teste</button></div>
-    <div class="paywall-demo-link" onclick="entrarDemo()">Continuar no modo demo</div>
+    <div id="paywall-back-btn" style="display:none"><button onclick="fecharPaywall()" style="background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;padding:9px 16px;border-radius:10px;transition:all 0.2s">← Voltar ao período de teste</button></div>
   </div>
 </div>
 
