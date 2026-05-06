@@ -8452,6 +8452,24 @@ async function continuarNoBase() {
   }
 }
 
+async function fazerUpgradeDaPaywall() {
+  const btn = document.getElementById('paywall-plus-btn')
+  if (btn) { btn.textContent = 'Aguarde...'; btn.disabled = true }
+  const res = await api('/stripe/checkout', { method: 'POST', body: JSON.stringify({ plan: 'plus' }) })
+  if (!res?.ok) {
+    mostrarToast('Erro ao iniciar o checkout. Tente novamente.', 'error')
+    if (btn) { btn.textContent = '⭐ Assinar o Plus'; btn.disabled = false }
+    return
+  }
+  const data = await res.json().catch(() => null)
+  if (data?.url) {
+    window.location.href = data.url
+  } else {
+    mostrarToast('URL de pagamento não encontrada. Tente novamente.', 'error')
+    if (btn) { btn.textContent = '⭐ Assinar o Plus'; btn.disabled = false }
+  }
+}
+
 function aplicarStatusPlano(usuario) {
   const plano = usuario?.plano
   const dias  = usuario?.diasRestantes
@@ -8848,7 +8866,7 @@ window.addEventListener('load',()=>{
           ✅ WhatsApp Agent com IA<br>
           ✅ Relatórios avançados
         </div>
-        <button onclick="fazerUpgrade()" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--green);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s">⭐ Assinar o Plus</button>
+        <button id="paywall-plus-btn" onclick="fazerUpgradeDaPaywall()" style="width:100%;padding:11px;border-radius:10px;border:none;background:var(--green);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s">⭐ Assinar o Plus</button>
       </div>
     </div>
     <div id="paywall-back-btn" style="display:none"><button onclick="fecharPaywall()" style="background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;width:100%;padding:9px 16px;border-radius:10px;transition:all 0.2s">← Voltar ao período de teste</button></div>
