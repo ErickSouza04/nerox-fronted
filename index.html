@@ -8455,7 +8455,12 @@ async function continuarNoBase() {
 async function fazerUpgradeDaPaywall() {
   const btn = document.getElementById('paywall-plus-btn')
   if (btn) { btn.textContent = 'Aguarde...'; btn.disabled = true }
+  console.log('[PAYWALL] Iniciando checkout...')
   const res = await api('/stripe/checkout', { method: 'POST', body: JSON.stringify({ plan: 'plus' }) })
+  console.log('[PAYWALL] Resposta:', res?.status, res?.ok)
+  if (res === null) {
+    console.warn('[PAYWALL] api() retornou null — erro de rede, 401, 402 ou _loggingOut=true')
+  }
   if (!res?.ok) {
     mostrarToast('Erro ao iniciar o checkout. Tente novamente.', 'error')
     if (btn) { btn.textContent = '⭐ Assinar o Plus'; btn.disabled = false }
