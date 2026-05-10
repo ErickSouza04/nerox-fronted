@@ -3717,7 +3717,8 @@ function navegarPlus(page, el) {
 
 function abrirModalUpgrade() {
   document.getElementById('modal-upgrade').classList.add('open')
-  document.getElementById('assinar-base-btn').style.display = isBase() ? 'none' : ''
+  const _assinBase = document.getElementById('assinar-base-btn')
+  if (_assinBase) _assinBase.style.display = isBase() ? 'none' : ''
 }
 
 function fecharModalUpgrade() {
@@ -4594,7 +4595,7 @@ async function carregarPerfil() {
     const planoNome = _planKey === 'plus' ? 'Plano Plus' : _planKey === 'base' ? 'Plano Base' : (_planKey ? 'Plano '+_planKey.charAt(0).toUpperCase()+_planKey.slice(1) : 'Plano')
     const planoDesc = u.plano_desc || 'Dashboard · Registros · Precificação · Relatórios · IA · Score · Metas · Cards'
     const isAnual = u.tipo_plano === 'anual' || u.plano_periodo === 'anual'
-    const planoPeriodicidade = isAnual ? 'R$ 247,90/ano' : (_planKey === 'plus' ? 'R$ 67,90/mês' : 'R$ 37,90/mês')
+    const planoPeriodicidade = isAnual ? 'R$ 247,90/ano' : (_planKey === 'plus' ? 'R$ 29,90/mês' : 'Grátis')
     card.innerHTML = `
       <div class="chart-title" style="margin-bottom:13px">📦 Plano Atual</div>
       <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(99,102,241,0.04));border:1px solid rgba(99,102,241,0.3);border-radius:var(--radius-sm);padding:15px">
@@ -7467,7 +7468,7 @@ async function modalRegistrarVenda() {
 
   const cat  = document.getElementById('modal-cat')?.value  || 'Produto'
   const pag  = document.getElementById('modal-pag')?.value  || 'Pix'
-  const data = _dataISO
+  const data = getDataBrasil(new Date())
 
   const modoAvulso = document.getElementById('modal-modo-avulso')?.style.display !== 'none'
   let prod = ''
@@ -7529,7 +7530,7 @@ async function modalRegistrarDespesa() {
   const cat  = document.getElementById('modal-desp-cat')?.value  || 'Outros'
   const pag  = document.getElementById('modal-desp-pag')?.value  || 'Pix'
   const desc = document.getElementById('modal-desp-desc')?.value || ''
-  const data = _dataISO
+  const data = getDataBrasil(new Date())
   closeModal('nova-despesa')
   document.getElementById('modal-desp-val').value = ''
   if (document.getElementById('modal-desp-desc')) document.getElementById('modal-desp-desc').value = ''
@@ -8480,7 +8481,7 @@ function aplicarStatusPlano(usuario) {
 
   if (!banner || !paywall) return
 
-  if (dias > 0 && plano !== 'expirado' && plano !== 'cancelado' && plano !== 'ativo') {
+  if (plano === 'trial' && dias > 0) {
     // Mostra banner de trial
     banner.style.display = 'flex'
     const label = document.getElementById('trial-dias-label')
@@ -8607,7 +8608,7 @@ async function excluirProduto(idx) {
   const nome = p.name ?? p.nome ?? 'este produto'
   if (!confirm(`Tem certeza que deseja excluir "${nome}"?`)) return
   const id = p.id ?? p._id
-  const res = await api(`/produtos/${id}`, { method: 'DELETE' })
+  const res = await api(`/stock/products/${id}`, { method: 'DELETE' })
   if (res?.ok) {
     _estoqueData.splice(idx, 1)
     renderizarEstoque()
